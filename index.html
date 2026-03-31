@@ -9,11 +9,12 @@
 <title>추씨네 리뷰 답글 생성기</title>
 <meta property="og:title" content="추씨네 리뷰 답글 생성기">
 <meta property="og:description" content="AI가 리뷰를 분석해서 답글을 자동으로 생성해드려요">
-<meta property="og:image" content="">
+<meta property="og:image" content="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2MDAiIGhlaWdodD0iMzE1Ij4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iYmciIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAlIiBzdHlsZT0ic3RvcC1jb2xvcjojRkY2QjZCIi8+CiAgICAgIDxzdG9wIG9mZnNldD0iNTAlIiBzdHlsZT0ic3RvcC1jb2xvcjojRkY4RTUzIi8+CiAgICAgIDxzdG9wIG9mZnNldD0iMTAwJSIgc3R5bGU9InN0b3AtY29sb3I6I0ZGRTY2RCIvPgogICAgPC9saW5lYXJHcmFkaWVudD4KICA8L2RlZnM+CiAgPHJlY3Qgd2lkdGg9IjYwMCIgaGVpZ2h0PSIzMTUiIGZpbGw9InVybCgjYmcpIi8+CiAgPHRleHQgeD0iMzAwIiB5PSIxMjAiIGZvbnQtc2l6ZT0iODAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJBcmlhbCxzYW5zLXNlcmlmIj7wn42xPC90ZXh0PgogIDx0ZXh0IHg9IjMwMCIgeT0iMTkwIiBmb250LXNpemU9IjQ4IiBmb250LXdlaWdodD0iYm9sZCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IkFyaWFsLHNhbnMtc2VyaWYiIGZpbGw9IndoaXRlIj7stpTslKjrhKQ8L3RleHQ+CiAgPHRleHQgeD0iMzAwIiB5PSIyNDUiIGZvbnQtc2l6ZT0iMjQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJBcmlhbCxzYW5zLXNlcmlmIiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuOSkiPkFJIOumrOu3sCDri7XquIAg7IOd7ISx6riwPC90ZXh0Pgo8L3N2Zz4=">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="추씨네 리뷰 답글 생성기">
 <meta name="twitter:description" content="AI가 리뷰를 분석해서 답글을 자동으로 생성해드려요">
+<meta name="twitter:image" content="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2MDAiIGhlaWdodD0iMzE1Ij4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iYmciIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAlIiBzdHlsZT0ic3RvcC1jb2xvcjojRkY2QjZCIi8+CiAgICAgIDxzdG9wIG9mZnNldD0iNTAlIiBzdHlsZT0ic3RvcC1jb2xvcjojRkY4RTUzIi8+CiAgICAgIDxzdG9wIG9mZnNldD0iMTAwJSIgc3R5bGU9InN0b3AtY29sb3I6I0ZGRTY2RCIvPgogICAgPC9saW5lYXJHcmFkaWVudD4KICA8L2RlZnM+CiAgPHJlY3Qgd2lkdGg9IjYwMCIgaGVpZ2h0PSIzMTUiIGZpbGw9InVybCgjYmcpIi8+CiAgPHRleHQgeD0iMzAwIiB5PSIxMjAiIGZvbnQtc2l6ZT0iODAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJBcmlhbCxzYW5zLXNlcmlmIj7wn42xPC90ZXh0PgogIDx0ZXh0IHg9IjMwMCIgeT0iMTkwIiBmb250LXNpemU9IjQ4IiBmb250LXdlaWdodD0iYm9sZCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IkFyaWFsLHNhbnMtc2VyaWYiIGZpbGw9IndoaXRlIj7stpTslKjrhKQ8L3RleHQ+CiAgPHRleHQgeD0iMzAwIiB5PSIyNDUiIGZvbnQtc2l6ZT0iMjQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJBcmlhbCxzYW5zLXNlcmlmIiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuOSkiPkFJIOumrOu3sCDri7XquIAg7IOd7ISx6riwPC90ZXh0Pgo8L3N2Zz4=">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -187,7 +188,7 @@ textarea::placeholder { color: #CCC; }
   <div class="container">
 
     <!-- API 키 -->
-    <div class="card" id="api-card" style="display:none;">
+    <div class="card" id="api-card">
       <div class="section-label">API 키 설정</div>
       <div class="api-notice">최초 1회만 입력하면 저장돼요.<br><strong>console.anthropic.com</strong> → API Keys에서 발급</div>
       <div class="api-row">
@@ -319,11 +320,7 @@ textarea::placeholder { color: #CCC; }
 
 <script>
 const PASSWORD = "9999";
-const _a = "sk-ant-a";
-const _b = "pi03-bGdeQnPPeTs2aGjZriJg4UGpTsq";
-const _c = "SrZAMv1P5Vt8X5KtgWQ1U51Bjigp7XNk";
-const _d = "a4O0rREonXx6uoM-XbE29IkE4hg-R6e80AAA";
-const API_KEY = _a + _b + _c + _d;
+const API_KEY = localStorage.getItem('ak') || '';
 const pNames = { coupang:'쿠팡이츠', baemin:'배달의민족', naver:'네이버 리뷰' };
 const starTxt = { 1:'⭐ 1점',2:'⭐⭐ 2점',3:'⭐⭐⭐ 3점',4:'⭐⭐⭐⭐ 4점',5:'⭐⭐⭐⭐⭐ 5점 — 최고예요!' };
 let star=5, platform='coupang', mode='text', imgB64='', imgType='', lastReview='';
@@ -421,9 +418,10 @@ function buildPrompt(text) {
 }
 
 async function generate() {
-  const apiKey = API_KEY;
+  const apiKey = localStorage.getItem('ak') || document.getElementById('api-key').value.trim();
   const errEl = document.getElementById('err');
   errEl.innerHTML = '';
+  if (!apiKey) { errEl.innerHTML='<div class="error-box">API 키를 먼저 입력하고 저장해주세요.</div>'; return; }
 
   let messages = [];
   if (mode==='image') {
