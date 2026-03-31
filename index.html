@@ -33,11 +33,13 @@
   .container { padding: 16px; max-width: 480px; margin: 0 auto; }
   .card { background: var(--card); border-radius: var(--radius); border: 1px solid var(--border); padding: 16px; margin-bottom: 12px; }
   .section-label { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
-  .platform-tabs { display: flex; gap: 6px; margin-bottom: 4px; }
+  .platform-tabs { display: flex; gap: 6px; }
   .platform-btn { flex: 1; padding: 10px 4px; border-radius: var(--radius-sm); border: 1.5px solid var(--border); background: var(--bg); font-size: 12px; font-weight: 700; cursor: pointer; font-family: 'Noto Sans KR', sans-serif; color: var(--muted); transition: all 0.15s; text-align: center; }
   .platform-btn.active.coupang { background: #E8F4FF; border-color: #1A73E8; color: #1A4FAA; }
   .platform-btn.active.baemin { background: #E8F9FF; border-color: #2AC1BC; color: #1A8A87; }
   .platform-btn.active.naver { background: #E8FFE8; border-color: #03C75A; color: #027A38; }
+  .star-card { transition: all 0.2s; overflow: hidden; }
+  .star-card.hidden { display: none; }
   .stars { display: flex; gap: 6px; margin-bottom: 4px; }
   .star-btn { flex: 1; height: 44px; border-radius: var(--radius-sm); border: 1.5px solid var(--border); background: var(--bg); font-size: 20px; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; justify-content: center; }
   .star-btn.active { background: var(--warn-bg); border-color: #F5C842; }
@@ -65,16 +67,17 @@
   @keyframes dot-bounce { 0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; } 40% { transform: scale(1); opacity: 1; } }
   .history-item { padding: 12px 0; border-bottom: 1px solid var(--border); }
   .history-item:last-child { border-bottom: none; }
-  .history-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .history-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; flex-wrap: wrap; }
   .history-stars { font-size: 13px; color: #F5C842; }
   .history-platform { font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 700; }
   .platform-tag-coupang { background: #E8F4FF; color: #1A4FAA; }
   .platform-tag-baemin { background: #E8F9FF; color: #1A8A87; }
   .platform-tag-naver { background: #E8FFE8; color: #027A38; }
-  .history-review { font-size: 11px; color: var(--muted); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .history-review { font-size: 11px; color: var(--muted); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
   .history-reply { font-size: 13px; color: var(--text); line-height: 1.6; }
   .notice { background: #FFF8EC; border: 1px solid #F5C842; border-radius: var(--radius-sm); padding: 10px 12px; font-size: 12px; color: var(--warn-text); line-height: 1.6; margin-bottom: 12px; }
   .error-box { background: var(--danger-bg); border-radius: var(--radius-sm); padding: 12px; font-size: 13px; color: var(--danger-text); margin-bottom: 12px; }
+  .naver-notice { background: #E8FFE8; border: 1px solid #03C75A; border-radius: var(--radius-sm); padding: 10px 12px; font-size: 12px; color: #027A38; margin-top: 8px; display: none; }
 </style>
 </head>
 <body>
@@ -83,6 +86,7 @@
   <p>한식 식당 · AI 자동 답글</p>
 </header>
 <div class="container">
+
   <div class="card">
     <div class="section-label">API 키 설정</div>
     <div class="notice">최초 1회만 입력하면 저장돼요.<br><strong>console.anthropic.com</strong> → API Keys에서 발급</div>
@@ -100,9 +104,10 @@
       <button class="platform-btn baemin" data-platform="baemin" onclick="selectPlatform(this)">배달의민족</button>
       <button class="platform-btn naver" data-platform="naver" onclick="selectPlatform(this)">네이버 리뷰</button>
     </div>
+    <div class="naver-notice" id="naver-notice">⭐ 네이버 리뷰는 별점 없이 리뷰 내용을 분석해서 답글을 생성해요</div>
   </div>
 
-  <div class="card">
+  <div class="card star-card" id="star-card">
     <div class="section-label">별점</div>
     <div class="stars" id="stars">
       <button class="star-btn" data-v="1">★</button>
@@ -136,8 +141,8 @@
     <div class="section-label">최근 기록</div>
     <div id="history-list"></div>
   </div>
-</div>
 
+</div>
 <script>
 let selectedStar = 5;
 let selectedPlatform = 'coupang';
@@ -146,12 +151,6 @@ let history = JSON.parse(localStorage.getItem('reply_history') || '[]');
 
 const starLabels = { 1:'⭐ 1점 — 많이 속상하셨겠어요', 2:'⭐ 2점 — 아쉬운 점이 있으셨군요', 3:'⭐ 3점 — 무난하셨나봐요', 4:'⭐ 4점 — 맛있게 드셨군요!', 5:'⭐ 5점 — 최고예요!' };
 const platformNames = { coupang:'쿠팡이츠', baemin:'배달의민족', naver:'네이버 리뷰' };
-
-const platformPrompts = {
-  coupang: '배달 음식 리뷰입니다. 배달 서비스와 음식 품질에 초점을 맞춰 답글을 작성하세요.',
-  baemin: '배달 음식 리뷰입니다. 친근하면서도 정중한 톤으로, 배달 음식점 사장님답게 답글을 작성하세요.',
-  naver: '네이버 방문자 리뷰입니다. 직접 방문해주신 고객분께 감사한 마음을 담아 답글을 작성하세요.'
-};
 
 window.onload = () => {
   const savedKey = localStorage.getItem('anthropic_key');
@@ -163,6 +162,15 @@ function selectPlatform(btn) {
   selectedPlatform = btn.dataset.platform;
   document.querySelectorAll('.platform-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
+  const starCard = document.getElementById('star-card');
+  const naverNotice = document.getElementById('naver-notice');
+  if (selectedPlatform === 'naver') {
+    starCard.classList.add('hidden');
+    naverNotice.style.display = 'block';
+  } else {
+    starCard.classList.remove('hidden');
+    naverNotice.style.display = 'none';
+  }
 }
 
 document.querySelectorAll('.star-btn').forEach(btn => {
@@ -183,6 +191,49 @@ function saveKey() {
   setTimeout(() => { saved.textContent = '✓ API 키가 저장되어 있어요'; }, 1500);
 }
 
+function buildPrompt(review) {
+  if (selectedPlatform === 'naver') {
+    return `당신은 한식 식당 사장님입니다. 네이버 방문자 리뷰에 정중하고 진심 어린 답글을 작성해주세요.
+
+식당 특징: 항상 신선한 재료를 사용하는 한식 전문점
+
+고객 리뷰: ${review}
+
+작성 지침:
+- 리뷰 내용을 꼼꼼히 분석하여 긍정적인 내용이면 감사하고 따뜻하게, 부정적인 내용이면 진심으로 사과하고 개선 의지를 보여주세요
+- 반드시 "방문해 주셔서 감사합니다" 또는 "찾아주셔서 감사합니다"라는 표현을 자연스럽게 포함하세요
+- 정중하고 격식 있는 말투 사용 (합쇼체)
+- 리뷰가 짧으면 최소 50자 이상, 리뷰가 길면 그에 맞게 충분히 길게 작성하세요
+- 신선한 재료에 대한 자부심을 자연스럽게 녹여내기
+- "고객님"으로 시작하기
+- 리뷰 내용에 직접 반응하는 진심 어린 답글을 작성하세요
+- 답글 내용만 출력하고 다른 설명은 쓰지 마세요`;
+  }
+
+  let toneGuide = '';
+  if (selectedStar >= 4) toneGuide = '감사하고 친근하면서도 따뜻한 톤으로, 재주문을 유도하는 답글을 작성하세요.';
+  else if (selectedStar === 3) toneGuide = '친근하게 감사함을 표하되, 더 나은 서비스를 약속하는 답글을 작성하세요.';
+  else toneGuide = '진심으로 사과하고, 구체적인 개선 의지를 보여주는 답글을 작성하세요.';
+
+  return `당신은 한식 식당 사장님입니다. ${platformNames[selectedPlatform]} 배달 리뷰에 친근하고 정중한 답글을 작성해주세요.
+
+식당 특징: 항상 신선한 재료를 사용하는 한식 전문점
+플랫폼: ${platformNames[selectedPlatform]}
+
+리뷰 별점: ${selectedStar}점
+고객 리뷰: ${review}
+
+작성 지침:
+- ${toneGuide}
+- 반드시 "주문해 주셔서 감사합니다"라는 표현을 자연스럽게 포함하세요
+- 친근하면서도 정중한 말투 사용 (합쇼체)
+- 리뷰가 짧으면 최소 50자 이상, 리뷰가 길면 그에 맞게 충분히 길게 작성하세요
+- 신선한 재료에 대한 자부심을 자연스럽게 녹여내기
+- "고객님"으로 시작하기
+- 리뷰 내용에 직접 반응하는 진심 어린 답글을 작성하세요
+- 답글 내용만 출력하고 다른 설명은 쓰지 마세요`;
+}
+
 async function generateReply() {
   const review = document.getElementById('review').value.trim();
   const apiKey = localStorage.getItem('anthropic_key') || document.getElementById('api-key').value.trim();
@@ -198,35 +249,11 @@ async function generateReply() {
   btn.innerHTML = '<span class="loading-dots"><span></span><span></span><span></span></span>';
   document.getElementById('result-card').style.display = 'none';
 
-  let toneGuide = '';
-  if (selectedStar >= 4) toneGuide = '감사하고 따뜻한 톤으로, 재방문 또는 재주문을 유도하는 답글을 작성하세요.';
-  else if (selectedStar === 3) toneGuide = '감사함을 표하되, 더 나은 서비스를 약속하는 답글을 작성하세요.';
-  else toneGuide = '진심으로 사과하고, 구체적인 개선 의지를 보여주는 답글을 작성하세요.';
-
-  const prompt = `당신은 한식 식당 사장님입니다. 고객의 리뷰에 정중하고 진심 어린 답글을 작성해주세요.
-
-식당 특징: 항상 신선한 재료를 사용하는 한식 전문점
-플랫폼: ${platformNames[selectedPlatform]}
-${platformPrompts[selectedPlatform]}
-
-리뷰 별점: ${selectedStar}점
-고객 리뷰: ${review}
-
-작성 지침:
-- ${toneGuide}
-- 정중하고 격식 있는 말투 사용 (합쇼체)
-- 2~4문장으로 간결하게 작성
-- 신선한 재료에 대한 자부심을 자연스럽게 녹여내기
-- "고객님"으로 시작하기
-- "저희 식당을 찾아주셔서 감사합니다" 같은 뻔한 문구는 절대 사용하지 마세요
-- 리뷰 내용에 직접 반응하는 진심 어린 답글을 작성하세요
-- 답글 내용만 출력하고 다른 설명은 쓰지 마세요`;
-
   try {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
-      body: JSON.stringify({ model: 'claude-opus-4-5', max_tokens: 300, messages: [{ role: 'user', content: prompt }] })
+      body: JSON.stringify({ model: 'claude-opus-4-5', max_tokens: 500, messages: [{ role: 'user', content: buildPrompt(review) }] })
     });
     const data = await res.json();
     if (data.error) throw new Error(data.error.message);
@@ -236,7 +263,8 @@ ${platformPrompts[selectedPlatform]}
     document.getElementById('copy-btn').textContent = '복사하기';
     document.getElementById('copy-btn').classList.remove('copied');
 
-    history.unshift({ star: selectedStar, platform: selectedPlatform, review: review.slice(0, 25) + (review.length > 25 ? '...' : ''), reply, time: new Date().toLocaleTimeString('ko-KR', {hour:'2-digit', minute:'2-digit'}) });
+    const starDisplay = selectedPlatform === 'naver' ? '분석' : '★'.repeat(selectedStar) + '☆'.repeat(5 - selectedStar);
+    history.unshift({ star: selectedStar, platform: selectedPlatform, starDisplay, review: review.slice(0, 25) + (review.length > 25 ? '...' : ''), reply, time: new Date().toLocaleTimeString('ko-KR', {hour:'2-digit', minute:'2-digit'}) });
     if (history.length > 10) history.pop();
     localStorage.setItem('reply_history', JSON.stringify(history));
     renderHistory();
@@ -269,7 +297,7 @@ function renderHistory() {
   list.innerHTML = history.map(h => `
     <div class="history-item">
       <div class="history-meta">
-        <span class="history-stars">${'★'.repeat(h.star)}${'☆'.repeat(5-h.star)}</span>
+        <span class="history-stars">${h.starDisplay || ('★'.repeat(h.star) + '☆'.repeat(5-h.star))}</span>
         <span class="history-platform platform-tag-${h.platform}">${platformNames[h.platform]||''}</span>
         <span class="history-review">${h.review}</span>
         <span style="font-size:11px;color:var(--muted)">${h.time||''}</span>
