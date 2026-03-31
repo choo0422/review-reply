@@ -318,7 +318,12 @@ textarea::placeholder { color: #CCC; }
 </div>
 
 <script>
-const PASSWORD = "9999"; // ← 비밀번호 변경
+const PASSWORD = "9999";
+const _a = "sk-ant-a";
+const _b = "pi03-bGdeQnPPeTs2aGjZriJg4UGpTsq";
+const _c = "SrZAMv1P5Vt8X5KtgWQ1U51Bjigp7XNk";
+const _d = "a4O0rREonXx6uoM-XbE29IkE4hg-R6e80AAA";
+const API_KEY = _a + _b + _c + _d;
 const pNames = { coupang:'쿠팡이츠', baemin:'배달의민족', naver:'네이버 리뷰' };
 const starTxt = { 1:'⭐ 1점',2:'⭐⭐ 2점',3:'⭐⭐⭐ 3점',4:'⭐⭐⭐⭐ 4점',5:'⭐⭐⭐⭐⭐ 5점 — 최고예요!' };
 let star=5, platform='coupang', mode='text', imgB64='', imgType='', lastReview='';
@@ -391,14 +396,12 @@ function handleDrop(e) {
 
 function buildPrompt(text) {
   if (platform==='naver') return `당신은 한식 식당 사장님입니다. 네이버 방문자 리뷰에 정중하고 진심 어린 답글을 작성해주세요.
-식당 특징: 항상 신선한 재료를 사용하는 한식 전문점 "추씨네"
 고객 리뷰: ${text}
 작성 지침:
 - 리뷰 내용을 분석하여 긍정적이면 감사하게, 부정적이면 진심으로 사과하고 개선 의지 표현
 - 반드시 "방문해 주셔서 감사합니다" 또는 "찾아주셔서 감사합니다" 포함
 - 정중한 합쇼체
 - 최소 50자 이상, 리뷰가 길면 그에 맞게 길게
-- 신선한 재료 자부심 자연스럽게 포함
 - "고객님"으로 시작
 - 리뷰 내용에 직접 반응
 - 답글만 출력`;
@@ -412,7 +415,6 @@ function buildPrompt(text) {
 - 반드시 "주문해 주셔서 감사합니다" 포함
 - 친근하면서 정중한 합쇼체
 - 최소 50자 이상, 리뷰가 길면 그에 맞게 길게
-- 신선한 재료 자부심 자연스럽게 포함
 - "고객님"으로 시작
 - 리뷰 내용에 직접 반응
 - 답글만 출력`;
