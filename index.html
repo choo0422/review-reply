@@ -5,255 +5,440 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="리뷰 답글">
-<title>리뷰 답글 생성기</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<meta name="apple-mobile-web-app-title" content="추씨네">
+<title>추씨네 리뷰 답글</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #F7F5F0;
-    --card: #FFFFFF;
-    --text: #1A1A1A;
-    --muted: #888880;
-    --border: #E5E3DC;
-    --accent: #2B5F3E;
-    --accent-light: #EAF3EC;
-    --accent-text: #1A3D27;
-    --warn-bg: #FFF8EC;
-    --warn-text: #7A4E00;
-    --danger-bg: #FDECEA;
-    --danger-text: #8B2020;
-    --radius: 14px;
-    --radius-sm: 8px;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-  body { font-family: 'Noto Sans KR', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding-bottom: 40px; }
-  header { background: var(--accent); color: white; padding: 20px 20px 16px; position: sticky; top: 0; z-index: 10; }
-  header h1 { font-size: 17px; font-weight: 700; letter-spacing: -0.3px; }
-  header p { font-size: 12px; opacity: 0.75; margin-top: 2px; }
-  .container { padding: 16px; max-width: 480px; margin: 0 auto; }
-  .card { background: var(--card); border-radius: var(--radius); border: 1px solid var(--border); padding: 16px; margin-bottom: 12px; }
-  .section-label { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
-  .platform-tabs { display: flex; gap: 6px; }
-  .platform-btn { flex: 1; padding: 10px 4px; border-radius: var(--radius-sm); border: 1.5px solid var(--border); background: var(--bg); font-size: 12px; font-weight: 700; cursor: pointer; font-family: 'Noto Sans KR', sans-serif; color: var(--muted); transition: all 0.15s; text-align: center; }
-  .platform-btn.active.coupang { background: #E8F4FF; border-color: #1A73E8; color: #1A4FAA; }
-  .platform-btn.active.baemin { background: #E8F9FF; border-color: #2AC1BC; color: #1A8A87; }
-  .platform-btn.active.naver { background: #E8FFE8; border-color: #03C75A; color: #027A38; }
-  .star-card { transition: all 0.2s; overflow: hidden; }
-  .star-card.hidden { display: none; }
-  .stars { display: flex; gap: 6px; margin-bottom: 4px; }
-  .star-btn { flex: 1; height: 44px; border-radius: var(--radius-sm); border: 1.5px solid var(--border); background: var(--bg); font-size: 20px; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; justify-content: center; }
-  .star-btn.active { background: var(--warn-bg); border-color: #F5C842; }
-  .star-label { font-size: 12px; color: var(--muted); text-align: center; margin-top: 6px; min-height: 16px; }
-  textarea { width: 100%; font-family: 'Noto Sans KR', sans-serif; font-size: 14px; color: var(--text); background: var(--bg); border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 12px; resize: none; line-height: 1.6; transition: border-color 0.15s; }
-  textarea:focus { outline: none; border-color: var(--accent); }
-  textarea::placeholder { color: #BBBBBB; }
-  .api-key-row { display: flex; gap: 8px; align-items: center; }
-  .api-input { flex: 1; font-family: 'Noto Sans KR', sans-serif; font-size: 12px; color: var(--text); background: var(--bg); border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; transition: border-color 0.15s; }
-  .api-input:focus { outline: none; border-color: var(--accent); }
-  .btn-save { padding: 10px 14px; border-radius: var(--radius-sm); border: 1.5px solid var(--accent); background: var(--accent-light); color: var(--accent-text); font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; font-family: 'Noto Sans KR', sans-serif; }
-  .api-saved { font-size: 11px; color: var(--accent); margin-top: 6px; display: none; }
-  .btn-generate { width: 100%; padding: 15px; border-radius: var(--radius); border: none; background: var(--accent); color: white; font-size: 15px; font-weight: 700; cursor: pointer; font-family: 'Noto Sans KR', sans-serif; transition: opacity 0.15s, transform 0.1s; margin-top: 4px; }
-  .btn-generate:active { opacity: 0.85; transform: scale(0.99); }
-  .btn-generate:disabled { opacity: 0.5; cursor: not-allowed; }
-  .result-box { background: var(--accent-light); border-radius: var(--radius-sm); padding: 14px; font-size: 14px; line-height: 1.8; color: var(--accent-text); border: 1px solid #C5E0CC; margin-bottom: 12px; min-height: 60px; white-space: pre-wrap; }
-  .result-actions { display: flex; gap: 8px; }
-  .btn-action { flex: 1; padding: 12px; border-radius: var(--radius-sm); border: 1.5px solid var(--border); background: var(--card); color: var(--text); font-size: 13px; font-weight: 700; cursor: pointer; font-family: 'Noto Sans KR', sans-serif; transition: background 0.15s; }
-  .btn-action:active { background: var(--bg); }
-  .btn-action.copied { background: var(--accent-light); border-color: var(--accent); color: var(--accent-text); }
-  .loading-dots { display: inline-flex; gap: 4px; align-items: center; }
-  .loading-dots span { width: 6px; height: 6px; border-radius: 50%; background: white; animation: dot-bounce 1.2s infinite; }
-  .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
-  .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
-  @keyframes dot-bounce { 0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; } 40% { transform: scale(1); opacity: 1; } }
-  .history-item { padding: 12px 0; border-bottom: 1px solid var(--border); }
-  .history-item:last-child { border-bottom: none; }
-  .history-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; flex-wrap: wrap; }
-  .history-stars { font-size: 13px; color: #F5C842; }
-  .history-platform { font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 700; }
-  .platform-tag-coupang { background: #E8F4FF; color: #1A4FAA; }
-  .platform-tag-baemin { background: #E8F9FF; color: #1A8A87; }
-  .platform-tag-naver { background: #E8FFE8; color: #027A38; }
-  .history-review { font-size: 11px; color: var(--muted); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
-  .history-reply { font-size: 13px; color: var(--text); line-height: 1.6; }
-  .notice { background: #FFF8EC; border: 1px solid #F5C842; border-radius: var(--radius-sm); padding: 10px 12px; font-size: 12px; color: var(--warn-text); line-height: 1.6; margin-bottom: 12px; }
-  .error-box { background: var(--danger-bg); border-radius: var(--radius-sm); padding: 12px; font-size: 13px; color: var(--danger-text); margin-bottom: 12px; }
-  .naver-notice { background: #E8FFE8; border: 1px solid #03C75A; border-radius: var(--radius-sm); padding: 10px 12px; font-size: 12px; color: #027A38; margin-top: 8px; display: none; }
+:root {
+  --coral: #FF6B6B; --coral-light: #FFF0F0; --coral-dark: #CC4444;
+  --mint: #4ECDC4; --mint-light: #E8FAF9; --mint-dark: #2EA89F;
+  --yellow: #FFE66D; --yellow-light: #FFFBEA; --yellow-dark: #CCA800;
+  --purple: #A855F7; --purple-light: #F5EEFF;
+  --bg: #FAFAF8; --card: #FFFFFF; --text: #1A1A1A; --muted: #999;
+  --border: #EBEBEB; --radius: 18px; --radius-sm: 10px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body { font-family: 'Noto Sans KR', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding-bottom: 48px; }
+
+/* 잠금화면 */
+.lock-screen {
+  position: fixed; inset: 0; z-index: 200;
+  background: linear-gradient(145deg, #FF6B6B 0%, #FF8E53 40%, #FFE66D 100%);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32px;
+}
+.lock-logo { font-size: 56px; margin-bottom: 8px; animation: bounce 1.5s infinite; }
+@keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+.lock-title { font-size: 32px; font-weight: 900; color: white; letter-spacing: -1px; margin-bottom: 4px; text-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+.lock-sub { font-size: 14px; color: rgba(255,255,255,0.85); margin-bottom: 40px; }
+.lock-box { background: white; border-radius: 20px; padding: 28px; width: 100%; max-width: 320px; box-shadow: 0 20px 60px rgba(0,0,0,0.15); }
+.lock-box p { font-size: 13px; font-weight: 700; color: var(--muted); margin-bottom: 12px; text-align: center; letter-spacing: 0.5px; }
+.lock-input { width: 100%; padding: 14px; border-radius: var(--radius-sm); border: 2px solid var(--border); font-size: 18px; font-family: 'Noto Sans KR', sans-serif; text-align: center; letter-spacing: 6px; color: var(--text); transition: border-color 0.15s; margin-bottom: 12px; }
+.lock-input:focus { outline: none; border-color: var(--coral); }
+.lock-btn { width: 100%; padding: 14px; border-radius: var(--radius-sm); border: none; background: linear-gradient(135deg, #FF6B6B, #FF8E53); color: white; font-size: 15px; font-weight: 700; cursor: pointer; font-family: 'Noto Sans KR', sans-serif; }
+.lock-error { font-size: 12px; color: var(--coral); text-align: center; margin-top: 8px; min-height: 18px; }
+
+/* 헤더 */
+header {
+  background: white; border-bottom: 1px solid var(--border);
+  padding: 16px 20px; position: sticky; top: 0; z-index: 10;
+  display: flex; align-items: center; gap: 10px;
+}
+.header-emoji { font-size: 28px; }
+.header-text h1 { font-size: 18px; font-weight: 900; letter-spacing: -0.5px; color: var(--text); }
+.header-text p { font-size: 11px; color: var(--muted); margin-top: 1px; }
+
+.container { padding: 16px; max-width: 480px; margin: 0 auto; }
+
+/* 카드 */
+.card { background: var(--card); border-radius: var(--radius); border: 1px solid var(--border); padding: 18px; margin-bottom: 12px; }
+.section-label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 12px; }
+
+/* API 입력 */
+.api-notice { background: var(--yellow-light); border: 1.5px solid var(--yellow); border-radius: var(--radius-sm); padding: 10px 12px; font-size: 12px; color: var(--yellow-dark); line-height: 1.6; margin-bottom: 12px; }
+.api-row { display: flex; gap: 8px; }
+.api-input { flex: 1; font-family: 'Noto Sans KR', sans-serif; font-size: 12px; color: var(--text); background: var(--bg); border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; transition: border-color 0.15s; }
+.api-input:focus { outline: none; border-color: var(--mint); }
+.btn-api-save { padding: 10px 14px; border-radius: var(--radius-sm); border: none; background: var(--mint); color: white; font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; font-family: 'Noto Sans KR', sans-serif; }
+.api-ok { font-size: 11px; color: var(--mint-dark); margin-top: 6px; display: none; }
+
+/* 모드 탭 */
+.mode-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.mode-btn { padding: 12px 8px; border-radius: var(--radius-sm); border: 2px solid var(--border); background: var(--bg); font-size: 13px; font-weight: 700; cursor: pointer; font-family: 'Noto Sans KR', sans-serif; color: var(--muted); transition: all 0.15s; text-align: center; }
+.mode-btn.active { border-color: var(--coral); background: var(--coral-light); color: var(--coral-dark); }
+
+/* 이미지 업로드 */
+.upload-area { border: 2.5px dashed var(--border); border-radius: var(--radius-sm); padding: 28px 16px; text-align: center; cursor: pointer; transition: all 0.2s; background: var(--bg); }
+.upload-area:hover, .upload-area.drag-over { border-color: var(--mint); background: var(--mint-light); }
+.upload-area input { display: none; }
+.upload-icon { font-size: 36px; margin-bottom: 8px; }
+.upload-text { font-size: 14px; color: var(--muted); }
+.upload-text strong { color: var(--mint-dark); }
+.preview-img { width: 100%; border-radius: var(--radius-sm); margin-top: 12px; display: none; max-height: 280px; object-fit: contain; border: 1px solid var(--border); }
+
+/* 플랫폼 탭 */
+.platform-tabs { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+.platform-btn { padding: 10px 4px; border-radius: var(--radius-sm); border: 2px solid var(--border); background: var(--bg); font-size: 12px; font-weight: 700; cursor: pointer; font-family: 'Noto Sans KR', sans-serif; color: var(--muted); transition: all 0.15s; text-align: center; line-height: 1.4; }
+.platform-btn .p-emoji { display: flex; justify-content: center; margin-bottom: 4px; }
+.platform-btn.active.coupang { background: #E8F4FF; border-color: #1A73E8; color: #1A4FAA; }
+.platform-btn.active.baemin { background: #E8FFFE; border-color: #2AC1BC; color: #1A8A87; }
+.platform-btn.active.naver { background: #E8FFE8; border-color: #03C75A; color: #027A38; }
+.naver-badge { display: none; background: #E8FFE8; border: 1px solid #03C75A; border-radius: var(--radius-sm); padding: 8px 12px; font-size: 12px; color: #027A38; margin-top: 10px; }
+
+/* 별점 */
+.star-card.hidden { display: none; }
+.stars { display: flex; gap: 6px; }
+.star-btn { flex: 1; height: 48px; border-radius: var(--radius-sm); border: 2px solid var(--border); background: var(--bg); font-size: 22px; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; justify-content: center; }
+.star-btn.active { background: var(--yellow-light); border-color: var(--yellow); }
+.star-label { font-size: 12px; color: var(--muted); text-align: center; margin-top: 8px; }
+
+/* 텍스트 입력 */
+textarea { width: 100%; font-family: 'Noto Sans KR', sans-serif; font-size: 14px; color: var(--text); background: var(--bg); border: 2px solid var(--border); border-radius: var(--radius-sm); padding: 12px; resize: none; line-height: 1.7; transition: border-color 0.15s; }
+textarea:focus { outline: none; border-color: var(--coral); }
+textarea::placeholder { color: #CCC; }
+
+/* 생성 버튼 */
+.btn-generate {
+  width: 100%; padding: 16px; border-radius: var(--radius); border: none;
+  background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
+  color: white; font-size: 16px; font-weight: 700; cursor: pointer;
+  font-family: 'Noto Sans KR', sans-serif; margin-top: 4px;
+  transition: opacity 0.15s, transform 0.1s;
+  box-shadow: 0 4px 20px rgba(255,107,107,0.35);
+}
+.btn-generate:active { opacity: 0.9; transform: scale(0.99); }
+.btn-generate:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; }
+
+/* 결과 */
+.result-box {
+  background: linear-gradient(135deg, var(--mint-light), #F0FFFE);
+  border-radius: var(--radius-sm); padding: 16px;
+  font-size: 14px; line-height: 1.9; color: #1A3D3A;
+  border: 1.5px solid #B2E8E5; margin-bottom: 14px; white-space: pre-wrap;
+}
+.result-actions { display: flex; gap: 8px; }
+.btn-copy { flex: 1; padding: 13px; border-radius: var(--radius-sm); border: none; background: var(--mint); color: white; font-size: 14px; font-weight: 700; cursor: pointer; font-family: 'Noto Sans KR', sans-serif; transition: background 0.15s; }
+.btn-copy.copied { background: var(--mint-dark); }
+.btn-retry { flex: 1; padding: 13px; border-radius: var(--radius-sm); border: 2px solid var(--border); background: white; color: var(--text); font-size: 14px; font-weight: 700; cursor: pointer; font-family: 'Noto Sans KR', sans-serif; }
+
+/* 로딩 */
+.loading-dots { display: inline-flex; gap: 5px; align-items: center; }
+.loading-dots span { width: 7px; height: 7px; border-radius: 50%; background: white; animation: db 1.2s infinite; }
+.loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+.loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes db { 0%,80%,100%{transform:scale(0.6);opacity:.4}40%{transform:scale(1);opacity:1} }
+
+/* 에러 */
+.error-box { background: var(--coral-light); border-radius: var(--radius-sm); padding: 12px; font-size: 13px; color: var(--coral-dark); margin-bottom: 12px; border: 1px solid #FFD0D0; }
+
+/* 히스토리 */
+.history-item { padding: 14px 0; border-bottom: 1px solid var(--border); }
+.history-item:last-child { border-bottom: none; }
+.history-meta { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; flex-wrap: wrap; }
+.h-stars { font-size: 12px; color: #F5C842; }
+.h-platform { font-size: 10px; padding: 3px 7px; border-radius: 20px; font-weight: 700; }
+.pt-coupang { background:#E8F4FF;color:#1A4FAA; }
+.pt-baemin { background:#E8FFFE;color:#1A8A87; }
+.pt-naver { background:#E8FFE8;color:#027A38; }
+.h-review { font-size: 11px; color: var(--muted); flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0; }
+.h-time { font-size: 11px; color: var(--muted); }
+.h-reply { font-size: 13px; color: var(--text); line-height: 1.6; }
+
+/* 구분선 태그 */
+.divider-tag { text-align: center; margin: 4px 0 16px; }
+.divider-tag span { font-size: 11px; color: var(--muted); background: var(--bg); padding: 0 10px; }
 </style>
 </head>
 <body>
-<header>
-  <h1>리뷰 답글 생성기</h1>
-  <p>한식 식당 · AI 자동 답글</p>
-</header>
-<div class="container">
 
-  <div class="card">
-    <div class="section-label">API 키 설정</div>
-    <div class="notice">최초 1회만 입력하면 저장돼요.<br><strong>console.anthropic.com</strong> → API Keys에서 발급</div>
-    <div class="api-key-row">
-      <input class="api-input" type="password" id="api-key" placeholder="sk-ant-..." />
-      <button class="btn-save" onclick="saveKey()">저장</button>
-    </div>
-    <div class="api-saved" id="api-saved">✓ API 키가 저장되어 있어요</div>
+<!-- 잠금화면 -->
+<div class="lock-screen" id="lock-screen">
+  <div class="lock-logo">🍱</div>
+  <div class="lock-title">추씨네</div>
+  <div class="lock-sub">리뷰 답글 생성기</div>
+  <div class="lock-box">
+    <p>비밀번호 입력</p>
+    <input class="lock-input" type="password" id="lock-input" placeholder="••••" onkeydown="if(event.key==='Enter')checkPw()" />
+    <button class="lock-btn" onclick="checkPw()">입장하기</button>
+    <div class="lock-error" id="lock-error"></div>
   </div>
-
-  <div class="card">
-    <div class="section-label">플랫폼 선택</div>
-    <div class="platform-tabs">
-      <button class="platform-btn active coupang" data-platform="coupang" onclick="selectPlatform(this)">쿠팡이츠</button>
-      <button class="platform-btn baemin" data-platform="baemin" onclick="selectPlatform(this)">배달의민족</button>
-      <button class="platform-btn naver" data-platform="naver" onclick="selectPlatform(this)">네이버 리뷰</button>
-    </div>
-    <div class="naver-notice" id="naver-notice">⭐ 네이버 리뷰는 별점 없이 리뷰 내용을 분석해서 답글을 생성해요</div>
-  </div>
-
-  <div class="card star-card" id="star-card">
-    <div class="section-label">별점</div>
-    <div class="stars" id="stars">
-      <button class="star-btn" data-v="1">★</button>
-      <button class="star-btn" data-v="2">★</button>
-      <button class="star-btn" data-v="3">★</button>
-      <button class="star-btn" data-v="4">★</button>
-      <button class="star-btn active" data-v="5">★</button>
-    </div>
-    <div class="star-label" id="star-label">⭐ 5점 — 최고예요!</div>
-  </div>
-
-  <div class="card">
-    <div class="section-label">리뷰 내용</div>
-    <textarea id="review" rows="5" placeholder="리뷰를 복사해서 붙여넣으세요..."></textarea>
-  </div>
-
-  <button class="btn-generate" id="gen-btn" onclick="generateReply()">AI 답글 생성</button>
-
-  <div id="error-area"></div>
-
-  <div class="card" id="result-card" style="display:none;">
-    <div class="section-label">생성된 답글</div>
-    <div class="result-box" id="result-text"></div>
-    <div class="result-actions">
-      <button class="btn-action" id="copy-btn" onclick="copyReply()">복사하기</button>
-      <button class="btn-action" onclick="regenerate()">다시 생성</button>
-    </div>
-  </div>
-
-  <div class="card" id="history-card" style="display:none;">
-    <div class="section-label">최근 기록</div>
-    <div id="history-list"></div>
-  </div>
-
 </div>
-<script>
-let selectedStar = 5;
-let selectedPlatform = 'coupang';
-let lastReview = '';
-let history = JSON.parse(localStorage.getItem('reply_history') || '[]');
 
-const starLabels = { 1:'⭐ 1점 — 많이 속상하셨겠어요', 2:'⭐ 2점 — 아쉬운 점이 있으셨군요', 3:'⭐ 3점 — 무난하셨나봐요', 4:'⭐ 4점 — 맛있게 드셨군요!', 5:'⭐ 5점 — 최고예요!' };
-const platformNames = { coupang:'쿠팡이츠', baemin:'배달의민족', naver:'네이버 리뷰' };
+<!-- 메인 앱 -->
+<div id="app" style="display:none;">
+  <header>
+    <div class="header-emoji">🍱</div>
+    <div class="header-text">
+      <h1>추씨네</h1>
+      <p>AI 리뷰 답글 생성기</p>
+    </div>
+  </header>
+<div style="width:100%;background:#fff;text-align:center;padding:6px 0;border-bottom:1px solid #EBEBEB;">
+  <a href="https://link.coupang.com/a/efkMur" target="_blank" referrerpolicy="unsafe-url"><img src="https://ads-partners.coupang.com/banners/870271?subId=&traceId=V0-301-879dd1202e5c73b2-I870271&w=320&h=50" alt="" style="max-width:320px;width:100%;height:auto;"></a>
+  <div style="font-size:9px;color:#BBB;margin-top:2px;">이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.</div>
+</div>
+
+  <div class="container">
+
+    <!-- API 키 -->
+    <div class="card" id="api-card" style="display:none;">
+      <div class="section-label">API 키 설정</div>
+      <div class="api-notice">최초 1회만 입력하면 저장돼요.<br><strong>console.anthropic.com</strong> → API Keys에서 발급</div>
+      <div class="api-row">
+        <input class="api-input" type="password" id="api-key" placeholder="sk-ant-..." />
+        <button class="btn-api-save" onclick="saveKey()">저장</button>
+      </div>
+      <div class="api-ok" id="api-ok">✓ API 키 저장됨</div>
+    </div>
+
+    <!-- 입력 방식 -->
+    <div class="card">
+      <div class="section-label">입력 방식</div>
+      <div class="mode-tabs">
+        <button class="mode-btn active" data-mode="text" onclick="selectMode(this)">✏️ 텍스트 입력</button>
+        <button class="mode-btn" data-mode="image" onclick="selectMode(this)">📷 스크린샷</button>
+      </div>
+
+      <div style="margin-top:12px;" id="text-area">
+        <textarea id="review" rows="5" placeholder="리뷰를 복사해서 붙여넣으세요..."></textarea>
+      </div>
+
+      <div style="margin-top:12px;display:none;" id="image-area">
+        <div class="upload-area" id="upload-area" onclick="document.getElementById('file-input').click()" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="handleDrop(event)">
+          <input type="file" id="file-input" accept="image/*" onchange="handleFile(this.files[0])">
+          <div class="upload-icon">📸</div>
+          <div class="upload-text"><strong>사진 선택</strong>하거나 끌어다 놓기</div>
+          <div class="upload-text" style="font-size:11px;margin-top:4px;color:#BBB;">쿠팡이츠 · 배민 · 네이버 리뷰 스크린샷</div>
+        </div>
+        <img id="preview-img" class="preview-img" />
+      </div>
+    </div>
+
+    <!-- 플랫폼 -->
+    <div class="card">
+      <div class="section-label">플랫폼</div>
+      <div class="platform-tabs">
+        <button class="platform-btn active coupang" data-p="coupang" onclick="selectPlatform(this)">
+          <span class="p-emoji">
+            <svg width="52" height="28" viewBox="0 0 260 140" xmlns="http://www.w3.org/2000/svg">
+              <!-- coupang -->
+              <text x="0" y="52" font-size="52" font-family="Arial,sans-serif" font-weight="700" fill="#333">c</text>
+              <text x="30" y="52" font-size="52" font-family="Arial,sans-serif" font-weight="700" fill="#E8432D">o</text>
+              <text x="63" y="52" font-size="52" font-family="Arial,sans-serif" font-weight="700" fill="#F4A124">u</text>
+              <text x="96" y="52" font-size="52" font-family="Arial,sans-serif" font-weight="700" fill="#4CAF50">p</text>
+              <text x="124" y="52" font-size="52" font-family="Arial,sans-serif" font-weight="700" fill="#2196F3">a</text>
+              <text x="154" y="52" font-size="52" font-family="Arial,sans-serif" font-weight="700" fill="#333">n</text>
+              <text x="186" y="52" font-size="52" font-family="Arial,sans-serif" font-weight="700" fill="#9C27B0">g</text>
+              <!-- eats -->
+              <text x="4" y="120" font-size="68" font-family="Arial,sans-serif" font-weight="900" fill="#7B3F00">eats</text>
+            </svg>
+          </span>
+          <span style="font-size:10px;display:block;margin-top:2px;">쿠팡이츠</span>
+        </button>
+        <button class="platform-btn baemin" data-p="baemin" onclick="selectPlatform(this)">
+          <span class="p-emoji">
+            <svg width="36" height="36" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+              <rect width="200" height="200" rx="36" fill="#2AC1BC"/>
+              <!-- 배민 캐릭터 얼굴 -->
+              <circle cx="100" cy="82" r="52" fill="white"/>
+              <!-- 헬멧 -->
+              <path d="M48 82 Q48 30 100 30 Q152 30 152 82 Z" fill="#333"/>
+              <rect x="44" y="78" width="112" height="18" rx="9" fill="#333"/>
+              <!-- 눈 -->
+              <circle cx="82" cy="95" r="8" fill="#333"/>
+              <circle cx="118" cy="95" r="8" fill="#333"/>
+              <circle cx="85" cy="92" r="3" fill="white"/>
+              <circle cx="121" cy="92" r="3" fill="white"/>
+              <!-- 입 -->
+              <path d="M85 115 Q100 128 115 115" stroke="#333" stroke-width="4" fill="none" stroke-linecap="round"/>
+              <!-- 배민 글자 -->
+              <text x="100" y="175" font-size="32" text-anchor="middle" font-family="Arial,sans-serif" font-weight="900" fill="white">배민</text>
+            </svg>
+          </span>
+          <span style="font-size:10px;display:block;margin-top:2px;">배달의민족</span>
+        </button>
+        <button class="platform-btn naver" data-p="naver" onclick="selectPlatform(this)">
+          <span class="p-emoji">
+            <svg width="36" height="36" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="ng" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" style="stop-color:#00DE5A"/>
+                  <stop offset="100%" style="stop-color:#00C73C"/>
+                </linearGradient>
+              </defs>
+              <rect width="200" height="200" rx="36" fill="url(#ng)"/>
+              <path d="M42 155V45h46l52 70V45h46v110H140L88 85v70H42z" fill="white"/>
+            </svg>
+          </span>
+          <span style="font-size:10px;display:block;margin-top:2px;">네이버 리뷰</span>
+        </button>
+      </div>
+      <div class="naver-badge" id="naver-badge">⭐ 별점 없이 리뷰 내용을 분석해서 답글을 생성해요</div>
+    </div>
+
+    <!-- 별점 -->
+    <div class="card star-card" id="star-card">
+      <div class="section-label">별점</div>
+      <div class="stars">
+        <button class="star-btn" data-v="1">★</button>
+        <button class="star-btn" data-v="2">★</button>
+        <button class="star-btn" data-v="3">★</button>
+        <button class="star-btn" data-v="4">★</button>
+        <button class="star-btn active" data-v="5">★</button>
+      </div>
+      <div class="star-label" id="star-label">⭐⭐⭐⭐⭐ 5점 — 최고예요!</div>
+    </div>
+
+    <button class="btn-generate" id="gen-btn" onclick="generate()">✨ AI 답글 생성</button>
+    <div id="err"></div>
+
+    <!-- 결과 -->
+    <div class="card" id="result-card" style="display:none;">
+      <div class="section-label">생성된 답글</div>
+      <div class="result-box" id="result-text"></div>
+      <div class="result-actions">
+        <button class="btn-copy" id="copy-btn" onclick="copyReply()">복사하기</button>
+        <button class="btn-retry" onclick="generate()">다시 생성</button>
+      </div>
+    </div>
+
+    <!-- 히스토리 -->
+    <div class="card" id="hist-card" style="display:none;">
+      <div class="section-label">최근 기록</div>
+      <div id="hist-list"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const PASSWORD = "1234"; // ← 비밀번호 변경
+const pNames = { coupang:'쿠팡이츠', baemin:'배달의민족', naver:'네이버 리뷰' };
+const starTxt = { 1:'⭐ 1점',2:'⭐⭐ 2점',3:'⭐⭐⭐ 3점',4:'⭐⭐⭐⭐ 4점',5:'⭐⭐⭐⭐⭐ 5점 — 최고예요!' };
+let star=5, platform='coupang', mode='text', imgB64='', imgType='', lastReview='';
+let genCount = parseInt(localStorage.getItem('genCount')||'0');
+let hist = JSON.parse(localStorage.getItem('rh')||'[]');
 
 window.onload = () => {
-  const savedKey = localStorage.getItem('anthropic_key');
-  if (savedKey) { document.getElementById('api-key').value = savedKey; document.getElementById('api-saved').style.display = 'block'; }
-  renderHistory();
+  unlock();
+  const k = localStorage.getItem('ak');
+  if (k) { document.getElementById('api-key').value=k; document.getElementById('api-ok').style.display='block'; }
+  renderHist();
 };
 
-function selectPlatform(btn) {
-  selectedPlatform = btn.dataset.platform;
-  document.querySelectorAll('.platform-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  const starCard = document.getElementById('star-card');
-  const naverNotice = document.getElementById('naver-notice');
-  if (selectedPlatform === 'naver') {
-    starCard.classList.add('hidden');
-    naverNotice.style.display = 'block';
-  } else {
-    starCard.classList.remove('hidden');
-    naverNotice.style.display = 'none';
-  }
+function checkPw() {
+  if (document.getElementById('lock-input').value === PASSWORD) { sessionStorage.setItem('ok','1'); unlock(); }
+  else { document.getElementById('lock-error').textContent='비밀번호가 틀렸어요 🥲'; document.getElementById('lock-input').value=''; }
+}
+function unlock() { document.getElementById('lock-screen').style.display='none'; document.getElementById('app').style.display='block'; }
+
+function saveKey() {
+  const k = document.getElementById('api-key').value.trim();
+  if (!k) return;
+  localStorage.setItem('ak', k);
+  const el = document.getElementById('api-ok');
+  el.style.display='block'; el.textContent='✓ 저장됐어요!';
+  setTimeout(()=>{ el.textContent='✓ API 키 저장됨'; }, 1500);
 }
 
-document.querySelectorAll('.star-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    selectedStar = parseInt(btn.dataset.v);
-    document.querySelectorAll('.star-btn').forEach(b => b.classList.toggle('active', parseInt(b.dataset.v) <= selectedStar));
-    document.getElementById('star-label').textContent = starLabels[selectedStar];
+function selectMode(btn) {
+  mode = btn.dataset.mode;
+  document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('text-area').style.display = mode==='text'?'block':'none';
+  document.getElementById('image-area').style.display = mode==='image'?'block':'none';
+}
+
+function selectPlatform(btn) {
+  platform = btn.dataset.p;
+  document.querySelectorAll('.platform-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const isNaver = platform==='naver';
+  document.getElementById('star-card').classList.toggle('hidden', isNaver);
+  document.getElementById('naver-badge').style.display = isNaver?'block':'none';
+}
+
+document.querySelectorAll('.star-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    star = parseInt(btn.dataset.v);
+    document.querySelectorAll('.star-btn').forEach(b=>b.classList.toggle('active', parseInt(b.dataset.v)<=star));
+    document.getElementById('star-label').textContent = starTxt[star];
   });
 });
 
-function saveKey() {
-  const key = document.getElementById('api-key').value.trim();
-  if (!key) return;
-  localStorage.setItem('anthropic_key', key);
-  const saved = document.getElementById('api-saved');
-  saved.style.display = 'block';
-  saved.textContent = '✓ 저장됐어요!';
-  setTimeout(() => { saved.textContent = '✓ API 키가 저장되어 있어요'; }, 1500);
+function handleFile(file) {
+  if (!file) return;
+  const r = new FileReader();
+  r.onload = e => {
+    imgType = file.type; imgB64 = e.target.result.split(',')[1];
+    const img = document.getElementById('preview-img');
+    img.src = e.target.result; img.style.display='block';
+  };
+  r.readAsDataURL(file);
+}
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('upload-area').classList.remove('drag-over');
+  const f = e.dataTransfer.files[0];
+  if (f && f.type.startsWith('image/')) handleFile(f);
 }
 
-function buildPrompt(review) {
-  if (selectedPlatform === 'naver') {
-    return `당신은 한식 식당 사장님입니다. 네이버 방문자 리뷰에 정중하고 진심 어린 답글을 작성해주세요.
-
-식당 특징: 항상 신선한 재료를 사용하는 한식 전문점
-
-고객 리뷰: ${review}
-
+function buildPrompt(text) {
+  if (platform==='naver') return `당신은 한식 식당 사장님입니다. 네이버 방문자 리뷰에 정중하고 진심 어린 답글을 작성해주세요.
+식당 특징: 항상 신선한 재료를 사용하는 한식 전문점 "추씨네"
+고객 리뷰: ${text}
 작성 지침:
-- 리뷰 내용을 꼼꼼히 분석하여 긍정적인 내용이면 감사하고 따뜻하게, 부정적인 내용이면 진심으로 사과하고 개선 의지를 보여주세요
-- 반드시 "방문해 주셔서 감사합니다" 또는 "찾아주셔서 감사합니다"라는 표현을 자연스럽게 포함하세요
-- 정중하고 격식 있는 말투 사용 (합쇼체)
-- 리뷰가 짧으면 최소 50자 이상, 리뷰가 길면 그에 맞게 충분히 길게 작성하세요
-- 신선한 재료에 대한 자부심을 자연스럽게 녹여내기
-- "고객님"으로 시작하기
-- 리뷰 내용에 직접 반응하는 진심 어린 답글을 작성하세요
-- 답글 내용만 출력하고 다른 설명은 쓰지 마세요`;
+- 리뷰 내용을 분석하여 긍정적이면 감사하게, 부정적이면 진심으로 사과하고 개선 의지 표현
+- 반드시 "방문해 주셔서 감사합니다" 또는 "찾아주셔서 감사합니다" 포함
+- 정중한 합쇼체
+- 최소 50자 이상, 리뷰가 길면 그에 맞게 길게
+- 신선한 재료 자부심 자연스럽게 포함
+- "고객님"으로 시작
+- 리뷰 내용에 직접 반응
+- 답글만 출력`;
+
+  const tone = star>=4 ? '감사하고 친근하면서 따뜻하게, 재주문을 유도하세요.' : star===3 ? '친근하게 감사하되 더 잘하겠다고 약속하세요.' : '진심으로 사과하고 구체적 개선 의지를 보여주세요.';
+  return `당신은 한식 식당 사장님입니다. ${pNames[platform]} 배달 리뷰에 친근하고 정중한 답글을 작성해주세요.
+식당: 항상 신선한 재료를 사용하는 한식 전문점 "추씨네"
+별점: ${star}점 / 리뷰: ${text}
+작성 지침:
+- ${tone}
+- 반드시 "주문해 주셔서 감사합니다" 포함
+- 친근하면서 정중한 합쇼체
+- 최소 50자 이상, 리뷰가 길면 그에 맞게 길게
+- 신선한 재료 자부심 자연스럽게 포함
+- "고객님"으로 시작
+- 리뷰 내용에 직접 반응
+- 답글만 출력`;
+}
+
+async function generate() {
+  const apiKey = API_KEY;
+  const errEl = document.getElementById('err');
+  errEl.innerHTML = '';
+
+  let messages = [];
+  if (mode==='image') {
+    if (!imgB64) { errEl.innerHTML='<div class="error-box">스크린샷을 먼저 업로드해주세요.</div>'; return; }
+    messages = [{ role:'user', content:[
+      { type:'image', source:{ type:'base64', media_type:imgType, data:imgB64 } },
+      { type:'text', text:`이미지의 리뷰 텍스트를 읽고 아래 지침으로 답글을 작성해주세요.\n\n${buildPrompt('[이미지의 리뷰 내용을 직접 읽어서 답글 작성]')}` }
+    ]}];
+  } else {
+    const rv = document.getElementById('review').value.trim();
+    if (!rv) { errEl.innerHTML='<div class="error-box">리뷰 내용을 입력해주세요.</div>'; return; }
+    lastReview = rv;
+    messages = [{ role:'user', content: buildPrompt(rv) }];
   }
 
-  let toneGuide = '';
-  if (selectedStar >= 4) toneGuide = '감사하고 친근하면서도 따뜻한 톤으로, 재주문을 유도하는 답글을 작성하세요.';
-  else if (selectedStar === 3) toneGuide = '친근하게 감사함을 표하되, 더 나은 서비스를 약속하는 답글을 작성하세요.';
-  else toneGuide = '진심으로 사과하고, 구체적인 개선 의지를 보여주는 답글을 작성하세요.';
-
-  return `당신은 한식 식당 사장님입니다. ${platformNames[selectedPlatform]} 배달 리뷰에 친근하고 정중한 답글을 작성해주세요.
-
-식당 특징: 항상 신선한 재료를 사용하는 한식 전문점
-플랫폼: ${platformNames[selectedPlatform]}
-
-리뷰 별점: ${selectedStar}점
-고객 리뷰: ${review}
-
-작성 지침:
-- ${toneGuide}
-- 반드시 "주문해 주셔서 감사합니다"라는 표현을 자연스럽게 포함하세요
-- 친근하면서도 정중한 말투 사용 (합쇼체)
-- 리뷰가 짧으면 최소 50자 이상, 리뷰가 길면 그에 맞게 충분히 길게 작성하세요
-- 신선한 재료에 대한 자부심을 자연스럽게 녹여내기
-- "고객님"으로 시작하기
-- 리뷰 내용에 직접 반응하는 진심 어린 답글을 작성하세요
-- 답글 내용만 출력하고 다른 설명은 쓰지 마세요`;
-}
-
-async function generateReply() {
-  const review = document.getElementById('review').value.trim();
-  const apiKey = localStorage.getItem('anthropic_key') || document.getElementById('api-key').value.trim();
-  const errorArea = document.getElementById('error-area');
-  errorArea.innerHTML = '';
-
-  if (!apiKey) { errorArea.innerHTML = '<div class="error-box">API 키를 먼저 입력하고 저장해주세요.</div>'; return; }
-  if (!review) { errorArea.innerHTML = '<div class="error-box">리뷰 내용을 입력해주세요.</div>'; return; }
-
-  lastReview = review;
   const btn = document.getElementById('gen-btn');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="loading-dots"><span></span><span></span><span></span></span>';
-  document.getElementById('result-card').style.display = 'none';
+  btn.disabled=true; btn.innerHTML='<span class="loading-dots"><span></span><span></span><span></span></span>';
+  document.getElementById('result-card').style.display='none';
 
   try {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
-      body: JSON.stringify({ model: 'claude-opus-4-5', max_tokens: 500, messages: [{ role: 'user', content: buildPrompt(review) }] })
+      method:'POST',
+      headers:{ 'Content-Type':'application/json', 'x-api-key':apiKey, 'anthropic-version':'2023-06-01', 'anthropic-dangerous-direct-browser-access':'true' },
+      body: JSON.stringify({ model:'claude-opus-4-5', max_tokens:600, messages })
     });
     const data = await res.json();
     if (data.error) throw new Error(data.error.message);
@@ -263,48 +448,48 @@ async function generateReply() {
     document.getElementById('copy-btn').textContent = '복사하기';
     document.getElementById('copy-btn').classList.remove('copied');
 
-    const starDisplay = selectedPlatform === 'naver' ? '분석' : '★'.repeat(selectedStar) + '☆'.repeat(5 - selectedStar);
-    history.unshift({ star: selectedStar, platform: selectedPlatform, starDisplay, review: review.slice(0, 25) + (review.length > 25 ? '...' : ''), reply, time: new Date().toLocaleTimeString('ko-KR', {hour:'2-digit', minute:'2-digit'}) });
-    if (history.length > 10) history.pop();
-    localStorage.setItem('reply_history', JSON.stringify(history));
-    renderHistory();
-    document.getElementById('result-card').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    const sd = platform==='naver'?'분석':'★'.repeat(star)+'☆'.repeat(5-star);
+    hist.unshift({ star, platform, sd, review: mode==='image'?'[스크린샷]':(lastReview.slice(0,25)+(lastReview.length>25?'...':'')), reply, time: new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'}) });
+    if (hist.length>10) hist.pop();
+    localStorage.setItem('rh', JSON.stringify(hist));
+    renderHist();
+    document.getElementById('result-card').scrollIntoView({ behavior:'smooth', block:'nearest' });
+    genCount++;
+    localStorage.setItem('genCount', genCount);
+    if (genCount % 4 === 0) {
+      setTimeout(() => {
+        window.open('https://link.coupang.com/a/efkMur', '_blank', 'noopener');
+      }, 1500);
+    }
   } catch(e) {
-    errorArea.innerHTML = `<div class="error-box">오류: ${e.message}<br>API 키를 확인해주세요.</div>`;
+    errEl.innerHTML=`<div class="error-box">오류: ${e.message}</div>`;
   } finally {
-    btn.disabled = false;
-    btn.innerHTML = 'AI 답글 생성';
+    btn.disabled=false; btn.innerHTML='✨ AI 답글 생성';
   }
 }
 
-function regenerate() { document.getElementById('review').value = lastReview; generateReply(); }
-
 function copyReply() {
-  const text = document.getElementById('result-text').textContent;
-  navigator.clipboard.writeText(text).then(() => {
-    const btn = document.getElementById('copy-btn');
-    btn.textContent = '✓ 복사됐어요!';
-    btn.classList.add('copied');
-    setTimeout(() => { btn.textContent = '복사하기'; btn.classList.remove('copied'); }, 2000);
+  navigator.clipboard.writeText(document.getElementById('result-text').textContent).then(()=>{
+    const btn=document.getElementById('copy-btn');
+    btn.textContent='✓ 복사됐어요!'; btn.classList.add('copied');
+    setTimeout(()=>{ btn.textContent='복사하기'; btn.classList.remove('copied'); }, 2000);
   });
 }
 
-function renderHistory() {
-  const card = document.getElementById('history-card');
-  const list = document.getElementById('history-list');
-  if (history.length === 0) { card.style.display = 'none'; return; }
-  card.style.display = 'block';
-  list.innerHTML = history.map(h => `
+function renderHist() {
+  const card=document.getElementById('hist-card'), list=document.getElementById('hist-list');
+  if (!hist.length) { card.style.display='none'; return; }
+  card.style.display='block';
+  list.innerHTML=hist.map(h=>`
     <div class="history-item">
       <div class="history-meta">
-        <span class="history-stars">${h.starDisplay || ('★'.repeat(h.star) + '☆'.repeat(5-h.star))}</span>
-        <span class="history-platform platform-tag-${h.platform}">${platformNames[h.platform]||''}</span>
-        <span class="history-review">${h.review}</span>
-        <span style="font-size:11px;color:var(--muted)">${h.time||''}</span>
+        <span class="h-stars">${h.sd||('★'.repeat(h.star)+'☆'.repeat(5-h.star))}</span>
+        <span class="h-platform pt-${h.platform}">${pNames[h.platform]||''}</span>
+        <span class="h-review">${h.review}</span>
+        <span class="h-time">${h.time||''}</span>
       </div>
-      <div class="history-reply">${h.reply}</div>
-    </div>
-  `).join('');
+      <div class="h-reply">${h.reply}</div>
+    </div>`).join('');
 }
 </script>
 </body>
