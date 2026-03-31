@@ -311,7 +311,7 @@ textarea::placeholder { color: #CCC; }
 </div>
 
 <script>
-const PASSWORD = "1234"; // ← 비밀번호 변경
+const PASSWORD = "9999"; // ← 비밀번호 변경
 const pNames = { coupang:'쿠팡이츠', baemin:'배달의민족', naver:'네이버 리뷰' };
 const starTxt = { 1:'⭐ 1점',2:'⭐⭐ 2점',3:'⭐⭐⭐ 3점',4:'⭐⭐⭐⭐ 4점',5:'⭐⭐⭐⭐⭐ 5점 — 최고예요!' };
 let star=5, platform='coupang', mode='text', imgB64='', imgType='', lastReview='';
@@ -319,7 +319,7 @@ let genCount = parseInt(localStorage.getItem('genCount')||'0');
 let hist = JSON.parse(localStorage.getItem('rh')||'[]');
 
 window.onload = () => {
-  unlock();
+  if (sessionStorage.getItem('ok')==='1') unlock();
   const k = localStorage.getItem('ak');
   if (k) { document.getElementById('api-key').value=k; document.getElementById('api-ok').style.display='block'; }
   renderHist();
