@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="추씨네">
-<title>추씨네 리뷰 답글 생성기</title>
-<meta property="og:title" content="추씨네 리뷰 답글 생성기">
+<meta name="apple-mobile-web-app-title" content=>
+<title>리뷰 답글 생성기</title>
+<meta property="og:title" content="리뷰 답글 생성기">
 <meta property="og:description" content="AI가 리뷰를 분석해서 답글을 자동으로 생성해드려요">
 <meta property="og:image" content="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2MDAiIGhlaWdodD0iMzE1Ij4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iYmciIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAlIiBzdHlsZT0ic3RvcC1jb2xvcjojRkY2QjZCIi8+CiAgICAgIDxzdG9wIG9mZnNldD0iNTAlIiBzdHlsZT0ic3RvcC1jb2xvcjojRkY4RTUzIi8+CiAgICAgIDxzdG9wIG9mZnNldD0iMTAwJSIgc3R5bGU9InN0b3AtY29sb3I6I0ZGRTY2RCIvPgogICAgPC9saW5lYXJHcmFkaWVudD4KICA8L2RlZnM+CiAgPHJlY3Qgd2lkdGg9IjYwMCIgaGVpZ2h0PSIzMTUiIGZpbGw9InVybCgjYmcpIi8+CiAgPHRleHQgeD0iMzAwIiB5PSIxMjAiIGZvbnQtc2l6ZT0iODAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJBcmlhbCxzYW5zLXNlcmlmIj7wn42xPC90ZXh0PgogIDx0ZXh0IHg9IjMwMCIgeT0iMTkwIiBmb250LXNpemU9IjQ4IiBmb250LXdlaWdodD0iYm9sZCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IkFyaWFsLHNhbnMtc2VyaWYiIGZpbGw9IndoaXRlIj7stpTslKjrhKQ8L3RleHQ+CiAgPHRleHQgeD0iMzAwIiB5PSIyNDUiIGZvbnQtc2l6ZT0iMjQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJBcmlhbCxzYW5zLXNlcmlmIiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuOSkiPkFJIOumrOu3sCDri7XquIAg7IOd7ISx6riwPC90ZXh0Pgo8L3N2Zz4=">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="추씨네 리뷰 답글 생성기">
+<meta name="twitter:title" content="리뷰 답글 생성기">
 <meta name="twitter:description" content="AI가 리뷰를 분석해서 답글을 자동으로 생성해드려요">
 <meta name="twitter:image" content="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2MDAiIGhlaWdodD0iMzE1Ij4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iYmciIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAlIiBzdHlsZT0ic3RvcC1jb2xvcjojRkY2QjZCIi8+CiAgICAgIDxzdG9wIG9mZnNldD0iNTAlIiBzdHlsZT0ic3RvcC1jb2xvcjojRkY4RTUzIi8+CiAgICAgIDxzdG9wIG9mZnNldD0iMTAwJSIgc3R5bGU9InN0b3AtY29sb3I6I0ZGRTY2RCIvPgogICAgPC9saW5lYXJHcmFkaWVudD4KICA8L2RlZnM+CiAgPHJlY3Qgd2lkdGg9IjYwMCIgaGVpZ2h0PSIzMTUiIGZpbGw9InVybCgjYmcpIi8+CiAgPHRleHQgeD0iMzAwIiB5PSIxMjAiIGZvbnQtc2l6ZT0iODAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJBcmlhbCxzYW5zLXNlcmlmIj7wn42xPC90ZXh0PgogIDx0ZXh0IHg9IjMwMCIgeT0iMTkwIiBmb250LXNpemU9IjQ4IiBmb250LXdlaWdodD0iYm9sZCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IkFyaWFsLHNhbnMtc2VyaWYiIGZpbGw9IndoaXRlIj7stpTslKjrhKQ8L3RleHQ+CiAgPHRleHQgeD0iMzAwIiB5PSIyNDUiIGZvbnQtc2l6ZT0iMjQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJBcmlhbCxzYW5zLXNlcmlmIiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuOSkiPkFJIOumrOu3sCDri7XquIAg7IOd7ISx6riwPC90ZXh0Pgo8L3N2Zz4=">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
@@ -161,7 +161,7 @@ textarea::placeholder { color: #CCC; }
 <!-- 잠금화면 -->
 <div class="lock-screen" id="lock-screen">
   <div class="lock-logo">🍱</div>
-  <div class="lock-title">추씨네</div>
+  <div class="lock-title"></div>
   <div class="lock-sub">리뷰 답글 생성기</div>
   <div class="lock-box">
     <p>비밀번호 입력</p>
@@ -176,13 +176,13 @@ textarea::placeholder { color: #CCC; }
   <header>
     <div class="header-emoji">🍱</div>
     <div class="header-text">
-      <h1>추씨네</h1>
+      <h1></h1>
       <p>AI 리뷰 답글 생성기</p>
     </div>
   </header>
-<div style="width:100%;background:#fff;text-align:center;padding:6px 0;border-bottom:1px solid #EBEBEB;">
-  <a href="https://link.coupang.com/a/efkMur" target="_blank" referrerpolicy="unsafe-url"><img src="https://ads-partners.coupang.com/banners/870271?subId=&traceId=V0-301-879dd1202e5c73b2-I870271&w=320&h=50" alt="" style="max-width:320px;width:100%;height:auto;"></a>
-  <div style="font-size:9px;color:#BBB;margin-top:2px;">이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.</div>
+<div style="width:100%;background:#FFF8EC;text-align:center;padding:8px 0;border-bottom:1px solid #FFE0A0;">
+  <a href="https://link.coupang.com/a/efkMur" target="_blank" referrerpolicy="unsafe-url" style="font-size:13px;font-weight:700;color:#B8860B;text-decoration:none;">🛒 오늘의 쿠팡 특가 보러가기</a>
+  <div style="font-size:9px;color:#CCA000;margin-top:2px;">이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.</div>
 </div>
 
   <div class="container">
@@ -405,7 +405,7 @@ function buildPrompt(text) {
 
   const tone = star>=4 ? '감사하고 친근하면서 따뜻하게, 재주문을 유도하세요.' : star===3 ? '친근하게 감사하되 더 잘하겠다고 약속하세요.' : '진심으로 사과하고 구체적 개선 의지를 보여주세요.';
   return `당신은 한식 식당 사장님입니다. ${pNames[platform]} 배달 리뷰에 친근하고 정중한 답글을 작성해주세요.
-식당: 항상 신선한 재료를 사용하는 한식 전문점 "추씨네"
+식당: 항상 신선한 재료를 사용하는 한식 전문점 
 별점: ${star}점 / 리뷰: ${text}
 작성 지침:
 - ${tone}
