@@ -328,7 +328,7 @@ let favs = JSON.parse(localStorage.getItem('favs')||'[]');
 const starTxt = {1:'⭐ 1점',2:'⭐⭐ 2점',3:'⭐⭐⭐ 3점',4:'⭐⭐⭐⭐ 4점',5:'⭐⭐⭐⭐⭐ 5점'};
 
 window.onload = () => {
-  if (sessionStorage.getItem('ok')==='1') unlock();
+  unlock();
 
   renderHist(); renderFav();
 };
@@ -478,13 +478,17 @@ async function generate() {
   document.getElementById('result-card').style.display='none';
 
   try {
-    const res = await fetch('/api/reply', {
+    const res = await fetch('/.netlify/functions/reply', {
       method:'POST',
       headers:{ 'Content-Type':'application/json' },
       body: JSON.stringify({ messages })
     });
+    if (!res.ok) {
+      const errText = await res.text();
+      throw new Error('서버 오류: ' + res.status + ' ' + errText);
+    }
     const data = await res.json();
-    if (data.error) throw new Error(data.error.message);
+    if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
     const reply = data.content[0].text.trim();
     document.getElementById('result-text').textContent = reply;
     document.getElementById('result-card').style.display = 'block';
