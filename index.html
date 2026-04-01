@@ -140,6 +140,22 @@ textarea::placeholder { color: #CCC; }
 @keyframes db { 0%,80%,100%{transform:scale(0.6);opacity:.4}40%{transform:scale(1);opacity:1} }
 .error-box { background: var(--coral-light); border-radius: var(--radius-sm); padding: 12px; font-size: 13px; color: var(--coral-dark); margin-bottom: 12px; border: 1px solid #FFD0D0; }
 
+/* 글자수 표시 */
+.char-count { font-size: 11px; text-align: right; margin-top: 4px; }
+.char-count.over { color: var(--coral-dark); font-weight: 700; }
+.char-count.ok { color: var(--mint-dark); }
+.char-limit-badge { display: inline-block; font-size: 10px; padding: 2px 8px; border-radius: 20px; margin-left: 6px; font-weight: 700; }
+.limit-coupang { background: #E8F4FF; color: #1A4FAA; }
+.limit-baemin { background: #E8FFFE; color: #1A8A87; }
+.limit-naver { background: #E8FFE8; color: #027A38; }
+
+/* 편집 가능한 답글 */
+.result-edit { width: 100%; font-family: 'Noto Sans KR', sans-serif; font-size: 14px; color: #1A3D3A; background: linear-gradient(135deg, var(--mint-light), #F0FFFE); border: 1.5px solid #B2E8E5; border-radius: var(--radius-sm); padding: 14px; line-height: 1.9; resize: vertical; min-height: 100px; margin-bottom: 4px; }
+.result-edit:focus { outline: none; border-color: var(--mint); }
+
+/* 취소 버튼 */
+.btn-cancel { width: 100%; padding: 12px; border-radius: var(--radius-sm); border: 2px solid var(--border); background: white; color: var(--muted); font-size: 13px; font-weight: 700; cursor: pointer; font-family: 'Noto Sans KR', sans-serif; margin-top: 6px; display: none; }
+
 /* 쿠팡 모달 */
 .coupon-modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 300; display: flex; align-items: center; justify-content: center; padding: 20px; }
 .coupon-modal { background: white; border-radius: 20px; padding: 24px; max-width: 340px; width: 100%; text-align: center; }
@@ -311,12 +327,14 @@ textarea::placeholder { color: #CCC; }
     </div>
 
     <button class="btn-generate" id="gen-btn" onclick="generate()">✨ AI 답글 생성</button>
+    <button class="btn-cancel" id="cancel-btn" onclick="cancelGenerate()">✕ 생성 취소</button>
     <div id="err"></div>
 
     <!-- 결과 -->
     <div class="card" id="result-card" style="display:none;">
       <div class="section-label">생성된 답글</div>
-      <div class="result-box" id="result-text"></div>
+      <textarea class="result-edit" id="result-text" oninput="updateCharCount()"></textarea>
+      <div class="char-count" id="char-count"></div>
       <div class="result-actions">
         <button class="btn-copy" id="copy-btn" onclick="copyReply()">복사하기</button>
         <button class="btn-retry" onclick="generate()">다시 생성</button>
@@ -356,6 +374,33 @@ function getGenCount() {
   return parseInt(localStorage.getItem('genCount')||'0');
 }
 let genCount = getGenCount();
+let abortController = null;
+
+// 저장된 설정 불러오기
+function loadSavedSettings() {
+  const saved = JSON.parse(localStorage.getItem('userSettings')||'{}');
+  if (saved.category) {
+    category = saved.category;
+    document.querySelectorAll('.cat-btn').forEach(b => {
+      if (b.dataset.cat === category) { b.classList.add('active'); }
+      else b.classList.remove('active');
+    });
+  }
+  if (saved.tone) {
+    tone = saved.tone;
+    document.querySelectorAll('.tone-btn').forEach(b => {
+      if (b.dataset.tone === tone) b.classList.add('active');
+      else b.classList.remove('active');
+    });
+  }
+  if (saved.length) {
+    length = saved.length;
+    document.querySelectorAll('.length-btn').forEach(b => {
+      if (b.dataset.len === length) b.classList.add('active');
+      else b.classList.remove('active');
+    });
+  }
+}
 let hist = JSON.parse(localStorage.getItem('rh')||'[]');
 let favs = JSON.parse(localStorage.getItem('favs')||'[]');
 
@@ -420,6 +465,7 @@ function selectCat(btn) {
   category = btn.dataset.cat;
   document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
+  saveSettings();
 }
 
 document.querySelectorAll('.star-btn').forEach(btn=>{
@@ -437,12 +483,18 @@ function selectTone(btn) {
   tone = btn.dataset.tone;
   document.querySelectorAll('.tone-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
+  saveSettings();
 }
 
 function selectLength(btn) {
   length = btn.dataset.len;
   document.querySelectorAll('.length-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
+  saveSettings();
+}
+
+function saveSettings() {
+  localStorage.setItem('userSettings', JSON.stringify({ category, tone, length }));
 }
 
 function handleFile(file) {
@@ -454,6 +506,30 @@ function handleFile(file) {
     img.src = e.target.result; img.style.display='block';
   };
   r.readAsDataURL(file);
+}
+
+function updateCharCount() {
+  const text = document.getElementById('result-text').value;
+  const len = text.length;
+  const el = document.getElementById('char-count');
+  const limits = { delivery: 300, visit: 0 };
+  const limit = reviewType === 'delivery' ? 300 : 0;
+  if (limit > 0) {
+    el.textContent = len + ' / ' + limit + '자';
+    el.className = 'char-count ' + (len > limit ? 'over' : 'ok');
+  } else {
+    el.textContent = len + '자';
+    el.className = 'char-count ok';
+  }
+}
+
+function cancelGenerate() {
+  if (abortController) { abortController.abort(); abortController = null; }
+  const btn = document.getElementById('gen-btn');
+  const cancelBtn = document.getElementById('cancel-btn');
+  btn.disabled = false;
+  btn.innerHTML = '✨ AI 답글 생성';
+  cancelBtn.style.display = 'none';
 }
 
 function buildPrompt(text) {
@@ -483,6 +559,11 @@ function buildPrompt(text) {
 
   const startWord = reviewType === 'delivery' ? '"주문해 주셔서 감사합니다"' : '"방문해 주셔서 감사합니다"';
 
+  // 언어 감지
+  const hasKorean = /[가-힣]/.test(text);
+  const hasEnglish = /[a-zA-Z]{3,}/.test(text) && !hasKorean;
+  const langGuide = hasEnglish ? '리뷰가 영어로 작성되었으니 영어로 답글을 작성하세요.' : '한국어로 답글을 작성하세요.';
+
   return `당신은 ${category === '선택안함' ? '' : category + ' '}사장님입니다. 고객의 ${typeStr}에 답글을 작성해주세요.
 별점: ${starStr}${ownerStr}${keywordStr}
 고객 리뷰: ${text}
@@ -498,6 +579,7 @@ function buildPrompt(text) {
 - 비슷한 의미의 감사 표현을 중복 사용하지 마세요 (예: "정말 감사합니다, 진심으로 감사합니다" 같은 중복 금지)
 - 비속어, 과한 홍보성 문구(예: "최고의 맛!", "강추!", "꼭 드셔보세요!") 사용 금지
 - 가독성을 위해 2~3문장마다 줄바꿈을 해주세요
+- ${langGuide}
 - 답글 내용만 출력`;
 }
 
@@ -526,15 +608,19 @@ async function generate() {
     messages = [{ role:'user', content: buildPrompt(rv) }];
   }
 
+  abortController = new AbortController();
   const btn = document.getElementById('gen-btn');
+  const cancelBtn = document.getElementById('cancel-btn');
   btn.disabled=true; btn.innerHTML='<span class="loading-dots"><span></span><span></span><span></span></span>';
+  cancelBtn.style.display = 'block';
   document.getElementById('result-card').style.display='none';
 
   try {
     const res = await fetch('/.netlify/functions/reply', {
       method:'POST',
       headers:{ 'Content-Type':'application/json' },
-      body: JSON.stringify({ messages })
+      body: JSON.stringify({ messages }),
+      signal: abortController ? abortController.signal : undefined
     });
     if (!res.ok) {
       const errText = await res.text();
@@ -543,7 +629,8 @@ async function generate() {
     const data = await res.json();
     if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
     const reply = data.content[0].text.trim();
-    document.getElementById('result-text').textContent = reply;
+    document.getElementById('result-text').value = reply;
+    updateCharCount();
     document.getElementById('result-card').style.display = 'block';
     document.getElementById('copy-btn').textContent = '복사하기';
     document.getElementById('copy-btn').classList.remove('copied');
@@ -562,11 +649,13 @@ async function generate() {
     errEl.innerHTML=`<div class="error-box">오류: ${e.message}</div>`;
   } finally {
     btn.disabled=false; btn.innerHTML='✨ AI 답글 생성';
+    document.getElementById('cancel-btn').style.display='none';
+    abortController = null;
   }
 }
 
 function copyReply() {
-  navigator.clipboard.writeText(document.getElementById('result-text').textContent).then(()=>{
+  navigator.clipboard.writeText(document.getElementById('result-text').value).then(()=>{
     const btn=document.getElementById('copy-btn');
     btn.textContent='✓ 복사됐어요!'; btn.classList.add('copied');
     setTimeout(()=>{ btn.textContent='복사하기'; btn.classList.remove('copied'); }, 2000);
@@ -574,7 +663,7 @@ function copyReply() {
 }
 
 function saveFav() {
-  const text = document.getElementById('result-text').textContent;
+  const text = document.getElementById('result-text').value;
   if (!text) return;
   favs.unshift({ text, time: new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'}) });
   if (favs.length > 20) favs.pop();
