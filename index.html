@@ -418,6 +418,8 @@ function buildPrompt(text) {
   const starStr = starNone ? '별점 없음' : `${star}점`;
   const ownerMsg = document.getElementById('owner-msg').value.trim();
   const ownerStr = ownerMsg ? `\n가게 특징: ${ownerMsg}` : '';
+  const keywordMsg = document.getElementById('keyword-msg').value.trim();
+  const keywordStr = keywordMsg ? `\n답글에 포함할 키워드: ${keywordMsg}` : '';
 
   const lenGuide = length === 'short' ? '2문장으로 간결하게' : length === 'medium' ? '3~4문장으로' : '5문장 이상 자세하게';
 
