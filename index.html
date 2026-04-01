@@ -140,6 +140,16 @@ textarea::placeholder { color: #CCC; }
 @keyframes db { 0%,80%,100%{transform:scale(0.6);opacity:.4}40%{transform:scale(1);opacity:1} }
 .error-box { background: var(--coral-light); border-radius: var(--radius-sm); padding: 12px; font-size: 13px; color: var(--coral-dark); margin-bottom: 12px; border: 1px solid #FFD0D0; }
 
+/* 쿠팡 모달 */
+.coupon-modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 300; display: flex; align-items: center; justify-content: center; padding: 20px; }
+.coupon-modal { background: white; border-radius: 20px; padding: 24px; max-width: 340px; width: 100%; text-align: center; }
+.coupon-modal h3 { font-size: 16px; font-weight: 700; margin-bottom: 6px; color: var(--text); }
+.coupon-modal p { font-size: 13px; color: var(--muted); margin-bottom: 16px; line-height: 1.6; }
+.coupon-banner-link { display: block; margin-bottom: 14px; border-radius: 10px; overflow: hidden; }
+.coupon-banner-link img { width: 100%; height: auto; display: block; }
+.btn-coupon-go { display: block; width: 100%; padding: 14px; border-radius: var(--radius-sm); border: none; background: linear-gradient(135deg, #FF6B6B, #FF8E53); color: white; font-size: 15px; font-weight: 700; cursor: pointer; font-family: 'Noto Sans KR', sans-serif; margin-bottom: 8px; text-decoration: none; }
+.btn-coupon-skip { display: block; width: 100%; padding: 10px; border-radius: var(--radius-sm); border: 2px solid var(--border); background: white; color: var(--muted); font-size: 13px; cursor: pointer; font-family: 'Noto Sans KR', sans-serif; }
+
 /* 히스토리 */
 .history-item { padding: 12px 0; border-bottom: 1px solid var(--border); }
 .history-item:last-child { border-bottom: none; }
@@ -168,6 +178,19 @@ textarea::placeholder { color: #CCC; }
 
 <!-- 메인 -->
 <div id="app" style="display:none;">
+  <!-- 쿠팡 모달 -->
+  <div class="coupon-modal-bg" id="coupon-modal" style="display:none;">
+    <div class="coupon-modal">
+      <h3>잠깐! 쿠팡 특가를 확인해보세요 🛒</h3>
+      <p>아래 배너를 확인하고<br>답글 생성을 계속해주세요</p>
+      <a class="coupon-banner-link" href="https://link.coupang.com/a/efkMur" target="_blank" referrerpolicy="unsafe-url" onclick="onCouponClick()">
+        <img src="https://ads-partners.coupang.com/banners/870271?subId=&traceId=V0-301-879dd1202e5c73b2-I870271&w=320&h=50" alt="쿠팡 특가">
+      </a>
+      <button class="btn-coupon-go" onclick="onCouponClick()">🛒 쿠팡 특가 보고 계속하기</button>
+      <p style="font-size:9px;color:#CCC;margin-top:8px;">이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.</p>
+    </div>
+  </div>
+
   <div class="top-banner">
     <a href="https://link.coupang.com/a/efkMur" target="_blank" referrerpolicy="unsafe-url">🛒 오늘의 쿠팡 특가 보러가기</a>
     <p>이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.</p>
@@ -321,7 +344,18 @@ const PASSWORD = "9999";
 let star = 5, starNone = false, reviewType = 'delivery', category = '선택안함';
 let tone = '친절', length = 'medium', mode = 'text';
 let imgB64 = '', imgType = '';
-let genCount = parseInt(localStorage.getItem('genCount')||'0');
+// 12시간 경과 시 카운트 리셋
+function getGenCount() {
+  const lastReset = parseInt(localStorage.getItem('genResetTime')||'0');
+  const now = Date.now();
+  if (now - lastReset > 12 * 60 * 60 * 1000) {
+    localStorage.setItem('genCount', '0');
+    localStorage.setItem('genResetTime', now.toString());
+    sessionStorage.removeItem('couponShown');
+  }
+  return parseInt(localStorage.getItem('genCount')||'0');
+}
+let genCount = getGenCount();
 let hist = JSON.parse(localStorage.getItem('rh')||'[]');
 let favs = JSON.parse(localStorage.getItem('favs')||'[]');
 
@@ -332,6 +366,15 @@ window.onload = () => {
 
   renderHist(); renderFav();
 };
+
+let pendingGenerate = false;
+
+function onCouponClick() {
+  sessionStorage.setItem('couponShown', '1');
+  document.getElementById('coupon-modal').style.display = 'none';
+  window.open('https://link.coupang.com/a/efkMur', '_blank', 'noopener');
+  if (pendingGenerate) { pendingGenerate = false; generate(); }
+}
 
 function checkPw() {
   if (document.getElementById('lock-input').value === PASSWORD) { sessionStorage.setItem('ok','1'); unlock(); }
@@ -462,6 +505,14 @@ async function generate() {
   const errEl = document.getElementById('err');
   errEl.innerHTML = '';
 
+  // 2번째 생성 시도 시 쿠팡 모달 표시 (12시간마다 리셋)
+  genCount = getGenCount();
+  if (genCount === 1 && !sessionStorage.getItem('couponShown')) {
+    pendingGenerate = true;
+    document.getElementById('coupon-modal').style.display = 'flex';
+    return;
+  }
+
   let messages = [];
   if (mode === 'image') {
     if (!imgB64) { errEl.innerHTML='<div class="error-box">스크린샷을 먼저 업로드해주세요.</div>'; return; }
@@ -497,11 +548,8 @@ async function generate() {
     document.getElementById('copy-btn').textContent = '복사하기';
     document.getElementById('copy-btn').classList.remove('copied');
 
-    genCount++;
-    localStorage.setItem('genCount', genCount);
-    if (genCount === 2) {
-      setTimeout(() => { window.open('https://link.coupang.com/a/efkMur', '_blank', 'noopener'); }, 1500);
-    }
+    genCount = getGenCount() + 1;
+    localStorage.setItem('genCount', genCount.toString());
 
     const sd = starNone ? '별점없음' : '★'.repeat(star)+'☆'.repeat(5-star);
     const rv = mode==='image' ? '[스크린샷]' : (document.getElementById('review').value.slice(0,20)+'...');
