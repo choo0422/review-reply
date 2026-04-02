@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="315">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF6B6B"/>
+      <stop offset="50%" stop-color="#FF8E53"/>
+      <stop offset="100%" stop-color="#FFE66D"/>
+    </linearGradient>
+  </defs>
+  <rect width="600" height="315" fill="url(#bg)" rx="0"/>
+  <rect x="40" y="40" width="520" height="235" rx="20" fill="rgba(255,255,255,0.15)"/>
+  <text x="300" y="130" font-size="72" text-anchor="middle" font-family="Arial">🍽️</text>
+  <text x="300" y="185" font-size="40" font-weight="bold" text-anchor="middle" font-family="Arial, sans-serif" fill="white">AI 리뷰 답글 생성기</text>
+  <text x="300" y="225" font-size="20" text-anchor="middle" font-family="Arial, sans-serif" fill="rgba(255,255,255,0.85)">사장님을 위한 스마트 답글 도우미</text>
+</svg>
