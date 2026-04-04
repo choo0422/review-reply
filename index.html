@@ -2,20 +2,357 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="리뷰 답글">
 <meta property="og:title" content="AI 리뷰 답글 생성기">
 <meta property="og:description" content="AI가 리뷰를 분석해서 맞춤 답글을 자동으로 생성해드려요">
 <meta property="og:type" content="website">
 <meta property="og:image" content="https://raw.githubusercontent.com/choo0422/review-reply/main/thumbnail.png">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://raw.githubusercontent.com/choo0422/review-reply/main/thumbnail.png">
 <title>AI 리뷰 답글 생성기</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet">
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0;}
+body{font-family:"Pretendard",-apple-system,sans-serif;background:#F8F9FA;min-height:100vh;padding-bottom:56px;color:#111;}
+/* 카드 */
+.card{background:#fff;border-radius:20px;box-shadow:0 2px 16px rgba(0,0,0,0.05);padding:20px;margin-bottom:12px;}
+/* 라벨 */
+.sec-label{font-size:11px;font-weight:700;color:#BBBEC4;letter-spacing:0.6px;text-transform:uppercase;margin-bottom:14px;}
+/* 버튼 기본 */
+.btn{cursor:pointer;font-family:inherit;border:none;outline:none;background:none;transition:all 0.12s;-webkit-appearance:none;}
+.btn:active{transform:scale(0.95);}
+/* 대분류 칩 - 그리드 */
+.cat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:4px;}
+.cat-chip{display:flex;flex-direction:column;align-items:center;gap:5px;padding:12px 4px;border-radius:14px;border:1.5px solid #E8EAED;background:#fff;font-size:11px;font-weight:600;color:#888;width:100%;transition:all 0.12s;}
+.cat-chip .cat-icon-wrap{width:36px;height:36px;border-radius:50%;background:#F3F4F6;display:flex;align-items:center;justify-content:center;font-size:18px;transition:all 0.12s;}
+.cat-chip:active{transform:scale(0.94);}
+.cat-chip.on{border-color:#F97316;background:#FFF7ED;color:#C2410C;font-weight:700;}
+.cat-chip.on .cat-icon-wrap{background:#FED7AA;}
+/* 세부 업종 카드 */
+.sub-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.sub-card{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px 4px 12px;border-radius:16px;border:1.5px solid #EBEBEB;background:#FAFAFA;font-size:11px;font-weight:600;color:#999;text-align:center;gap:8px;min-height:84px;transition:all 0.12s;width:100%;}
+.sub-card .sub-emoji{font-size:26px;line-height:1;}
+.sub-card:active{transform:scale(0.93);}
+.sub-card.on{border-color:#F97316!important;background:#FFF7ED!important;color:#C2410C!important;font-weight:700!important;box-shadow:0 2px 12px rgba(249,115,22,0.15);}
+.sub-card .check{display:none;position:absolute;top:6px;right:6px;width:18px;height:18px;background:#F97316;border-radius:50%;color:#fff;font-size:10px;font-weight:900;align-items:center;justify-content:center;line-height:1;}
+.sub-card.on .check{display:flex;}
+.sub-card.recent{border-color:#FCA5A5;background:#FFF5F5;color:#DC2626;}
+/* 최근 선택 */
+.recent-label{font-size:11px;font-weight:700;color:#F59E0B;margin-bottom:10px;display:none;align-items:center;gap:4px;}
+.recent-label.show{display:flex;}
+/* 키워드 말풍선 */
+.kw-box{display:none;position:relative;margin-top:14px;background:#FFFBEA;border:1.5px solid #FDE68A;border-radius:16px;padding:14px;}
+.kw-box::before{content:"";position:absolute;top:-9px;left:18px;border:8px solid transparent;border-bottom-color:#FDE68A;border-top:none;}
+.kw-box::after{content:"";position:absolute;top:-7px;left:19px;border:7px solid transparent;border-bottom-color:#FFFBEA;border-top:none;}
+.kw-box.show{display:block;}
+.kw-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.kw-badges{display:flex;flex-wrap:wrap;gap:8px;}
+.kw-badge{padding:7px 14px;border-radius:999px;border:1.5px solid #FCD34D;background:#fff;color:#78350F;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:all 0.12s;}
+.kw-badge:hover{background:#FEF3C7;}
+.kw-badge:active{transform:scale(0.95);}
+.kw-refresh{padding:5px 10px;border-radius:999px;border:1px solid #FDE68A;background:#fff;color:#92400E;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;transition:all 0.12s;}
+.kw-refresh:active{transform:scale(0.95);}
+/* 별점 */
+.star-btn{flex:1;height:50px;border-radius:14px;border:1.5px solid #EBEBEB;background:#F8F8F8;font-size:22px;display:flex;align-items:center;justify-content:center;transition:all 0.12s;}
+.star-btn.on{border-color:#FCD34D;background:#FFFBEA;box-shadow:0 2px 8px rgba(252,211,77,0.3);}
+.star-btn:active{transform:scale(0.88);}
+@keyframes starPop{0%{transform:scale(1)}40%{transform:scale(1.4)}70%{transform:scale(0.88)}100%{transform:scale(1)}}
+.star-pop{animation:starPop 0.3s ease;}
+/* 토글 버튼 (모드/타입/톤/길이) */
+.toggle-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.toggle-grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.toggle-btn{padding:13px 4px;border-radius:14px;border:1.5px solid #EBEBEB;background:#F8F8F8;font-size:12px;font-weight:600;color:#999;text-align:center;transition:all 0.12s;}
+.toggle-btn:active{transform:scale(0.95);}
+.toggle-btn.on-coral{border-color:#F97316;background:#FFF7ED;color:#C2410C;font-weight:700;}
+.toggle-btn.on-mint{border-color:#14B8A6;background:#F0FDFA;color:#0F766E;font-weight:700;}
+/* 텍스트 영역 */
+.txt-area{width:100%;background:#F8F9FA;border:1.5px solid #EBEBEB;border-radius:14px;padding:14px;font-size:14px;color:#333;line-height:1.7;resize:none;font-family:inherit;outline:none;transition:border-color 0.15s;}
+.txt-area:focus{border-color:#F97316;}
+/* 업로드 */
+.upload-zone{border:2px dashed #D1D5DB;border-radius:16px;padding:32px 16px;text-align:center;cursor:pointer;transition:all 0.15s;}
+.upload-zone:active{border-color:#14B8A6;background:#F0FDFA;}
+/* 생성 버튼 */
+.gen-btn{width:100%;padding:17px;border-radius:20px;border:none;color:#fff;font-size:16px;font-weight:900;cursor:pointer;font-family:inherit;background:linear-gradient(135deg,#FF6B6B,#F97316);box-shadow:0 4px 20px rgba(249,115,22,0.3);transition:all 0.15s;margin-bottom:8px;}
+.gen-btn:active{transform:scale(0.98);}
+.gen-btn:disabled{opacity:0.5;cursor:not-allowed;}
+.cancel-btn{width:100%;padding:12px;border-radius:16px;border:1.5px solid #E5E7EB;background:#fff;font-size:13px;font-weight:700;color:#9CA3AF;cursor:pointer;font-family:inherit;display:none;margin-bottom:8px;transition:all 0.12s;}
+.cancel-btn:active{transform:scale(0.98);}
+/* 결과 */
+.result-ta{width:100%;background:#F0FDFA;border:1.5px solid #99F6E4;border-radius:14px;padding:16px;font-size:14px;color:#134E4A;line-height:1.9;resize:vertical;min-height:100px;font-family:inherit;outline:none;}
+.copy-btn{flex:1;padding:13px;border-radius:14px;border:none;background:#14B8A6;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:all 0.12s;}
+.copy-btn:active{transform:scale(0.95);}
+.retry-btn{flex:1;padding:13px;border-radius:14px;border:1.5px solid #EBEBEB;background:#F8F9FA;font-size:14px;font-weight:700;color:#555;cursor:pointer;font-family:inherit;transition:all 0.12s;}
+.retry-btn:active{transform:scale(0.95);}
+.fav-btn{width:100%;padding:11px;border-radius:14px;border:1.5px solid #FDE68A;background:#FFFBEA;font-size:12px;font-weight:700;color:#78350F;cursor:pointer;font-family:inherit;margin-top:8px;transition:all 0.12s;}
+.fav-btn:active{transform:scale(0.98);}
+/* 에러 */
+.err-box{background:#FFF1F2;border:1px solid #FECDD3;border-radius:14px;padding:12px;font-size:13px;color:#BE123C;margin-bottom:10px;}
+/* 즐겨찾기/히스토리 */
+.fav-item{background:#FFFBEA;border:1px solid #FDE68A;border-radius:14px;padding:12px;position:relative;margin-bottom:8px;}
+.fav-item p{font-size:13px;color:#333;line-height:1.6;padding-right:76px;}
+.tag{font-size:10px;padding:2px 8px;border-radius:999px;font-weight:700;}
+.tag-orange{background:#FFF7ED;color:#C2410C;}
+.tag-gray{background:#F3F4F6;color:#6B7280;}
+.no-scroll{overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
+.no-scroll::-webkit-scrollbar{display:none;}
+/* 잠금화면 */
+#lock{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;background:linear-gradient(145deg,#FF6B6B,#F97316,#FBBF24);}
+.lock-box{background:#fff;border-radius:24px;padding:28px;width:100%;max-width:300px;box-shadow:0 24px 60px rgba(0,0,0,0.15);}
+.lock-input{width:100%;text-align:center;font-size:22px;letter-spacing:10px;border:2px solid #F3F4F6;border-radius:14px;padding:13px;margin-bottom:12px;background:#F8F9FA;font-family:inherit;outline:none;transition:border-color 0.15s;}
+.lock-input:focus{border-color:#F97316;}
+.lock-btn{width:100%;padding:15px;border-radius:14px;border:none;color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;background:linear-gradient(135deg,#FF6B6B,#F97316);}
+.lock-btn:active{transform:scale(0.98);}
+@keyframes bounce2{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes dotB{0%,80%,100%{transform:scale(0.6);opacity:.4}40%{transform:scale(1);opacity:1}}
+</style>
+</head>
+<body>
+
+<!-- 잠금 -->
+<div id="lock" style="display:none;">
+  <div style="font-size:52px;margin-bottom:8px;animation:bounce2 1.5s infinite;">🍽️</div>
+  <h1 style="font-size:26px;font-weight:900;color:#fff;margin-bottom:4px;letter-spacing:-0.5px;">리뷰 답글 생성기</h1>
+  <p style="font-size:13px;color:rgba(255,255,255,0.8);margin-bottom:28px;">사장님을 위한 AI 답글 도우미</p>
+  <div class="lock-box">
+    <p style="text-align:center;font-size:12px;color:#9CA3AF;font-weight:700;margin-bottom:10px;">비밀번호 입력</p>
+    <input id="lock-input" type="password" placeholder="••••" class="lock-input" onkeydown="if(event.key==='Enter')checkPw()">
+    <button onclick="checkPw()" class="lock-btn">입장하기</button>
+    <p id="lock-err" style="text-align:center;font-size:12px;color:#EF4444;margin-top:8px;min-height:16px;"></p>
+  </div>
+</div>
+
+<!-- 앱 -->
+<div id="app">
+  <div style="background:#fff;border-bottom:1px solid #F0F0F0;position:sticky;top:0;z-index:10;">
+    <div style="max-width:480px;margin:0 auto;padding:14px 20px;display:flex;align-items:center;gap:12px;">
+      <span style="font-size:24px;">🍽️</span>
+      <div>
+        <div style="font-size:16px;font-weight:900;color:#111;letter-spacing:-0.3px;">리뷰 답글 생성기</div>
+        <div style="font-size:11px;color:#9CA3AF;margin-top:1px;">AI가 맞춤 답글을 작성해드려요</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="max-width:480px;margin:0 auto;padding:16px;">
+
+    <!-- API 키 -->
+    <div class="card" id="api-card">
+      <div class="sec-label">API 키 설정</div>
+      <div style="background:#FFFBEA;border:1px solid #FDE68A;border-radius:12px;padding:10px 12px;margin-bottom:10px;">
+        <p style="font-size:12px;color:#78350F;line-height:1.6;">최초 1회만 입력하면 저장돼요.<br><strong>console.anthropic.com</strong> → API Keys에서 발급</p>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <input id="api-key" type="password" placeholder="sk-ant-..."
+          style="flex:1;font-size:12px;background:#F8F9FA;border:1.5px solid #EBEBEB;border-radius:12px;padding:10px 12px;font-family:inherit;outline:none;">
+        <button onclick="saveKey()" class="btn"
+          style="padding:10px 16px;border-radius:12px;background:#14B8A6;color:#fff;font-size:12px;font-weight:700;">저장</button>
+      </div>
+      <p id="api-ok" style="font-size:11px;color:#14B8A6;margin-top:6px;display:none;">✓ API 키 저장됨</p>
+    </div>
+
+    <!-- 입력 방식 -->
+    <div class="card">
+      <div class="sec-label">입력 방식</div>
+      <div class="toggle-grid-2" style="margin-bottom:14px;">
+        <button data-mode="text" onclick="selectMode(this)" class="btn toggle-btn on-coral">✏️ 텍스트 입력</button>
+        <button data-mode="image" onclick="selectMode(this)" class="btn toggle-btn">📷 스크린샷</button>
+      </div>
+      <div id="text-area">
+        <textarea id="review" rows="5" placeholder="리뷰를 복사해서 붙여넣으세요..." class="txt-area"></textarea>
+      </div>
+      <div id="image-area" style="display:none;">
+        <div class="upload-zone" onclick="document.getElementById('file-input').click()">
+          <input type="file" id="file-input" accept="image/*" style="display:none;" onchange="handleFile(this.files[0])">
+          <div style="font-size:36px;margin-bottom:8px;">🤖</div>
+          <p style="font-size:14px;font-weight:700;color:#374151;margin-bottom:4px;">리뷰 스크린샷을 올려주세요!</p>
+          <p style="font-size:12px;color:#9CA3AF;">AI가 리뷰를 읽고 딱 맞는 답글을 써드려요 ✨</p>
+        </div>
+        <img id="preview-img" style="width:100%;border-radius:14px;margin-top:10px;display:none;max-height:260px;object-fit:contain;">
+      </div>
+    </div>
+
+    <!-- 리뷰 유형 -->
+    <div class="card">
+      <div class="sec-label">리뷰 유형</div>
+      <div class="toggle-grid-2">
+        <button data-type="delivery" onclick="selectType(this)" class="btn"
+          style="display:flex;flex-direction:column;align-items:center;padding:16px 8px;border-radius:16px;border:1.5px solid #F97316;background:#FFF7ED;gap:6px;transition:all 0.12s;">
+          <span style="font-size:24px;">🛵</span>
+          <span style="font-size:12px;font-weight:700;color:#C2410C;">배달 리뷰</span>
+        </button>
+        <button data-type="visit" onclick="selectType(this)" class="btn"
+          style="display:flex;flex-direction:column;align-items:center;padding:16px 8px;border-radius:16px;border:1.5px solid #EBEBEB;background:#F8F9FA;gap:6px;transition:all 0.12s;">
+          <span style="font-size:24px;">🚶</span>
+          <span style="font-size:12px;font-weight:700;color:#9CA3AF;">방문자 리뷰</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 업종 선택 -->
+    <div class="card">
+      <div class="sec-label">업종 선택</div>
+      <div class="cat-grid">
+        <button data-major="식사/요리" onclick="selectMajor(this)" class="btn cat-chip">
+          <div class="cat-icon-wrap">🍽️</div><span>식사/요리</span>
+        </button>
+        <button data-major="배달인기" onclick="selectMajor(this)" class="btn cat-chip">
+          <div class="cat-icon-wrap">🛵</div><span>배달 인기</span>
+        </button>
+        <button data-major="카페/간식" onclick="selectMajor(this)" class="btn cat-chip">
+          <div class="cat-icon-wrap">☕</div><span>카페/간식</span>
+        </button>
+        <button data-major="주류/펍" onclick="selectMajor(this)" class="btn cat-chip">
+          <div class="cat-icon-wrap">🍺</div><span>주류/펍</span>
+        </button>
+        <button data-major="서비스/여가" onclick="selectMajor(this)" class="btn cat-chip">
+          <div class="cat-icon-wrap">✨</div><span>서비스/여가</span>
+        </button>
+        <button data-major="기타" onclick="selectMajor(this)" class="btn cat-chip">
+          <div class="cat-icon-wrap">🏪</div><span>기타</span>
+        </button>
+      </div>
+
+      <div id="sub-wrap" style="display:none;margin-top:14px;">
+        <p id="recent-lbl" class="recent-label">⭐ 최근 선택</p>
+        <div id="sub-grid" class="sub-grid"></div>
+        <div id="kw-box" class="kw-box">
+          <div class="kw-header">
+            <div style="display:flex;align-items:center;gap:6px;">
+              <span style="font-size:16px;">💡</span>
+              <p style="font-size:11px;color:#92400E;font-weight:700;">AI 추천 키워드</p>
+            </div>
+            <button onclick="refreshKw()" class="btn kw-refresh">🔄 새로고침</button>
+          </div>
+          <div id="kw-badges" class="kw-badges"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 별점 -->
+    <div class="card" id="star-card">
+      <div class="sec-label">별점</div>
+      <div id="star-none-wrap" style="display:none;margin-bottom:8px;">
+        <button id="star-none-btn" onclick="selectStarNone()" class="btn"
+          style="width:100%;padding:10px;border-radius:14px;border:1.5px solid #EBEBEB;background:#F8F9FA;font-size:12px;font-weight:700;color:#9CA3AF;transition:all 0.12s;">
+          ⭕ 별점 없음
+        </button>
+      </div>
+      <div id="star-select" style="display:flex;gap:8px;">
+        <button class="star-btn btn" data-v="1">⭐</button>
+        <button class="star-btn btn" data-v="2">⭐</button>
+        <button class="star-btn btn" data-v="3">⭐</button>
+        <button class="star-btn btn" data-v="4">⭐</button>
+        <button class="star-btn btn on" data-v="5">⭐</button>
+      </div>
+      <p id="star-lbl" style="text-align:center;font-size:12px;color:#9CA3AF;margin-top:8px;">⭐⭐⭐⭐⭐ 5점</p>
+    </div>
+
+    <!-- 가게 특징 -->
+    <div class="card">
+      <div class="sec-label">우리 가게 특징 <span style="font-weight:400;color:#D1D5DB;text-transform:none;font-size:10px;">(선택)</span></div>
+      <textarea id="owner-msg" rows="2" placeholder="예) 국내산 재료만 사용, 20년 전통, 직접 만든 소스..." class="txt-area"></textarea>
+    </div>
+
+    <!-- 키워드 -->
+    <div class="card">
+      <div class="sec-label">넣고 싶은 키워드 <span style="font-weight:400;color:#D1D5DB;text-transform:none;font-size:10px;">(선택)</span></div>
+      <textarea id="keyword-msg" rows="2" placeholder="예) 재방문 감사, 포장 무료, 리뷰 이벤트 진행중..." class="txt-area"></textarea>
+    </div>
+
+    <!-- 답글 톤 -->
+    <div class="card">
+      <div class="sec-label">답글 톤</div>
+      <div class="toggle-grid-2">
+        <button data-tone="친절" onclick="selectTone(this)" class="btn toggle-btn on-coral">😊 친절/다정</button>
+        <button data-tone="전문" onclick="selectTone(this)" class="btn toggle-btn">🎩 전문적/진중</button>
+        <button data-tone="유머" onclick="selectTone(this)" class="btn toggle-btn">😄 유머러스/친근</button>
+        <button data-tone="사과" onclick="selectTone(this)" class="btn toggle-btn">🙏 사과/반성</button>
+      </div>
+    </div>
+
+    <!-- 답글 길이 -->
+    <div class="card">
+      <div class="sec-label">답글 길이</div>
+      <div class="toggle-grid-3">
+        <button data-len="short" onclick="selectLength(this)" class="btn toggle-btn">✂️ 짧게<br><span style="font-size:10px;font-weight:400;color:#9CA3AF;">2문장</span></button>
+        <button data-len="medium" onclick="selectLength(this)" class="btn toggle-btn on-mint">📝 보통<br><span style="font-size:10px;font-weight:400;">3~4문장</span></button>
+        <button data-len="long" onclick="selectLength(this)" class="btn toggle-btn">📄 길게<br><span style="font-size:10px;font-weight:400;color:#9CA3AF;">5문장+</span></button>
+      </div>
+    </div>
+
+    <button id="gen-btn" class="gen-btn" onclick="generate()">✨ AI 답글 생성</button>
+    <button id="cancel-btn" class="cancel-btn btn" onclick="cancelGenerate()">✕ 생성 취소</button>
+    <div id="err"></div>
+
+    <!-- 쿠팡 모달 -->
+    <div id="coupon-modal" style="display:none;position:fixed;inset:0;z-index:50;background:rgba(0,0,0,0.5);align-items:center;justify-content:center;padding:20px;">
+      <div style="background:#fff;border-radius:24px;padding:24px;width:100%;max-width:320px;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,0.2);">
+        <p style="font-size:16px;font-weight:900;color:#111;margin-bottom:6px;">잠깐! 쿠팡 특가 확인 🛒</p>
+        <p style="font-size:12px;color:#9CA3AF;margin-bottom:16px;line-height:1.6;">아래 버튼을 누르고<br>답글 생성을 계속해주세요</p>
+        <a href="https://link.coupang.com/a/egBt7O" target="_blank" referrerpolicy="unsafe-url" onclick="onCouponClick()"
+          style="display:block;width:100%;padding:15px;border-radius:16px;color:#fff;font-size:14px;font-weight:700;text-decoration:none;background:linear-gradient(135deg,#FF6B6B,#F97316);margin-bottom:8px;">
+          🛒 쿠팡 특가 보고 계속하기
+        </a>
+        <p style="font-size:9px;color:#D1D5DB;margin-top:8px;">이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.</p>
+      </div>
+    </div>
+
+    <!-- 결과 -->
+    <div id="result-card" style="display:none;" class="card">
+      <div class="sec-label">생성된 답글</div>
+      <textarea id="result-text" class="result-ta" oninput="updateCharCount()"></textarea>
+      <p id="char-count" style="text-align:right;font-size:11px;color:#9CA3AF;margin-top:4px;margin-bottom:12px;"></p>
+      <div style="display:flex;gap:8px;margin-bottom:8px;">
+        <button id="copy-btn" onclick="copyReply()" class="btn copy-btn">복사하기</button>
+        <button onclick="generate()" class="btn retry-btn">다시 생성</button>
+      </div>
+      <button onclick="saveFav()" class="btn fav-btn">⭐ 즐겨찾기에 저장</button>
+    </div>
+
+    <!-- 즐겨찾기 -->
+    <div id="fav-card" style="display:none;" class="card">
+      <div class="sec-label">즐겨찾기</div>
+      <div id="fav-list"></div>
+    </div>
+
+    <!-- 히스토리 -->
+    <div id="hist-card" style="display:none;" class="card">
+      <div class="sec-label">최근 기록</div>
+      <div id="hist-list"></div>
+    </div>
+
+  </div>
+</div>
+
 <script>
 
+const PASSWORD = "9999";
+let star=5, starNone=false, reviewType="delivery", category="선택안함";
+let tone="친절", length="medium", mode="text";
+let imgB64="", imgType="", abortController=null;
+let recentCat = localStorage.getItem("recentCat") || "";
+let pendingGenerate = false;
+let hist = JSON.parse(localStorage.getItem("rh") || "[]");
+let favs = JSON.parse(localStorage.getItem("favs") || "[]");
+
+function checkPw() {
+  if (document.getElementById("lock-input").value === PASSWORD) {
+    sessionStorage.setItem("ok","1"); unlock();
+  } else {
+    document.getElementById("lock-err").textContent = "비밀번호가 틀렸어요 🥲";
+    document.getElementById("lock-input").value = "";
+  }
+}
+function unlock() {
+  document.getElementById("lock").style.display = "none";
+  document.getElementById("app").style.display = "block";
+}
+window.onload = () => {
+  unlock();
+  const k = localStorage.getItem("ak");
+  if (k) { document.getElementById("api-key").value = k; document.getElementById("api-ok").style.display = "block"; }
+  renderHist(); renderFav();
+};
 const keywordPool={
   "한식":["정갈한 손맛","국내산 재료","엄마의 손맛","매일 직접 끓이는 육수","정성 가득한 한 상","전통 레시피","신선한 제철 재료","건강한 집밥 같은 맛","깊고 진한 국물","화학조미료 무첨가","당일 손질 재료","깔끔한 뒷맛","정직한 재료","든든한 한 끼","오래된 단골 맛집","어머니 손맛 그대로","재래시장 직거래 재료","저염 건강식","푸짐한 양","계절 별미"],
   "중식":["불 조절의 비법","신선한 해산물","직접 만든 탕수육 소스","중화풍 깊은 감칠맛","매일 새벽 반죽","고온 웍 조리","진한 육수 베이스","바삭한 튀김","풍부한 재료","정통 중화 레시피","쫄깃한 면발","알싸한 마라 향","신선 채소 듬뿍","넉넉한 포션","빠른 배달"],
@@ -50,268 +387,8 @@ function getRandomKws(sub,count){
 }
 
 
-tailwind.config = {
-  theme: {
-    extend: {
-      fontFamily: { sans: ['Noto Sans KR', 'sans-serif'] },
-    }
-  }
-}
-</script>
-<style>
-* { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
-body { font-family: 'Noto Sans KR', sans-serif; }
-.no-scroll::-webkit-scrollbar { display: none; }
-.no-scroll { scrollbar-width: none; }
-@keyframes starPop { 0%{transform:scale(1)} 40%{transform:scale(1.4)} 70%{transform:scale(0.9)} 100%{transform:scale(1)} }
-.star-pop { animation: starPop 0.3s ease forwards; }
-@keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
-.fade-up { animation: fadeUp 0.2s ease forwards; }
-@keyframes dotBounce { 0%,80%,100%{transform:scale(0.6);opacity:.4} 40%{transform:scale(1);opacity:1} }
-.dot { width:8px;height:8px;border-radius:50%;background:white;animation:dotBounce 1.2s infinite;display:inline-block; }
-.dot:nth-child(2){animation-delay:.2s}
-.dot:nth-child(3){animation-delay:.4s}
-.bubble-tail::before { content:''; position:absolute; top:-9px; left:18px; border:8px solid transparent; border-bottom-color:#FFE066; border-top:0; }
-.bubble-tail::after { content:''; position:absolute; top:-7px; left:19px; border:7px solid transparent; border-bottom-color:#FFFBEA; border-top:0; }
-textarea:focus { outline: none; }
-.star-active { border-color: #FFD700 !important; background: #FFFBEA !important; color: #FFD700 !important; filter: drop-shadow(0 2px 4px rgba(255,215,0,0.3)); }
-.chip-active { border-color: #FF6B6B !important; background: #FFF0F0 !important; color: #CC4444 !important; font-weight: 700 !important; }
-.sub-active { border-color: #4ECDC4 !important; background: #E8FAF9 !important; color: #2EA89F !important; }
-.tone-active { border-color: #FF6B6B !important; background: #FFF0F0 !important; color: #CC4444 !important; }
-.len-active { border-color: #4ECDC4 !important; background: #E8FAF9 !important; color: #2EA89F !important; }
-.type-active { border-color: #FF6B6B !important; background: #FFF0F0 !important; }
-.type-active .type-label { color: #CC4444 !important; }
-</style>
-</head>
-<body class="bg-[#F2F4F6] min-h-screen pb-16">
+const subIcons={"한식":"🍚","중식":"🥟","일식/회":"🐟","양식/레스토랑":"🍝","고기/구이":"🥩","치킨":"🍗","피자":"🍕","족발/보쌈":"🐷","분식":"🍜","패스트푸드":"🍔","카페/베이커리":"☕","디저트":"🍰","아이스크림":"🍦","호프/맥주":"🍺","이자카야/포차":"🍶","미용/뷰티":"💄","헬스/스포츠":"💪","필라테스/요가":"🧘","스크린골프":"⛳","PC방":"🖥️","노래방":"🎤","기타업종":"🏪","기타/일반":"➕"};
 
-<!-- 쿠팡 모달 -->
-<div id="coupon-modal" class="fixed inset-0 bg-black/60 z-50 hidden items-center justify-center p-5">
-  <div class="bg-white rounded-3xl p-6 w-full max-w-sm text-center">
-    <div class="text-5xl mb-3">🛒</div>
-    <h3 class="text-lg font-black text-gray-900 mb-1">쿠팡 특가를 확인해보세요!</h3>
-    <p class="text-sm text-gray-400 mb-5 leading-relaxed">아래 버튼을 눌러 확인 후<br>답글 생성을 계속하세요</p>
-    <a href="https://link.coupang.com/a/egBt7O" target="_blank" referrerpolicy="unsafe-url"
-       onclick="onCouponClick()"
-       class="block w-full py-4 rounded-2xl bg-[#FF6B6B] text-white font-black text-base active:scale-95 transition-transform">
-      🛒 쿠팡 특가 보고 계속하기
-    </a>
-    <p class="text-[9px] text-gray-300 mt-4">이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.</p>
-  </div>
-</div>
-
-<div id="app">
-  <!-- 헤더 -->
-  <div class="bg-white border-b border-gray-100 sticky top-0 z-10">
-    <div class="max-w-lg mx-auto px-5 py-4 flex items-center gap-3">
-      <span class="text-2xl">🍽️</span>
-      <div>
-        <h1 class="text-[15px] font-black text-gray-900 leading-tight">AI 리뷰 답글 생성기</h1>
-        <p class="text-[11px] text-gray-400">사장님을 위한 스마트 답글 도우미</p>
-      </div>
-    </div>
-  </div>
-
-  <div class="max-w-lg mx-auto px-4 pt-4 space-y-3">
-
-    <!-- 입력 방식 -->
-    <div class="bg-white rounded-3xl p-5 shadow-sm">
-      <p class="text-[11px] font-bold text-gray-400 tracking-widest uppercase mb-3">입력 방식</p>
-      <div class="grid grid-cols-2 gap-2.5 mb-4">
-        <button data-mode="text" onclick="selectMode(this)"
-          class="mode-btn py-3.5 rounded-2xl border-2 font-bold text-sm flex items-center justify-center gap-2 transition-all active:scale-95 type-active">
-          <span>✏️</span><span class="type-label text-[#CC4444]">텍스트 입력</span>
-        </button>
-        <button data-mode="image" onclick="selectMode(this)"
-          class="mode-btn py-3.5 rounded-2xl border-2 border-gray-100 bg-gray-50 font-bold text-sm flex items-center justify-center gap-2 transition-all active:scale-95">
-          <span>📷</span><span class="type-label text-gray-400">스크린샷</span>
-        </button>
-      </div>
-      <div id="text-area">
-        <textarea id="review" rows="5"
-          class="w-full bg-gray-50 rounded-2xl p-4 text-sm text-gray-800 resize-none border border-gray-100 placeholder:text-gray-300 focus:ring-2 focus:ring-[#FF6B6B]/20 transition-all"
-          placeholder="리뷰를 복사해서 붙여넣으세요..."></textarea>
-      </div>
-      <div id="image-area" class="hidden">
-        <div onclick="document.getElementById('file-input').click()"
-          class="border-2 border-dashed border-gray-200 rounded-2xl p-8 text-center cursor-pointer active:scale-95 transition-all hover:border-[#4ECDC4] hover:bg-[#E8FAF9]">
-          <input type="file" id="file-input" accept="image/*" class="hidden" onchange="handleFile(this.files[0])">
-          <div class="text-4xl mb-2">🤖</div>
-          <p class="font-bold text-gray-700 text-sm">리뷰 스크린샷을 올려주세요!</p>
-          <p class="text-xs text-gray-400 mt-1">AI가 리뷰를 읽고 딱 맞는 답글을 써드려요 ✨</p>
-        </div>
-        <img id="preview-img" class="w-full rounded-2xl mt-3 hidden max-h-64 object-contain">
-      </div>
-    </div>
-
-    <!-- 리뷰 유형 -->
-    <div class="bg-white rounded-3xl p-5 shadow-sm">
-      <p class="text-[11px] font-bold text-gray-400 tracking-widest uppercase mb-3">리뷰 유형</p>
-      <div class="grid grid-cols-2 gap-2.5">
-        <button data-type="delivery" onclick="selectType(this)"
-          class="type-btn py-4 rounded-2xl border-2 font-bold text-sm transition-all active:scale-95 flex flex-col items-center gap-1.5 type-active">
-          <span class="text-2xl">🛵</span><span class="type-label text-[#CC4444] text-xs">배달 리뷰</span>
-        </button>
-        <button data-type="visit" onclick="selectType(this)"
-          class="type-btn py-4 rounded-2xl border-2 border-gray-100 bg-gray-50 font-bold text-sm transition-all active:scale-95 flex flex-col items-center gap-1.5">
-          <span class="text-2xl">🚶</span><span class="type-label text-gray-400 text-xs">방문자 리뷰</span>
-        </button>
-      </div>
-    </div>
-
-    <!-- 업종 선택 -->
-    <div class="bg-white rounded-3xl p-5 shadow-sm">
-      <p class="text-[11px] font-bold text-gray-400 tracking-widest uppercase mb-3">업종 선택</p>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;">
-        <button class="major-chip btn" data-major="식사/요리" onclick="selectMajor(this)"><span style="font-size:18px;">🍽️</span><span>식사/요리</span></button>
-        <button class="major-chip btn" data-major="배달인기" onclick="selectMajor(this)"><span style="font-size:18px;">🛵</span><span>배달 인기</span></button>
-        <button class="major-chip btn" data-major="카페/간식" onclick="selectMajor(this)"><span style="font-size:18px;">☕</span><span>카페/간식</span></button>
-        <button class="major-chip btn" data-major="주류/펍" onclick="selectMajor(this)"><span style="font-size:18px;">🍺</span><span>주류/펍</span></button>
-        <button class="major-chip btn" data-major="서비스/여가" onclick="selectMajor(this)"><span style="font-size:18px;">✨</span><span>서비스/여가</span></button>
-        <button class="major-chip btn" data-major="기타" onclick="selectMajor(this)"><span style="font-size:18px;">🏪</span><span>기타</span></button>
-      </div>
-      <div id="sub-cat-wrap" class="hidden">
-        <p id="recent-label" class="hidden text-xs font-bold text-[#FF6B6B] mb-2">⭐ 최근 선택</p>
-        <div id="sub-grid" class="grid grid-cols-3 gap-2.5"></div>
-        <div id="keyword-hint" style="display:none;position:relative;margin-top:12px;background:#FFFBEA;border:1.5px solid #FFE066;border-radius:16px;padding:14px;">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-            <div style="display:flex;align-items:center;gap:6px;">
-              <span style="font-size:16px;">💡</span>
-              <p style="font-size:11px;color:#AA8800;font-weight:700;">AI 추천 키워드</p>
-            </div>
-            <button onclick="refreshKeywords()" class="btn" style="padding:4px 10px;border-radius:999px;border:1px solid #FFE066;background:white;color:#AA8800;font-size:11px;font-weight:700;">🔄 새로고침</button>
-          </div>
-          <div id="keyword-badges" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 별점 -->
-    <div class="bg-white rounded-3xl p-5 shadow-sm" id="star-card">
-      <p class="text-[11px] font-bold text-gray-400 tracking-widest uppercase mb-3">별점</p>
-      <div id="star-none-wrap" class="hidden mb-3">
-        <button id="star-none-btn" onclick="selectStarNone()"
-          class="w-full py-3 rounded-2xl border-2 border-gray-100 bg-gray-50 text-gray-500 font-bold text-sm transition-all active:scale-95">
-          ⭕ 별점 없음 (당근 등)
-        </button>
-      </div>
-      <div id="star-select">
-        <div class="flex gap-2">
-          <button class="star-btn flex-1 h-12 rounded-2xl border-2 border-gray-100 bg-gray-50 text-2xl text-gray-300 flex items-center justify-center transition-all active:scale-90" data-v="1">★</button>
-          <button class="star-btn flex-1 h-12 rounded-2xl border-2 border-gray-100 bg-gray-50 text-2xl text-gray-300 flex items-center justify-center transition-all active:scale-90" data-v="2">★</button>
-          <button class="star-btn flex-1 h-12 rounded-2xl border-2 border-gray-100 bg-gray-50 text-2xl text-gray-300 flex items-center justify-center transition-all active:scale-90" data-v="3">★</button>
-          <button class="star-btn flex-1 h-12 rounded-2xl border-2 border-gray-100 bg-gray-50 text-2xl text-gray-300 flex items-center justify-center transition-all active:scale-90" data-v="4">★</button>
-          <button class="star-btn flex-1 h-12 rounded-2xl border-2 border-gray-100 bg-gray-50 text-2xl text-gray-300 flex items-center justify-center transition-all active:scale-90 star-active" data-v="5">★</button>
-        </div>
-        <p id="star-label" class="text-xs text-center text-gray-400 mt-2.5 font-medium">⭐⭐⭐⭐⭐ 5점</p>
-      </div>
-    </div>
-
-    <!-- 가게 특징 -->
-    <div class="bg-white rounded-3xl p-5 shadow-sm">
-      <p class="text-[11px] font-bold text-gray-400 tracking-widest uppercase mb-1">우리 가게 특징</p>
-      <p class="text-[11px] text-gray-300 mb-3">선택사항 · 답글 퀄리티가 올라가요</p>
-      <textarea id="owner-msg" rows="2"
-        class="w-full bg-gray-50 rounded-2xl p-4 text-sm text-gray-800 resize-none border border-gray-100 placeholder:text-gray-300 focus:ring-2 focus:ring-[#4ECDC4]/20 transition-all"
-        placeholder="예) 국내산 재료만 사용, 20년 전통, 직접 만든 소스..."></textarea>
-    </div>
-
-    <!-- 키워드 -->
-    <div class="bg-white rounded-3xl p-5 shadow-sm">
-      <p class="text-[11px] font-bold text-gray-400 tracking-widest uppercase mb-1">넣고 싶은 키워드</p>
-      <p class="text-[11px] text-gray-300 mb-3">선택사항 · 답글에 자연스럽게 반영돼요</p>
-      <textarea id="keyword-msg" rows="2"
-        class="w-full bg-gray-50 rounded-2xl p-4 text-sm text-gray-800 resize-none border border-gray-100 placeholder:text-gray-300 focus:ring-2 focus:ring-[#4ECDC4]/20 transition-all"
-        placeholder="예) 재방문 감사, 포장 무료, 이벤트 진행중..."></textarea>
-    </div>
-
-    <!-- 답글 톤 -->
-    <div class="bg-white rounded-3xl p-5 shadow-sm">
-      <p class="text-[11px] font-bold text-gray-400 tracking-widest uppercase mb-3">답글 톤</p>
-      <div class="grid grid-cols-2 gap-2.5">
-        <button class="tone-btn py-3.5 rounded-2xl border-2 font-bold text-sm transition-all active:scale-95 tone-active" data-tone="친절" onclick="selectTone(this)">😊 친절/다정</button>
-        <button class="tone-btn py-3.5 rounded-2xl border-2 border-gray-100 bg-gray-50 text-gray-500 font-bold text-sm transition-all active:scale-95" data-tone="전문" onclick="selectTone(this)">🎩 전문적/진중</button>
-        <button class="tone-btn py-3.5 rounded-2xl border-2 border-gray-100 bg-gray-50 text-gray-500 font-bold text-sm transition-all active:scale-95" data-tone="유머" onclick="selectTone(this)">😄 유머러스</button>
-        <button class="tone-btn py-3.5 rounded-2xl border-2 border-gray-100 bg-gray-50 text-gray-500 font-bold text-sm transition-all active:scale-95" data-tone="사과" onclick="selectTone(this)">🙏 사과/반성</button>
-      </div>
-    </div>
-
-    <!-- 답글 길이 -->
-    <div class="bg-white rounded-3xl p-5 shadow-sm">
-      <p class="text-[11px] font-bold text-gray-400 tracking-widest uppercase mb-3">답글 길이</p>
-      <div class="grid grid-cols-3 gap-2.5">
-        <button class="length-btn py-4 rounded-2xl border-2 border-gray-100 bg-gray-50 text-gray-500 font-bold text-sm transition-all active:scale-95 flex flex-col items-center gap-1" data-len="short" onclick="selectLength(this)">
-          <span>✂️</span><span class="text-xs">짧게</span><span class="text-[10px] text-gray-300 font-normal">2문장</span>
-        </button>
-        <button class="length-btn py-4 rounded-2xl border-2 font-bold text-sm transition-all active:scale-95 flex flex-col items-center gap-1 len-active" data-len="medium" onclick="selectLength(this)">
-          <span>📝</span><span class="text-xs">보통</span><span class="text-[10px] text-[#4ECDC4] font-normal">3~4문장</span>
-        </button>
-        <button class="length-btn py-4 rounded-2xl border-2 border-gray-100 bg-gray-50 text-gray-500 font-bold text-sm transition-all active:scale-95 flex flex-col items-center gap-1" data-len="long" onclick="selectLength(this)">
-          <span>📄</span><span class="text-xs">길게</span><span class="text-[10px] text-gray-300 font-normal">5문장+</span>
-        </button>
-      </div>
-    </div>
-
-    <!-- 생성 버튼 -->
-    <button id="gen-btn" onclick="generate()"
-      class="w-full py-5 rounded-3xl bg-[#FF6B6B] text-white font-black text-lg shadow-lg shadow-[#FF6B6B]/25 transition-all active:scale-95 active:shadow-none">
-      ✨ AI 답글 생성
-    </button>
-    <button id="cancel-btn" onclick="cancelGenerate()"
-      class="w-full py-3.5 rounded-3xl border-2 border-gray-100 bg-white text-gray-400 font-bold text-sm hidden transition-all active:scale-95">
-      ✕ 생성 취소
-    </button>
-    <div id="err"></div>
-
-    <!-- 결과 -->
-    <div id="result-card" class="bg-white rounded-3xl p-5 shadow-sm hidden">
-      <div class="flex items-center justify-between mb-3">
-        <p class="text-[11px] font-bold text-gray-400 tracking-widest uppercase">생성된 답글</p>
-        <span id="char-count" class="text-xs text-gray-400"></span>
-      </div>
-      <textarea id="result-text" rows="6"
-        class="w-full bg-[#E8FAF9] border border-[#B2E8E5] rounded-2xl p-4 text-sm text-[#1A3D3A] leading-relaxed resize-y mb-3 transition-all"
-        oninput="updateCharCount()"></textarea>
-      <div class="grid grid-cols-2 gap-2.5 mb-2.5">
-        <button id="copy-btn" onclick="copyReply()"
-          class="py-3.5 rounded-2xl bg-[#4ECDC4] text-white font-bold text-sm transition-all active:scale-95">복사하기</button>
-        <button onclick="generate()"
-          class="py-3.5 rounded-2xl border-2 border-gray-100 bg-gray-50 text-gray-600 font-bold text-sm transition-all active:scale-95">다시 생성</button>
-      </div>
-      <button onclick="saveFav()" id="fav-btn"
-        class="w-full py-3 rounded-2xl border-2 border-yellow-200 bg-yellow-50 text-yellow-700 font-bold text-sm transition-all active:scale-95">⭐ 즐겨찾기 저장</button>
-    </div>
-
-    <!-- 즐겨찾기 -->
-    <div id="fav-card" class="bg-white rounded-3xl p-5 shadow-sm hidden">
-      <p class="text-[11px] font-bold text-gray-400 tracking-widest uppercase mb-3">즐겨찾기</p>
-      <div id="fav-list" class="space-y-2"></div>
-    </div>
-
-    <!-- 히스토리 -->
-    <div id="hist-card" class="bg-white rounded-3xl p-5 shadow-sm hidden">
-      <p class="text-[11px] font-bold text-gray-400 tracking-widest uppercase mb-3">최근 기록</p>
-      <div id="hist-list" class="divide-y divide-gray-50"></div>
-    </div>
-
-    <!-- API 키 -->
-    <div class="bg-white rounded-3xl p-5 shadow-sm">
-      <p class="text-[11px] font-bold text-gray-400 tracking-widest uppercase mb-3">API 키 설정</p>
-      <div class="bg-yellow-50 border border-yellow-100 rounded-2xl p-3 mb-3 text-xs text-yellow-700 leading-relaxed">
-        최초 1회만 입력하면 저장돼요.<br><strong>console.anthropic.com</strong> → API Keys에서 발급
-      </div>
-      <div class="flex gap-2">
-        <input type="password" id="api-key" placeholder="sk-ant-..."
-          class="flex-1 bg-gray-50 rounded-2xl px-4 py-3 text-sm border border-gray-100 placeholder:text-gray-300 focus:ring-2 focus:ring-[#4ECDC4]/20 transition-all">
-        <button onclick="saveKey()" class="px-5 py-3 rounded-2xl bg-[#4ECDC4] text-white font-bold text-sm transition-all active:scale-95">저장</button>
-      </div>
-      <p id="api-ok" class="hidden text-xs text-[#4ECDC4] mt-2 font-medium">✓ API 키 저장됨</p>
-    </div>
-
-  </div>
-</div>
-
-<script>
 const majorData = {
   "식사/요리": { subs:["한식","중식","일식/회","양식/레스토랑","고기/구이","기타/일반"], keywords:{"한식":"정갈한 한식의 맛","중식":"깊은 중화요리의 풍미","일식/회":"제철 회의 싱싱함","양식/레스토랑":"셰프의 정성이 담긴 요리","고기/구이":"불향 가득한 구이의 맛","기타/일반":""} },
   "배달인기": { subs:["치킨","피자","족발/보쌈","분식","패스트푸드","기타/일반"], keywords:{"치킨":"바삭한 튀김옷의 비법","피자":"쭉 늘어나는 치즈의 풍미","족발/보쌈":"부드러운 육질의 비결","분식":"추억의 분식 맛","패스트푸드":"빠르고 든든한 한 끼","기타/일반":""} },
@@ -324,12 +401,10 @@ const majorData = {
 const subEmojis = {"한식":"🍚","중식":"🥟","일식/회":"🐟","양식/레스토랑":"🍝","고기/구이":"🥩","치킨":"🍗","피자":"🍕","족발/보쌈":"🐷","분식":"🍜","패스트푸드":"🍔","카페/베이커리":"☕","디저트":"🍰","아이스크림":"🍦","호프/맥주":"🍺","이자카야/포차":"🍶","미용/뷰티":"💄","헬스/스포츠":"💪","노래방/오락":"🎤","필라테스/요가":"🧘","스크린골프":"⛳","PC방":"🖥️","노래방":"🎤","기타 업종":"🏪","기타/일반":"➖"};
 const starTxt = {1:"⭐ 1점",2:"⭐⭐ 2점",3:"⭐⭐⭐ 3점",4:"⭐⭐⭐⭐ 4점",5:"⭐⭐⭐⭐⭐ 5점"};
 
-let star=5,starNone=false,reviewType="delivery",category="기타/일반";
-let tone="친절",length="medium",mode="text";
-let imgB64="",imgType="",recentCat="",currentKeyword="";
-let genCount=getGenCount(),abortController=null,pendingGenerate=false;
-let hist=JSON.parse(localStorage.getItem("rh")||"[]");
-let favs=JSON.parse(localStorage.getItem("favs")||"[]");
+
+let genCount=getGenCount();
+
+
 
 function getGenCount(){
   const lr=parseInt(localStorage.getItem("genResetTime")||"0");
@@ -586,6 +661,80 @@ function renderHist(){
   card.classList.remove("hidden");
   list.innerHTML=hist.map(h=>`<div class="py-3 first:pt-0 last:pb-0"><div class="flex items-center gap-1.5 mb-1"><span class="text-[10px] px-2 py-0.5 rounded-full bg-red-50 text-red-400 font-bold">${h.cat||"기타"}</span><span class="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-400">${h.type==="delivery"?"배달":"방문"}</span><span class="text-xs text-yellow-400">${typeof h.star==="number"?"★".repeat(h.star):h.star}</span><span class="text-[10px] text-gray-300 ml-auto">${h.time||""}</span></div><p class="text-xs text-gray-400 truncate mb-1">${h.review}</p><p class="text-sm text-gray-600 leading-relaxed">${h.reply}</p></div>`).join("");
 }
+
+// selectMajor 오버라이드 - 새 UI에 맞게
+function selectMajor(btn) {
+  const major = btn.dataset.major;
+  document.querySelectorAll('.cat-chip').forEach(b => {
+    const isOn = b.dataset.major === major;
+    b.classList.toggle('on', isOn);
+  });
+  const wrap = document.getElementById('sub-wrap');
+  const grid = document.getElementById('sub-grid');
+  wrap.style.display = 'block';
+  grid.innerHTML = '';
+  const data = majorData[major] || majorData['식사/요리'];
+  const subs = data.subs || [];
+  subs.forEach(sub => {
+    const card = document.createElement('button');
+    const isActive = sub === category;
+    const isRecent = sub === recentCat && sub !== '기타/일반';
+    card.className = 'sub-card btn' + (isActive ? ' on' : isRecent ? ' recent' : '');
+    card.innerHTML = `<div class="check">✓</div><span class="sub-emoji">${subIcons[sub] || '🏪'}</span><span>${sub}</span>`;
+    card.onclick = () => selectSubCat2(card, sub, major);
+    grid.appendChild(card);
+  });
+  const rl = document.getElementById('recent-lbl');
+  rl.className = 'recent-label' + (recentCat && recentCat !== '기타/일반' ? ' show' : '');
+  document.getElementById('kw-box').classList.remove('show');
+}
+
+function selectSubCat2(card, sub, major) {
+  category = sub; currentKwSub = sub;
+  document.querySelectorAll('.sub-card').forEach(b => b.classList.remove('on', 'recent'));
+  card.classList.add('on');
+  recentCat = sub; localStorage.setItem('recentCat', sub);
+  const pool = keywordPool[sub] || [];
+  const box = document.getElementById('kw-box');
+  if (pool.length > 0) {
+    showKwBadges(getRandomKws(sub, 3));
+    box.classList.add('show');
+  } else {
+    box.classList.remove('show');
+  }
+}
+
+function showKwBadges(kws) {
+  const c = document.getElementById('kw-badges');
+  c.innerHTML = kws.map(kw => `<button onclick="applyKw('${kw.replace(/'/g,"\'")}')" class="btn kw-badge">${kw}</button>`).join('');
+}
+
+let currentKwSub = '';
+function refreshKw() {
+  if (!currentKwSub) return;
+  showKwBadges(getRandomKws(currentKwSub, 3));
+}
+
+function applyKw(kw) {
+  const cur = document.getElementById('keyword-msg').value.trim();
+  document.getElementById('keyword-msg').value = cur ? (cur + ', ' + kw) : kw;
+}
+
+// 별점
+document.querySelectorAll('.star-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    star = parseInt(btn.dataset.v); starNone = false;
+    const snb = document.getElementById('star-none-btn');
+    snb.style.background = '#F8F9FA'; snb.style.borderColor = '#EBEBEB'; snb.style.color = '#9CA3AF';
+    document.getElementById('star-select').style.display = 'flex';
+    document.querySelectorAll('.star-btn').forEach(b => b.classList.toggle('on', parseInt(b.dataset.v) <= star));
+    document.querySelectorAll('.star-btn.on').forEach((b, i) => {
+      setTimeout(() => { b.classList.add('star-pop'); setTimeout(() => b.classList.remove('star-pop'), 320); }, i * 45);
+    });
+    document.getElementById('star-lbl').textContent = ['','⭐','⭐⭐','⭐⭐⭐','⭐⭐⭐⭐','⭐⭐⭐⭐⭐'][star] + ' ' + star + '점';
+  });
+});
 </script>
+<style>@keyframes bounce2{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}</style>
 </body>
 </html>
