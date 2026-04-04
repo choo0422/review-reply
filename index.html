@@ -508,7 +508,9 @@ function buildPrompt(text){
   const startWord=reviewType==="delivery"?'"주문해 주셔서 감사합니다"':'"방문해 주셔서 감사합니다"';
   const hasEnglish=/[a-zA-Z]{3,}/.test(text)&&!/[가-힣]/.test(text);
   const langGuide=hasEnglish?"리뷰가 영어로 작성되었으니 영어로 답글을 작성하세요.":"한국어로 답글을 작성하세요.";
-  const catStr=category==="기타/일반"?"":category+" ";
+  const catStr=category==="기타/일반"?"":category==="선택안함"?"":category+" ";
+  const isGeneral=category==="기타/일반";
+  const generalGuide=isGeneral?"\n- 특정 메뉴보다 친절한 서비스, 정성 담긴 음식, 깔끔한 포장, 빠른 응대 등 보편적 가치를 자연스럽게 강조해주세요":"";
   return `당신은 ${catStr}사장님입니다. 고객의 ${typeStr}에 답글을 작성해주세요.\n별점: ${starStr}${ownerStr}${keywordStr}\n고객 리뷰: ${text}\n\n작성 지침:\n- ${toneGuide} 작성\n- ${starGuide} 내용으로\n- ${lenGuide} 작성\n- 반드시 ${startWord} 표현을 자연스럽게 포함\n- "고객님"으로 시작\n- 리뷰 내용에 직접 반응\n- 비슷한 의미의 감사 표현 중복 금지\n- 과한 홍보성 문구 금지\n- 가게 이름이나 브랜드명 절대 언급 금지\n- 2~3문장마다 줄바꿈으로 가독성 확보\n- ${langGuide}\n- 답글 내용만 출력${generalGuide}`;
 }
 
