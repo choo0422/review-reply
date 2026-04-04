@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="리뷰 답글">
 <meta property="og:title" content="AI 리뷰 답글 생성기">
@@ -12,705 +12,578 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://raw.githubusercontent.com/choo0422/review-reply/main/thumbnail.png">
 <title>AI 리뷰 답글 생성기</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      fontFamily: { sans: ['Noto Sans KR', 'sans-serif'] },
+    }
+  }
+}
+</script>
 <style>
-:root {
-  --coral: #FF6B6B; --coral-light: #FFF0F0; --coral-dark: #CC4444;
-  --mint: #4ECDC4; --mint-light: #E8FAF9; --mint-dark: #2EA89F;
-  --yellow: #FFE66D; --yellow-light: #FFFBEA; --yellow-dark: #CCA800;
-  --bg: #FAFAF8; --card: #FFFFFF; --text: #1A1A1A; --muted: #999;
-  --border: #EBEBEB; --radius: 18px; --radius-sm: 10px;
-}
-* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-body { font-family: 'Noto Sans KR', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding-bottom: 48px; }
-
-/* 잠금화면 */
-.lock-screen {
-  position: fixed; inset: 0; z-index: 200;
-  background: linear-gradient(145deg, #FF6B6B 0%, #FF8E53 40%, #FFE66D 100%);
-  display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32px;
-}
-.lock-logo { font-size: 56px; margin-bottom: 8px; animation: bounce 1.5s infinite; }
-@keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
-.lock-title { font-size: 32px; font-weight: 900; color: white; letter-spacing: -1px; margin-bottom: 4px; text-shadow: 0 2px 8px rgba(0,0,0,0.15); }
-.lock-sub { font-size: 14px; color: rgba(255,255,255,0.85); margin-bottom: 40px; }
-.lock-box { background: white; border-radius: 20px; padding: 28px; width: 100%; max-width: 320px; box-shadow: 0 20px 60px rgba(0,0,0,0.15); }
-.lock-box p { font-size: 13px; font-weight: 700; color: var(--muted); margin-bottom: 12px; text-align: center; }
-.lock-input { width: 100%; padding: 14px; border-radius: var(--radius-sm); border: 2px solid var(--border); font-size: 18px; font-family: 'Noto Sans KR', sans-serif; text-align: center; letter-spacing: 6px; margin-bottom: 12px; }
-.lock-input:focus { outline: none; border-color: var(--coral); }
-.lock-btn { width: 100%; padding: 14px; border-radius: var(--radius-sm); border: none; background: linear-gradient(135deg, #FF6B6B, #FF8E53); color: white; font-size: 15px; font-weight: 700; cursor: pointer; font-family: 'Noto Sans KR', sans-serif; }
-.lock-error { font-size: 12px; color: var(--coral); text-align: center; margin-top: 8px; min-height: 18px; }
-
-/* 상단 배너 */
-
-
-/* 헤더 */
-header { background: white; border-bottom: 1px solid var(--border); padding: 14px 20px; position: sticky; top: 0; z-index: 10; display: flex; align-items: center; gap: 10px; }
-.header-emoji { font-size: 26px; }
-.header-text h1 { font-size: 17px; font-weight: 900; }
-.header-text p { font-size: 11px; color: var(--muted); margin-top: 1px; }
-
-.container { padding: 14px; max-width: 480px; margin: 0 auto; }
-.card { background: var(--card); border-radius: var(--radius); border: 1px solid var(--border); padding: 16px; margin-bottom: 12px; }
-.section-label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 10px; }
-
-/* API 키 */
-.api-notice { background: var(--yellow-light); border: 1.5px solid var(--yellow); border-radius: var(--radius-sm); padding: 10px 12px; font-size: 12px; color: var(--yellow-dark); line-height: 1.6; margin-bottom: 10px; }
-.api-row { display: flex; gap: 8px; }
-.api-input { flex: 1; font-family: 'Noto Sans KR', sans-serif; font-size: 12px; color: var(--text); background: var(--bg); border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; }
-.api-input:focus { outline: none; border-color: var(--mint); }
-.btn-api-save { padding: 10px 14px; border-radius: var(--radius-sm); border: none; background: var(--mint); color: white; font-size: 12px; font-weight: 700; cursor: pointer; font-family: 'Noto Sans KR', sans-serif; white-space: nowrap; }
-.api-ok { font-size: 11px; color: var(--mint-dark); margin-top: 6px; display: none; }
-
-/* 입력 방식 */
-.mode-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
-.mode-btn { padding: 11px 8px; border-radius: var(--radius-sm); border: 2px solid var(--border); background: var(--bg); font-size: 13px; font-weight: 700; cursor: pointer; font-family: 'Noto Sans KR', sans-serif; color: var(--muted); text-align: center; }
-.mode-btn.active { border-color: var(--coral); background: var(--coral-light); color: var(--coral-dark); }
-
-/* 업로드 */
-.upload-area { border: 2.5px dashed var(--border); border-radius: var(--radius-sm); padding: 24px 16px; text-align: center; cursor: pointer; background: var(--bg); }
-.upload-area:hover { border-color: var(--mint); background: var(--mint-light); }
-.upload-icon { font-size: 32px; margin-bottom: 6px; }
-.upload-text { font-size: 13px; color: var(--muted); }
-.upload-text strong { color: var(--mint-dark); }
-.preview-img { width: 100%; border-radius: var(--radius-sm); margin-top: 10px; display: none; max-height: 260px; object-fit: contain; border: 1px solid var(--border); }
-
-/* 리뷰 유형 */
-.type-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.type-btn { padding: 12px 8px; border-radius: var(--radius-sm); border: 2px solid var(--border); background: var(--bg); font-size: 13px; font-weight: 700; cursor: pointer; font-family: 'Noto Sans KR', sans-serif; color: var(--muted); text-align: center; }
-.type-btn.active { border-color: var(--coral); background: var(--coral-light); color: var(--coral-dark); }
-.type-btn .t-icon { font-size: 22px; display: block; margin-bottom: 4px; }
-
-/* 업종 */
-.category-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
-.cat-btn { padding: 8px 4px; border-radius: var(--radius-sm); border: 1.5px solid var(--border); background: var(--bg); font-size: 11px; font-weight: 700; cursor: pointer; font-family: 'Noto Sans KR', sans-serif; color: var(--muted); text-align: center; line-height: 1.4; }
-.cat-btn .c-icon { font-size: 18px; display: block; margin-bottom: 2px; }
-.cat-btn.active { border-color: var(--mint); background: var(--mint-light); color: var(--mint-dark); }
-
-/* 별점 */
-.star-wrap.hidden { display: none; }
-.star-none-btn { width: 100%; padding: 10px; border-radius: var(--radius-sm); border: 2px solid var(--border); background: var(--bg); font-size: 13px; font-weight: 700; cursor: pointer; font-family: 'Noto Sans KR', sans-serif; color: var(--muted); margin-bottom: 8px; }
-.star-none-btn.active { border-color: var(--mint); background: var(--mint-light); color: var(--mint-dark); }
-.stars { display: flex; gap: 6px; }
-.star-btn { flex: 1; height: 46px; border-radius: var(--radius-sm); border: 2px solid var(--border); background: var(--bg); font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-.star-btn.active { background: var(--yellow-light); border-color: var(--yellow); }
-.star-label { font-size: 12px; color: var(--muted); text-align: center; margin-top: 8px; }
-
-/* 사장님 한마디 */
-.owner-input { width: 100%; font-family: 'Noto Sans KR', sans-serif; font-size: 13px; color: var(--text); background: var(--bg); border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; resize: none; line-height: 1.6; }
-.owner-input:focus { outline: none; border-color: var(--coral); }
-
-/* 톤 선택 */
-.tone-tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
-.tone-btn { padding: 10px 4px; border-radius: var(--radius-sm); border: 1.5px solid var(--border); background: var(--bg); font-size: 12px; font-weight: 700; cursor: pointer; font-family: 'Noto Sans KR', sans-serif; color: var(--muted); text-align: center; }
-.tone-btn.active { border-color: var(--coral); background: var(--coral-light); color: var(--coral-dark); }
-
-/* 길이 선택 */
-.length-tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
-.length-btn { padding: 10px 4px; border-radius: var(--radius-sm); border: 1.5px solid var(--border); background: var(--bg); font-size: 12px; font-weight: 700; cursor: pointer; font-family: 'Noto Sans KR', sans-serif; color: var(--muted); text-align: center; }
-.length-btn.active { border-color: var(--mint); background: var(--mint-light); color: var(--mint-dark); }
-
-/* 리뷰 입력 */
-textarea { width: 100%; font-family: 'Noto Sans KR', sans-serif; font-size: 14px; color: var(--text); background: var(--bg); border: 2px solid var(--border); border-radius: var(--radius-sm); padding: 12px; resize: none; line-height: 1.7; }
-textarea:focus { outline: none; border-color: var(--coral); }
-textarea::placeholder { color: #CCC; }
-
-/* 생성 버튼 */
-.btn-generate { width: 100%; padding: 16px; border-radius: var(--radius); border: none; background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%); color: white; font-size: 16px; font-weight: 700; cursor: pointer; font-family: 'Noto Sans KR', sans-serif; margin-top: 4px; box-shadow: 0 4px 20px rgba(255,107,107,0.35); }
-.btn-generate:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; }
-
-/* 결과 */
-.result-box { background: linear-gradient(135deg, var(--mint-light), #F0FFFE); border-radius: var(--radius-sm); padding: 16px; font-size: 14px; line-height: 1.9; color: #1A3D3A; border: 1.5px solid #B2E8E5; margin-bottom: 12px; white-space: pre-wrap; }
-.result-actions { display: flex; gap: 8px; }
-.btn-copy { flex: 1; padding: 13px; border-radius: var(--radius-sm); border: none; background: var(--mint); color: white; font-size: 14px; font-weight: 700; cursor: pointer; font-family: 'Noto Sans KR', sans-serif; }
-.btn-copy.copied { background: var(--mint-dark); }
-.btn-retry { flex: 1; padding: 13px; border-radius: var(--radius-sm); border: 2px solid var(--border); background: white; color: var(--text); font-size: 14px; font-weight: 700; cursor: pointer; font-family: 'Noto Sans KR', sans-serif; }
-.btn-save-fav { width: 100%; padding: 10px; border-radius: var(--radius-sm); border: 2px solid var(--yellow); background: var(--yellow-light); color: var(--yellow-dark); font-size: 13px; font-weight: 700; cursor: pointer; font-family: 'Noto Sans KR', sans-serif; margin-top: 8px; }
-
-/* 즐겨찾기 */
-.fav-item { padding: 12px; background: var(--yellow-light); border-radius: var(--radius-sm); margin-bottom: 8px; border: 1px solid var(--yellow); position: relative; }
-.fav-item p { font-size: 13px; color: var(--text); line-height: 1.6; padding-right: 40px; }
-.fav-copy { position: absolute; top: 10px; right: 10px; padding: 4px 10px; border-radius: 6px; border: none; background: var(--mint); color: white; font-size: 11px; font-weight: 700; cursor: pointer; font-family: 'Noto Sans KR', sans-serif; }
-.fav-del { position: absolute; bottom: 10px; right: 10px; padding: 4px 8px; border-radius: 6px; border: none; background: var(--coral-light); color: var(--coral-dark); font-size: 11px; cursor: pointer; font-family: 'Noto Sans KR', sans-serif; }
-
-/* 로딩 */
-.loading-dots { display: inline-flex; gap: 5px; align-items: center; }
-.loading-dots span { width: 7px; height: 7px; border-radius: 50%; background: white; animation: db 1.2s infinite; }
-.loading-dots span:nth-child(2) { animation-delay: 0.2s; }
-.loading-dots span:nth-child(3) { animation-delay: 0.4s; }
-@keyframes db { 0%,80%,100%{transform:scale(0.6);opacity:.4}40%{transform:scale(1);opacity:1} }
-.error-box { background: var(--coral-light); border-radius: var(--radius-sm); padding: 12px; font-size: 13px; color: var(--coral-dark); margin-bottom: 12px; border: 1px solid #FFD0D0; }
-
-/* 글자수 표시 */
-.char-count { font-size: 11px; text-align: right; margin-top: 4px; }
-.char-count.over { color: var(--coral-dark); font-weight: 700; }
-.char-count.ok { color: var(--mint-dark); }
-.char-limit-badge { display: inline-block; font-size: 10px; padding: 2px 8px; border-radius: 20px; margin-left: 6px; font-weight: 700; }
-.limit-coupang { background: #E8F4FF; color: #1A4FAA; }
-.limit-baemin { background: #E8FFFE; color: #1A8A87; }
-.limit-naver { background: #E8FFE8; color: #027A38; }
-
-/* 편집 가능한 답글 */
-.result-edit { width: 100%; font-family: 'Noto Sans KR', sans-serif; font-size: 14px; color: #1A3D3A; background: linear-gradient(135deg, var(--mint-light), #F0FFFE); border: 1.5px solid #B2E8E5; border-radius: var(--radius-sm); padding: 14px; line-height: 1.9; resize: vertical; min-height: 100px; margin-bottom: 4px; }
-.result-edit:focus { outline: none; border-color: var(--mint); }
-
-/* 취소 버튼 */
-.btn-cancel { width: 100%; padding: 12px; border-radius: var(--radius-sm); border: 2px solid var(--border); background: white; color: var(--muted); font-size: 13px; font-weight: 700; cursor: pointer; font-family: 'Noto Sans KR', sans-serif; margin-top: 6px; display: none; }
-
-/* 쿠팡 모달 */
-.coupon-modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 300; display: flex; align-items: center; justify-content: center; padding: 20px; }
-.coupon-modal { background: white; border-radius: 20px; padding: 24px; max-width: 340px; width: 100%; text-align: center; }
-.coupon-modal h3 { font-size: 16px; font-weight: 700; margin-bottom: 6px; color: var(--text); }
-.coupon-modal p { font-size: 13px; color: var(--muted); margin-bottom: 16px; line-height: 1.6; }
-.coupon-banner-link { display: block; margin-bottom: 14px; border-radius: 10px; overflow: hidden; }
-.coupon-banner-link img { width: 100%; height: auto; display: block; }
-.btn-coupon-go { display: block; width: 100%; padding: 14px; border-radius: var(--radius-sm); border: none; background: linear-gradient(135deg, #FF6B6B, #FF8E53); color: white; font-size: 15px; font-weight: 700; cursor: pointer; font-family: 'Noto Sans KR', sans-serif; margin-bottom: 8px; text-decoration: none; }
-.btn-coupon-skip { display: block; width: 100%; padding: 10px; border-radius: var(--radius-sm); border: 2px solid var(--border); background: white; color: var(--muted); font-size: 13px; cursor: pointer; font-family: 'Noto Sans KR', sans-serif; }
-
-/* 히스토리 */
-.history-item { padding: 12px 0; border-bottom: 1px solid var(--border); }
-.history-item:last-child { border-bottom: none; }
-.h-meta { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; flex-wrap: wrap; }
-.h-tag { font-size: 10px; padding: 3px 7px; border-radius: 20px; font-weight: 700; background: var(--coral-light); color: var(--coral-dark); }
-.h-stars { font-size: 12px; color: #F5C842; }
-.h-review { font-size: 11px; color: var(--muted); flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0; }
-.h-time { font-size: 11px; color: var(--muted); }
-.h-reply { font-size: 13px; color: var(--text); line-height: 1.6; }
+* { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+body { font-family: 'Noto Sans KR', sans-serif; }
+.no-scroll::-webkit-scrollbar { display: none; }
+.no-scroll { scrollbar-width: none; }
+@keyframes starPop { 0%{transform:scale(1)} 40%{transform:scale(1.4)} 70%{transform:scale(0.9)} 100%{transform:scale(1)} }
+.star-pop { animation: starPop 0.3s ease forwards; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+.fade-up { animation: fadeUp 0.2s ease forwards; }
+@keyframes dotBounce { 0%,80%,100%{transform:scale(0.6);opacity:.4} 40%{transform:scale(1);opacity:1} }
+.dot { width:8px;height:8px;border-radius:50%;background:white;animation:dotBounce 1.2s infinite;display:inline-block; }
+.dot:nth-child(2){animation-delay:.2s}
+.dot:nth-child(3){animation-delay:.4s}
+.bubble-tail::before { content:''; position:absolute; top:-9px; left:18px; border:8px solid transparent; border-bottom-color:#FFE066; border-top:0; }
+.bubble-tail::after { content:''; position:absolute; top:-7px; left:19px; border:7px solid transparent; border-bottom-color:#FFFBEA; border-top:0; }
+textarea:focus { outline: none; }
+.star-active { border-color: #FFD700 !important; background: #FFFBEA !important; color: #FFD700 !important; filter: drop-shadow(0 2px 4px rgba(255,215,0,0.3)); }
+.chip-active { border-color: #FF6B6B !important; background: #FFF0F0 !important; color: #CC4444 !important; font-weight: 700 !important; }
+.sub-active { border-color: #4ECDC4 !important; background: #E8FAF9 !important; color: #2EA89F !important; }
+.tone-active { border-color: #FF6B6B !important; background: #FFF0F0 !important; color: #CC4444 !important; }
+.len-active { border-color: #4ECDC4 !important; background: #E8FAF9 !important; color: #2EA89F !important; }
+.type-active { border-color: #FF6B6B !important; background: #FFF0F0 !important; }
+.type-active .type-label { color: #CC4444 !important; }
 </style>
 </head>
-<body>
+<body class="bg-[#F2F4F6] min-h-screen pb-16">
 
-<!-- 잠금화면 -->
-<div class="lock-screen" id="lock-screen">
-  <div class="lock-logo">🍽️</div>
-  <div class="lock-title">리뷰 답글 생성기</div>
-  <div class="lock-sub">사장님을 위한 AI 답글 도우미</div>
-  <div class="lock-box">
-    <p>비밀번호 입력</p>
-    <input class="lock-input" type="password" id="lock-input" placeholder="••••" onkeydown="if(event.key==='Enter')checkPw()"/>
-    <button class="lock-btn" onclick="checkPw()">입장하기</button>
-    <div class="lock-error" id="lock-error"></div>
+<!-- 쿠팡 모달 -->
+<div id="coupon-modal" class="fixed inset-0 bg-black/60 z-50 hidden items-center justify-center p-5">
+  <div class="bg-white rounded-3xl p-6 w-full max-w-sm text-center">
+    <div class="text-5xl mb-3">🛒</div>
+    <h3 class="text-lg font-black text-gray-900 mb-1">쿠팡 특가를 확인해보세요!</h3>
+    <p class="text-sm text-gray-400 mb-5 leading-relaxed">아래 버튼을 눌러 확인 후<br>답글 생성을 계속하세요</p>
+    <a href="https://link.coupang.com/a/egBt7O" target="_blank" referrerpolicy="unsafe-url"
+       onclick="onCouponClick()"
+       class="block w-full py-4 rounded-2xl bg-[#FF6B6B] text-white font-black text-base active:scale-95 transition-transform">
+      🛒 쿠팡 특가 보고 계속하기
+    </a>
+    <p class="text-[9px] text-gray-300 mt-4">이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.</p>
   </div>
 </div>
 
-<!-- 메인 -->
-<div id="app" style="display:none;">
-  <!-- 쿠팡 모달 -->
-  <div class="coupon-modal-bg" id="coupon-modal" style="display:none;">
-    <div class="coupon-modal">
-      <h3>잠깐! 쿠팡 특가를 확인해보세요 🛒</h3>
-      <p>아래 배너를 확인하고<br>답글 생성을 계속해주세요</p>
-      <a class="coupon-banner-link" href="https://link.coupang.com/a/egBt7O" target="_blank" referrerpolicy="unsafe-url" onclick="onCouponClick()">
-        <img src="https://ads-partners.coupang.com/banners/870271?subId=&traceId=V0-301-879dd1202e5c73b2-I870271&w=320&h=50" alt="쿠팡 특가">
-      </a>
-      <button class="btn-coupon-go" onclick="onCouponClick()">🛒 쿠팡 특가 보고 계속하기</button>
-      <p style="font-size:9px;color:#CCC;margin-top:8px;">이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.</p>
+<div id="app">
+  <!-- 헤더 -->
+  <div class="bg-white border-b border-gray-100 sticky top-0 z-10">
+    <div class="max-w-lg mx-auto px-5 py-4 flex items-center gap-3">
+      <span class="text-2xl">🍽️</span>
+      <div>
+        <h1 class="text-[15px] font-black text-gray-900 leading-tight">AI 리뷰 답글 생성기</h1>
+        <p class="text-[11px] text-gray-400">사장님을 위한 스마트 답글 도우미</p>
+      </div>
     </div>
   </div>
 
-  <header>
-    <div class="header-emoji">🍽️</div>
-    <div class="header-text">
-      <h1>리뷰 답글 생성기</h1>
-      <p>AI가 맞춤 답글을 작성해드려요</p>
-    </div>
-  </header>
-
-  <div class="container">
-
-
+  <div class="max-w-lg mx-auto px-4 pt-4 space-y-3">
 
     <!-- 입력 방식 -->
-    <div class="card">
-      <div class="section-label">입력 방식</div>
-      <div class="mode-tabs">
-        <button class="mode-btn active" data-mode="text" onclick="selectMode(this)">✏️ 텍스트 입력</button>
-        <button class="mode-btn" data-mode="image" onclick="selectMode(this)">📷 스크린샷</button>
+    <div class="bg-white rounded-3xl p-5 shadow-sm">
+      <p class="text-[11px] font-bold text-gray-400 tracking-widest uppercase mb-3">입력 방식</p>
+      <div class="grid grid-cols-2 gap-2.5 mb-4">
+        <button data-mode="text" onclick="selectMode(this)"
+          class="mode-btn py-3.5 rounded-2xl border-2 font-bold text-sm flex items-center justify-center gap-2 transition-all active:scale-95 type-active">
+          <span>✏️</span><span class="type-label text-[#CC4444]">텍스트 입력</span>
+        </button>
+        <button data-mode="image" onclick="selectMode(this)"
+          class="mode-btn py-3.5 rounded-2xl border-2 border-gray-100 bg-gray-50 font-bold text-sm flex items-center justify-center gap-2 transition-all active:scale-95">
+          <span>📷</span><span class="type-label text-gray-400">스크린샷</span>
+        </button>
       </div>
       <div id="text-area">
-        <textarea id="review" rows="5" placeholder="리뷰를 복사해서 붙여넣으세요..."></textarea>
+        <textarea id="review" rows="5"
+          class="w-full bg-gray-50 rounded-2xl p-4 text-sm text-gray-800 resize-none border border-gray-100 placeholder:text-gray-300 focus:ring-2 focus:ring-[#FF6B6B]/20 transition-all"
+          placeholder="리뷰를 복사해서 붙여넣으세요..."></textarea>
       </div>
-      <div id="image-area" style="display:none;">
-        <div class="upload-area" onclick="document.getElementById('file-input').click()">
-          <input type="file" id="file-input" accept="image/*" style="display:none" onchange="handleFile(this.files[0])">
-          <div class="upload-icon">📸</div>
-          <div class="upload-text"><strong>사진 선택</strong>하거나 끌어다 놓기</div>
+      <div id="image-area" class="hidden">
+        <div onclick="document.getElementById('file-input').click()"
+          class="border-2 border-dashed border-gray-200 rounded-2xl p-8 text-center cursor-pointer active:scale-95 transition-all hover:border-[#4ECDC4] hover:bg-[#E8FAF9]">
+          <input type="file" id="file-input" accept="image/*" class="hidden" onchange="handleFile(this.files[0])">
+          <div class="text-4xl mb-2">🤖</div>
+          <p class="font-bold text-gray-700 text-sm">리뷰 스크린샷을 올려주세요!</p>
+          <p class="text-xs text-gray-400 mt-1">AI가 리뷰를 읽고 딱 맞는 답글을 써드려요 ✨</p>
         </div>
-        <img id="preview-img" class="preview-img"/>
+        <img id="preview-img" class="w-full rounded-2xl mt-3 hidden max-h-64 object-contain">
       </div>
     </div>
 
     <!-- 리뷰 유형 -->
-    <div class="card">
-      <div class="section-label">리뷰 유형</div>
-      <div class="type-tabs">
-        <button class="type-btn active" data-type="delivery" onclick="selectType(this)">
-          <span class="t-icon">🛵</span>배달 리뷰
+    <div class="bg-white rounded-3xl p-5 shadow-sm">
+      <p class="text-[11px] font-bold text-gray-400 tracking-widest uppercase mb-3">리뷰 유형</p>
+      <div class="grid grid-cols-2 gap-2.5">
+        <button data-type="delivery" onclick="selectType(this)"
+          class="type-btn py-4 rounded-2xl border-2 font-bold text-sm transition-all active:scale-95 flex flex-col items-center gap-1.5 type-active">
+          <span class="text-2xl">🛵</span><span class="type-label text-[#CC4444] text-xs">배달 리뷰</span>
         </button>
-        <button class="type-btn" data-type="visit" onclick="selectType(this)">
-          <span class="t-icon">🚶</span>방문자 리뷰
+        <button data-type="visit" onclick="selectType(this)"
+          class="type-btn py-4 rounded-2xl border-2 border-gray-100 bg-gray-50 font-bold text-sm transition-all active:scale-95 flex flex-col items-center gap-1.5">
+          <span class="text-2xl">🚶</span><span class="type-label text-gray-400 text-xs">방문자 리뷰</span>
         </button>
       </div>
     </div>
 
-    <!-- 업종 -->
-    <div class="card">
-      <div class="section-label">업종</div>
-      <div class="category-grid" style="grid-template-columns:repeat(4,1fr);">
-        <button class="cat-btn active" data-cat="선택안함" onclick="selectCat(this)"><span class="c-icon">🔓</span>선택안함</button>
-        <button class="cat-btn" data-cat="한식" onclick="selectCat(this)"><span class="c-icon">🍚</span>한식</button>
-        <button class="cat-btn" data-cat="치킨" onclick="selectCat(this)"><span class="c-icon">🍗</span>치킨</button>
-        <button class="cat-btn" data-cat="카페" onclick="selectCat(this)"><span class="c-icon">☕</span>카페</button>
-        <button class="cat-btn" data-cat="피자" onclick="selectCat(this)"><span class="c-icon">🍕</span>피자</button>
-        <button class="cat-btn" data-cat="고기집" onclick="selectCat(this)"><span class="c-icon">🥩</span>고기집</button>
-        <button class="cat-btn" data-cat="패스트푸드" onclick="selectCat(this)"><span class="c-icon">🍔</span>패스트푸드</button>
-        <button class="cat-btn" data-cat="분식" onclick="selectCat(this)"><span class="c-icon">🍜</span>분식</button>
-        <button class="cat-btn" data-cat="일식" onclick="selectCat(this)"><span class="c-icon">🍣</span>일식</button>
-        <button class="cat-btn" data-cat="양식" onclick="selectCat(this)"><span class="c-icon">🍝</span>양식</button>
-        <button class="cat-btn" data-cat="족발" onclick="selectCat(this)"><span class="c-icon">🐷</span>족발</button>
+    <!-- 업종 선택 -->
+    <div class="bg-white rounded-3xl p-5 shadow-sm">
+      <p class="text-[11px] font-bold text-gray-400 tracking-widest uppercase mb-3">업종 선택</p>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;">
+        <button class="major-chip btn" data-major="식사/요리" onclick="selectMajor(this)"><span style="font-size:18px;">🍽️</span><span>식사/요리</span></button>
+        <button class="major-chip btn" data-major="배달인기" onclick="selectMajor(this)"><span style="font-size:18px;">🛵</span><span>배달 인기</span></button>
+        <button class="major-chip btn" data-major="카페/간식" onclick="selectMajor(this)"><span style="font-size:18px;">☕</span><span>카페/간식</span></button>
+        <button class="major-chip btn" data-major="주류/펍" onclick="selectMajor(this)"><span style="font-size:18px;">🍺</span><span>주류/펍</span></button>
+        <button class="major-chip btn" data-major="서비스/여가" onclick="selectMajor(this)"><span style="font-size:18px;">✨</span><span>서비스/여가</span></button>
+        <button class="major-chip btn" data-major="기타" onclick="selectMajor(this)"><span style="font-size:18px;">🏪</span><span>기타</span></button>
+      </div>
+      <div id="sub-cat-wrap" class="hidden">
+        <p id="recent-label" class="hidden text-xs font-bold text-[#FF6B6B] mb-2">⭐ 최근 선택</p>
+        <div id="sub-grid" class="grid grid-cols-3 gap-2.5"></div>
+        <div id="keyword-hint" style="display:none;position:relative;margin-top:12px;background:#FFFBEA;border:1.5px solid #FFE066;border-radius:16px;padding:14px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+            <div style="display:flex;align-items:center;gap:6px;">
+              <span style="font-size:16px;">💡</span>
+              <p style="font-size:11px;color:#AA8800;font-weight:700;">AI 추천 키워드</p>
+            </div>
+            <button onclick="refreshKeywords()" class="btn" style="padding:4px 10px;border-radius:999px;border:1px solid #FFE066;background:white;color:#AA8800;font-size:11px;font-weight:700;">🔄 새로고침</button>
+          </div>
+          <div id="keyword-badges" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+        </div>
       </div>
     </div>
 
     <!-- 별점 -->
-    <div class="card" id="star-card">
-      <div class="section-label">별점</div>
-      <div class="star-wrap" id="star-none-wrap" style="display:none;">
-        <button class="star-none-btn" id="star-none-btn" onclick="selectStarNone()">⭕ 별점 없음</button>
+    <div class="bg-white rounded-3xl p-5 shadow-sm" id="star-card">
+      <p class="text-[11px] font-bold text-gray-400 tracking-widest uppercase mb-3">별점</p>
+      <div id="star-none-wrap" class="hidden mb-3">
+        <button id="star-none-btn" onclick="selectStarNone()"
+          class="w-full py-3 rounded-2xl border-2 border-gray-100 bg-gray-50 text-gray-500 font-bold text-sm transition-all active:scale-95">
+          ⭕ 별점 없음 (당근 등)
+        </button>
       </div>
       <div id="star-select">
-        <div class="stars">
-          <button class="star-btn" data-v="1">★</button>
-          <button class="star-btn" data-v="2">★</button>
-          <button class="star-btn" data-v="3">★</button>
-          <button class="star-btn" data-v="4">★</button>
-          <button class="star-btn active" data-v="5">★</button>
+        <div class="flex gap-2">
+          <button class="star-btn flex-1 h-12 rounded-2xl border-2 border-gray-100 bg-gray-50 text-2xl text-gray-300 flex items-center justify-center transition-all active:scale-90" data-v="1">★</button>
+          <button class="star-btn flex-1 h-12 rounded-2xl border-2 border-gray-100 bg-gray-50 text-2xl text-gray-300 flex items-center justify-center transition-all active:scale-90" data-v="2">★</button>
+          <button class="star-btn flex-1 h-12 rounded-2xl border-2 border-gray-100 bg-gray-50 text-2xl text-gray-300 flex items-center justify-center transition-all active:scale-90" data-v="3">★</button>
+          <button class="star-btn flex-1 h-12 rounded-2xl border-2 border-gray-100 bg-gray-50 text-2xl text-gray-300 flex items-center justify-center transition-all active:scale-90" data-v="4">★</button>
+          <button class="star-btn flex-1 h-12 rounded-2xl border-2 border-gray-100 bg-gray-50 text-2xl text-gray-300 flex items-center justify-center transition-all active:scale-90 star-active" data-v="5">★</button>
         </div>
-        <div class="star-label" id="star-label">⭐⭐⭐⭐⭐ 5점</div>
+        <p id="star-label" class="text-xs text-center text-gray-400 mt-2.5 font-medium">⭐⭐⭐⭐⭐ 5점</p>
       </div>
     </div>
 
-    <!-- 사장님 한마디 -->
-    <div class="card">
-      <div class="section-label">우리 가게 특징 (선택)</div>
-      <textarea class="owner-input" id="owner-msg" rows="2" placeholder="예) 국내산 재료만 사용, 20년 전통, 직접 만든 소스..."></textarea>
+    <!-- 가게 특징 -->
+    <div class="bg-white rounded-3xl p-5 shadow-sm">
+      <p class="text-[11px] font-bold text-gray-400 tracking-widest uppercase mb-1">우리 가게 특징</p>
+      <p class="text-[11px] text-gray-300 mb-3">선택사항 · 답글 퀄리티가 올라가요</p>
+      <textarea id="owner-msg" rows="2"
+        class="w-full bg-gray-50 rounded-2xl p-4 text-sm text-gray-800 resize-none border border-gray-100 placeholder:text-gray-300 focus:ring-2 focus:ring-[#4ECDC4]/20 transition-all"
+        placeholder="예) 국내산 재료만 사용, 20년 전통, 직접 만든 소스..."></textarea>
     </div>
 
     <!-- 키워드 -->
-    <div class="card">
-      <div class="section-label">넣고 싶은 키워드 (선택)</div>
-      <textarea class="owner-input" id="keyword-msg" rows="2" placeholder="예) 재방문 감사, 포장 무료, 리뷰 이벤트 진행중..."></textarea>
+    <div class="bg-white rounded-3xl p-5 shadow-sm">
+      <p class="text-[11px] font-bold text-gray-400 tracking-widest uppercase mb-1">넣고 싶은 키워드</p>
+      <p class="text-[11px] text-gray-300 mb-3">선택사항 · 답글에 자연스럽게 반영돼요</p>
+      <textarea id="keyword-msg" rows="2"
+        class="w-full bg-gray-50 rounded-2xl p-4 text-sm text-gray-800 resize-none border border-gray-100 placeholder:text-gray-300 focus:ring-2 focus:ring-[#4ECDC4]/20 transition-all"
+        placeholder="예) 재방문 감사, 포장 무료, 이벤트 진행중..."></textarea>
     </div>
 
-    <!-- 톤 선택 -->
-    <div class="card">
-      <div class="section-label">답글 톤</div>
-      <div class="tone-tabs" style="grid-template-columns:repeat(2,1fr);">
-        <button class="tone-btn active" data-tone="친절" onclick="selectTone(this)">😊 친절/다정</button>
-        <button class="tone-btn" data-tone="전문" onclick="selectTone(this)">🎩 전문적/진중</button>
-        <button class="tone-btn" data-tone="유머" onclick="selectTone(this)">😄 유머러스/친근</button>
-        <button class="tone-btn" data-tone="사과" onclick="selectTone(this)">🙏 사과/반성</button>
+    <!-- 답글 톤 -->
+    <div class="bg-white rounded-3xl p-5 shadow-sm">
+      <p class="text-[11px] font-bold text-gray-400 tracking-widest uppercase mb-3">답글 톤</p>
+      <div class="grid grid-cols-2 gap-2.5">
+        <button class="tone-btn py-3.5 rounded-2xl border-2 font-bold text-sm transition-all active:scale-95 tone-active" data-tone="친절" onclick="selectTone(this)">😊 친절/다정</button>
+        <button class="tone-btn py-3.5 rounded-2xl border-2 border-gray-100 bg-gray-50 text-gray-500 font-bold text-sm transition-all active:scale-95" data-tone="전문" onclick="selectTone(this)">🎩 전문적/진중</button>
+        <button class="tone-btn py-3.5 rounded-2xl border-2 border-gray-100 bg-gray-50 text-gray-500 font-bold text-sm transition-all active:scale-95" data-tone="유머" onclick="selectTone(this)">😄 유머러스</button>
+        <button class="tone-btn py-3.5 rounded-2xl border-2 border-gray-100 bg-gray-50 text-gray-500 font-bold text-sm transition-all active:scale-95" data-tone="사과" onclick="selectTone(this)">🙏 사과/반성</button>
       </div>
     </div>
 
-    <!-- 길이 선택 -->
-    <div class="card">
-      <div class="section-label">답글 길이</div>
-      <div class="length-tabs">
-        <button class="length-btn" data-len="short" onclick="selectLength(this)">✂️ 짧게<br><span style="font-size:10px;font-weight:400;">2문장</span></button>
-        <button class="length-btn active" data-len="medium" onclick="selectLength(this)">📝 보통<br><span style="font-size:10px;font-weight:400;">3~4문장</span></button>
-        <button class="length-btn" data-len="long" onclick="selectLength(this)">📄 길게<br><span style="font-size:10px;font-weight:400;">5문장+</span></button>
+    <!-- 답글 길이 -->
+    <div class="bg-white rounded-3xl p-5 shadow-sm">
+      <p class="text-[11px] font-bold text-gray-400 tracking-widest uppercase mb-3">답글 길이</p>
+      <div class="grid grid-cols-3 gap-2.5">
+        <button class="length-btn py-4 rounded-2xl border-2 border-gray-100 bg-gray-50 text-gray-500 font-bold text-sm transition-all active:scale-95 flex flex-col items-center gap-1" data-len="short" onclick="selectLength(this)">
+          <span>✂️</span><span class="text-xs">짧게</span><span class="text-[10px] text-gray-300 font-normal">2문장</span>
+        </button>
+        <button class="length-btn py-4 rounded-2xl border-2 font-bold text-sm transition-all active:scale-95 flex flex-col items-center gap-1 len-active" data-len="medium" onclick="selectLength(this)">
+          <span>📝</span><span class="text-xs">보통</span><span class="text-[10px] text-[#4ECDC4] font-normal">3~4문장</span>
+        </button>
+        <button class="length-btn py-4 rounded-2xl border-2 border-gray-100 bg-gray-50 text-gray-500 font-bold text-sm transition-all active:scale-95 flex flex-col items-center gap-1" data-len="long" onclick="selectLength(this)">
+          <span>📄</span><span class="text-xs">길게</span><span class="text-[10px] text-gray-300 font-normal">5문장+</span>
+        </button>
       </div>
     </div>
 
-    <button class="btn-generate" id="gen-btn" onclick="generate()">✨ AI 답글 생성</button>
-    <button class="btn-cancel" id="cancel-btn" onclick="cancelGenerate()">✕ 생성 취소</button>
+    <!-- 생성 버튼 -->
+    <button id="gen-btn" onclick="generate()"
+      class="w-full py-5 rounded-3xl bg-[#FF6B6B] text-white font-black text-lg shadow-lg shadow-[#FF6B6B]/25 transition-all active:scale-95 active:shadow-none">
+      ✨ AI 답글 생성
+    </button>
+    <button id="cancel-btn" onclick="cancelGenerate()"
+      class="w-full py-3.5 rounded-3xl border-2 border-gray-100 bg-white text-gray-400 font-bold text-sm hidden transition-all active:scale-95">
+      ✕ 생성 취소
+    </button>
     <div id="err"></div>
 
     <!-- 결과 -->
-    <div class="card" id="result-card" style="display:none;">
-      <div class="section-label">생성된 답글</div>
-      <textarea class="result-edit" id="result-text" oninput="updateCharCount()"></textarea>
-      <div class="char-count" id="char-count"></div>
-      <div class="result-actions">
-        <button class="btn-copy" id="copy-btn" onclick="copyReply()">복사하기</button>
-        <button class="btn-retry" onclick="generate()">다시 생성</button>
+    <div id="result-card" class="bg-white rounded-3xl p-5 shadow-sm hidden">
+      <div class="flex items-center justify-between mb-3">
+        <p class="text-[11px] font-bold text-gray-400 tracking-widest uppercase">생성된 답글</p>
+        <span id="char-count" class="text-xs text-gray-400"></span>
       </div>
-      <button class="btn-save-fav" onclick="saveFav()">⭐ 즐겨찾기에 저장</button>
+      <textarea id="result-text" rows="6"
+        class="w-full bg-[#E8FAF9] border border-[#B2E8E5] rounded-2xl p-4 text-sm text-[#1A3D3A] leading-relaxed resize-y mb-3 transition-all"
+        oninput="updateCharCount()"></textarea>
+      <div class="grid grid-cols-2 gap-2.5 mb-2.5">
+        <button id="copy-btn" onclick="copyReply()"
+          class="py-3.5 rounded-2xl bg-[#4ECDC4] text-white font-bold text-sm transition-all active:scale-95">복사하기</button>
+        <button onclick="generate()"
+          class="py-3.5 rounded-2xl border-2 border-gray-100 bg-gray-50 text-gray-600 font-bold text-sm transition-all active:scale-95">다시 생성</button>
+      </div>
+      <button onclick="saveFav()" id="fav-btn"
+        class="w-full py-3 rounded-2xl border-2 border-yellow-200 bg-yellow-50 text-yellow-700 font-bold text-sm transition-all active:scale-95">⭐ 즐겨찾기 저장</button>
     </div>
 
     <!-- 즐겨찾기 -->
-    <div class="card" id="fav-card" style="display:none;">
-      <div class="section-label">즐겨찾기</div>
-      <div id="fav-list"></div>
+    <div id="fav-card" class="bg-white rounded-3xl p-5 shadow-sm hidden">
+      <p class="text-[11px] font-bold text-gray-400 tracking-widest uppercase mb-3">즐겨찾기</p>
+      <div id="fav-list" class="space-y-2"></div>
     </div>
 
     <!-- 히스토리 -->
-    <div class="card" id="hist-card" style="display:none;">
-      <div class="section-label">최근 기록</div>
-      <div id="hist-list"></div>
+    <div id="hist-card" class="bg-white rounded-3xl p-5 shadow-sm hidden">
+      <p class="text-[11px] font-bold text-gray-400 tracking-widest uppercase mb-3">최근 기록</p>
+      <div id="hist-list" class="divide-y divide-gray-50"></div>
+    </div>
+
+    <!-- API 키 -->
+    <div class="bg-white rounded-3xl p-5 shadow-sm">
+      <p class="text-[11px] font-bold text-gray-400 tracking-widest uppercase mb-3">API 키 설정</p>
+      <div class="bg-yellow-50 border border-yellow-100 rounded-2xl p-3 mb-3 text-xs text-yellow-700 leading-relaxed">
+        최초 1회만 입력하면 저장돼요.<br><strong>console.anthropic.com</strong> → API Keys에서 발급
+      </div>
+      <div class="flex gap-2">
+        <input type="password" id="api-key" placeholder="sk-ant-..."
+          class="flex-1 bg-gray-50 rounded-2xl px-4 py-3 text-sm border border-gray-100 placeholder:text-gray-300 focus:ring-2 focus:ring-[#4ECDC4]/20 transition-all">
+        <button onclick="saveKey()" class="px-5 py-3 rounded-2xl bg-[#4ECDC4] text-white font-bold text-sm transition-all active:scale-95">저장</button>
+      </div>
+      <p id="api-ok" class="hidden text-xs text-[#4ECDC4] mt-2 font-medium">✓ API 키 저장됨</p>
     </div>
 
   </div>
-
-
 </div>
 
 <script>
-const PASSWORD = "9999";
-let star = 5, starNone = false, reviewType = 'delivery', category = '선택안함';
-let tone = '친절', length = 'medium', mode = 'text';
-let imgB64 = '', imgType = '';
-// 12시간 경과 시 카운트 리셋
-function getGenCount() {
-  const lastReset = parseInt(localStorage.getItem('genResetTime')||'0');
-  const now = Date.now();
-  if (now - lastReset > 12 * 60 * 60 * 1000) {
-    localStorage.setItem('genCount', '0');
-    localStorage.setItem('genResetTime', now.toString());
-    sessionStorage.removeItem('couponShown');
-  }
-  return parseInt(localStorage.getItem('genCount')||'0');
-}
-let genCount = getGenCount();
-let abortController = null;
-
-// 저장된 설정 불러오기
-function loadSavedSettings() {
-  const saved = JSON.parse(localStorage.getItem('userSettings')||'{}');
-  if (saved.category) {
-    category = saved.category;
-    document.querySelectorAll('.cat-btn').forEach(b => {
-      if (b.dataset.cat === category) { b.classList.add('active'); }
-      else b.classList.remove('active');
-    });
-  }
-  if (saved.tone) {
-    tone = saved.tone;
-    document.querySelectorAll('.tone-btn').forEach(b => {
-      if (b.dataset.tone === tone) b.classList.add('active');
-      else b.classList.remove('active');
-    });
-  }
-  if (saved.length) {
-    length = saved.length;
-    document.querySelectorAll('.length-btn').forEach(b => {
-      if (b.dataset.len === length) b.classList.add('active');
-      else b.classList.remove('active');
-    });
-  }
-}
-let hist = JSON.parse(localStorage.getItem('rh')||'[]');
-let favs = JSON.parse(localStorage.getItem('favs')||'[]');
-
-const starTxt = {1:'⭐ 1점',2:'⭐⭐ 2점',3:'⭐⭐⭐ 3점',4:'⭐⭐⭐⭐ 4점',5:'⭐⭐⭐⭐⭐ 5점'};
-
-window.onload = () => {
-  unlock();
-
-  renderHist(); renderFav();
+const majorData = {
+  "식사/요리": { subs:["한식","중식","일식/회","양식/레스토랑","고기/구이","기타/일반"], keywords:{"한식":"정갈한 한식의 맛","중식":"깊은 중화요리의 풍미","일식/회":"제철 회의 싱싱함","양식/레스토랑":"셰프의 정성이 담긴 요리","고기/구이":"불향 가득한 구이의 맛","기타/일반":""} },
+  "배달인기": { subs:["치킨","피자","족발/보쌈","분식","패스트푸드","기타/일반"], keywords:{"치킨":"바삭한 튀김옷의 비법","피자":"쭉 늘어나는 치즈의 풍미","족발/보쌈":"부드러운 육질의 비결","분식":"추억의 분식 맛","패스트푸드":"빠르고 든든한 한 끼","기타/일반":""} },
+  "카페/간식": { subs:["카페/베이커리","디저트","아이스크림","기타/일반"], keywords:{"카페/베이커리":"원두의 향미와 갓 구운 빵","디저트":"달콤한 수제 디저트","아이스크림":"시원하고 달콤한 맛","기타/일반":""} },
+  "주류/펍": { subs:["호프/맥주","이자카야/포차","기타/일반"], keywords:{"호프/맥주":"시원하게 넘어가는 생맥주","이자카야/포차":"분위기 있는 안주와 술","기타/일반":""} },
+  "서비스/여가": { subs:["미용/뷰티","헬스/스포츠","필라테스/요가","스크린골프","PC방","노래방","기타/일반"], keywords:{"미용/뷰티":"세심한 손길과 전문 기술","헬스/스포츠":"체계적인 운동 케어","노래방/오락":"즐거운 시간과 쾌적한 환경","기타/일반":""} },
+  "기타": { subs:["기타업종"], keywords:{"기타 업종":"","기타/일반":""} }
 };
 
-let pendingGenerate = false;
+const subEmojis = {"한식":"🍚","중식":"🥟","일식/회":"🐟","양식/레스토랑":"🍝","고기/구이":"🥩","치킨":"🍗","피자":"🍕","족발/보쌈":"🐷","분식":"🍜","패스트푸드":"🍔","카페/베이커리":"☕","디저트":"🍰","아이스크림":"🍦","호프/맥주":"🍺","이자카야/포차":"🍶","미용/뷰티":"💄","헬스/스포츠":"💪","노래방/오락":"🎤","필라테스/요가":"🧘","스크린골프":"⛳","PC방":"🖥️","노래방":"🎤","기타 업종":"🏪","기타/일반":"➖"};
+const starTxt = {1:"⭐ 1점",2:"⭐⭐ 2점",3:"⭐⭐⭐ 3점",4:"⭐⭐⭐⭐ 4점",5:"⭐⭐⭐⭐⭐ 5점"};
 
-function onCouponClick() {
-  sessionStorage.setItem('couponShown', '1');
-  document.getElementById('coupon-modal').style.display = 'none';
-  window.open('https://link.coupang.com/a/egBt7O', '_blank', 'noopener');
-  if (pendingGenerate) { pendingGenerate = false; generate(); }
+let star=5,starNone=false,reviewType="delivery",category="기타/일반";
+let tone="친절",length="medium",mode="text";
+let imgB64="",imgType="",recentCat="",currentKeyword="";
+let genCount=getGenCount(),abortController=null,pendingGenerate=false;
+let hist=JSON.parse(localStorage.getItem("rh")||"[]");
+let favs=JSON.parse(localStorage.getItem("favs")||"[]");
+
+function getGenCount(){
+  const lr=parseInt(localStorage.getItem("genResetTime")||"0");
+  if(Date.now()-lr>12*60*60*1000){localStorage.setItem("genCount","0");localStorage.setItem("genResetTime",Date.now().toString());sessionStorage.removeItem("couponShown");}
+  return parseInt(localStorage.getItem("genCount")||"0");
 }
 
-function checkPw() {
-  if (document.getElementById('lock-input').value === PASSWORD) { sessionStorage.setItem('ok','1'); unlock(); }
-  else { document.getElementById('lock-error').textContent='비밀번호가 틀렸어요 🥲'; document.getElementById('lock-input').value=''; }
-}
-function unlock() { document.getElementById('lock-screen').style.display='none'; document.getElementById('app').style.display='block'; }
+window.onload=()=>{
+  const k=localStorage.getItem("ak");
+  if(k){document.getElementById("api-key").value=k;document.getElementById("api-ok").classList.remove("hidden");}
+  recentCat=localStorage.getItem("recentCat")||"";
+  updateStars();renderHist();renderFav();
+};
 
-
-
-function selectMode(btn) {
-  mode = btn.dataset.mode;
-  document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  document.getElementById('text-area').style.display = mode==='text'?'block':'none';
-  document.getElementById('image-area').style.display = mode==='image'?'block':'none';
+function saveKey(){
+  const k=document.getElementById("api-key").value.trim();if(!k)return;
+  localStorage.setItem("ak",k);
+  const el=document.getElementById("api-ok");el.classList.remove("hidden");el.textContent="✓ 저장됐어요!";
+  setTimeout(()=>{el.textContent="✓ API 키 저장됨";},1500);
 }
 
-function selectType(btn) {
-  reviewType = btn.dataset.type;
-  document.querySelectorAll('.type-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  const noneWrap = document.getElementById('star-none-wrap');
-  const starSelect = document.getElementById('star-select');
-  if (reviewType === 'visit') {
-    noneWrap.style.display = 'block';
+function selectMode(btn){
+  mode=btn.dataset.mode;
+  document.querySelectorAll(".mode-btn").forEach(b=>{
+    const a=b===btn;
+    b.classList.toggle("type-active",a);
+    b.classList.toggle("border-gray-100",!a);b.classList.toggle("bg-gray-50",!a);
+    b.querySelector(".type-label").className="type-label "+(a?"text-[#CC4444]":"text-gray-400")+" text-sm";
+  });
+  document.getElementById("text-area").classList.toggle("hidden",mode!=="text");
+  document.getElementById("image-area").classList.toggle("hidden",mode!=="image");
+}
+
+function selectType(btn){
+  reviewType=btn.dataset.type;
+  document.querySelectorAll(".type-btn").forEach(b=>{
+    const a=b===btn;
+    b.classList.toggle("type-active",a);b.classList.toggle("border-gray-100",!a);b.classList.toggle("bg-gray-50",!a);
+    b.querySelector(".type-label").className="type-label "+(a?"text-[#CC4444]":"text-gray-400")+" text-xs";
+  });
+  const nw=document.getElementById("star-none-wrap");
+  if(reviewType==="visit")nw.classList.remove("hidden");
+  else{nw.classList.add("hidden");starNone=false;document.getElementById("star-none-btn").classList.remove("sub-active");document.getElementById("star-select").classList.remove("hidden");}
+}
+
+function selectMajor(btn){
+  document.querySelectorAll(".major-chip").forEach(b=>{
+    const a=b===btn;
+    b.classList.toggle("chip-active",a);b.classList.toggle("border-gray-100",!a);b.classList.toggle("bg-gray-50",!a);b.classList.toggle("text-gray-500",!a);b.classList.toggle("font-semibold",!a);b.classList.toggle("font-bold",a);
+  });
+  const major=btn.dataset.major;
+  const wrap=document.getElementById("sub-cat-wrap");const grid=document.getElementById("sub-grid");
+  wrap.classList.remove("hidden");
+  const data=majorData[major];grid.innerHTML="";
+  data.subs.forEach(sub=>{
+    const isA=sub===category,isR=sub===recentCat&&sub!=="기타/일반";
+    const card=document.createElement("button");
+    card.className="flex flex-col items-center justify-center gap-2 py-4 px-2 rounded-2xl border-2 text-[11px] font-bold transition-all active:scale-95 min-h-[78px] "+(isA?"sub-active":isR?"border-red-200 bg-red-50 text-red-400":"border-gray-100 bg-gray-50 text-gray-500");
+    card.innerHTML=`<span class="text-2xl">${subEmojis[sub]||"🏪"}</span><span>${sub}</span>`;
+    card.onclick=()=>selectSubCat(card,sub,major);
+    grid.appendChild(card);
+  });
+  document.getElementById("recent-label").classList.toggle("hidden",!recentCat||recentCat==="기타/일반");
+  document.getElementById("keyword-hint").classList.add("hidden");
+}
+
+function selectSubCat(card,sub,major){
+  category=sub;currentMajorForKw=sub;
+  document.querySelectorAll(".sub-card").forEach(b=>{b.classList.remove("on","recent");});
+  card.classList.add("on");
+  recentCat=sub;localStorage.setItem("recentCat",sub);
+  const pool=keywordPool[sub]||[];
+  const hint=document.getElementById("keyword-hint");
+  if(pool.length>0){
+    showKeywordBadges(getRandomKws(sub,3));
+    hint.style.display="block";
   } else {
-    noneWrap.style.display = 'none';
-    starNone = false;
-    document.getElementById('star-none-btn').classList.remove('active');
-    starSelect.style.display = 'block';
+    hint.style.display="none";
   }
 }
-
-function selectStarNone() {
-  starNone = !starNone;
-  document.getElementById('star-none-btn').classList.toggle('active', starNone);
-  document.getElementById('star-select').style.display = starNone ? 'none' : 'flex';
-  if (starNone) document.getElementById('star-select').style.display = 'none';
-  else document.getElementById('star-select').style.display = 'block';
+function showKeywordBadges(kws){
+  const container=document.getElementById("keyword-badges");
+  if(!container)return;
+  container.innerHTML=kws.map(kw=>`<button onclick="applyKeyword('${kw.replace(/'/g,"\\'")}')" class="btn" style="padding:7px 14px;border-radius:999px;border:1.5px solid #FFD700;background:white;color:#554400;font-size:12px;font-weight:700;transition:all 0.15s;" onmouseover="this.style.background='#FFF8CC'" onmouseout="this.style.background='white'">${kw}</button>`).join("");
+}
+function refreshKeywords(){
+  if(!currentMajorForKw)return;
+  showKeywordBadges(getRandomKws(currentMajorForKw,3));
+}
+function applyKeyword(kw){
+  const cur=document.getElementById("keyword-msg").value.trim();
+  document.getElementById("keyword-msg").value=cur?(cur+", "+kw):kw;
 }
 
-function selectCat(btn) {
-  category = btn.dataset.cat;
-  document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  saveSettings();
+function selectStarNone(){
+  starNone=!starNone;
+  const btn=document.getElementById("star-none-btn");const sel=document.getElementById("star-select");
+  if(starNone){btn.classList.add("sub-active");sel.classList.add("hidden");}
+  else{btn.classList.remove("sub-active");sel.classList.remove("hidden");}
 }
 
-document.querySelectorAll('.star-btn').forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    star = parseInt(btn.dataset.v);
-    starNone = false;
-    document.getElementById('star-none-btn').classList.remove('active');
-    document.getElementById('star-select').style.display = 'block';
-    document.querySelectorAll('.star-btn').forEach(b=>b.classList.toggle('active', parseInt(b.dataset.v)<=star));
-    document.getElementById('star-label').textContent = starTxt[star];
+function updateStars(){
+  document.querySelectorAll(".star-btn").forEach(b=>{
+    const v=parseInt(b.dataset.v);
+    if(v<=star){b.classList.add("star-active");b.classList.remove("border-gray-100","bg-gray-50","text-gray-300");}
+    else{b.classList.remove("star-active");b.classList.add("border-gray-100","bg-gray-50","text-gray-300");}
+  });
+}
+
+document.querySelectorAll(".star-btn").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    star=parseInt(btn.dataset.v);starNone=false;
+    document.getElementById("star-none-btn").classList.remove("sub-active");
+    document.getElementById("star-select").classList.remove("hidden");
+    updateStars();
+    document.querySelectorAll(".star-btn").forEach((b,i)=>{if(parseInt(b.dataset.v)<=star){setTimeout(()=>{b.classList.add("star-pop");setTimeout(()=>b.classList.remove("star-pop"),350);},i*50);}});
+    document.getElementById("star-label").textContent=starTxt[star];
   });
 });
 
-function selectTone(btn) {
-  tone = btn.dataset.tone;
-  document.querySelectorAll('.tone-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  saveSettings();
-}
-
-function selectLength(btn) {
-  length = btn.dataset.len;
-  document.querySelectorAll('.length-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  saveSettings();
-}
-
-function saveSettings() {
-  localStorage.setItem('userSettings', JSON.stringify({ category, tone, length }));
-}
-
-function handleFile(file) {
-  if (!file) return;
-  const r = new FileReader();
-  r.onload = e => {
-    imgType = file.type; imgB64 = e.target.result.split(',')[1];
-    const img = document.getElementById('preview-img');
-    img.src = e.target.result; img.style.display='block';
-  };
-  r.readAsDataURL(file);
-}
-
-function updateCharCount() {
-  const text = document.getElementById('result-text').value;
-  const len = text.length;
-  const el = document.getElementById('char-count');
-  const limits = { delivery: 300, visit: 0 };
-  const limit = reviewType === 'delivery' ? 300 : 0;
-  if (limit > 0) {
-    el.textContent = len + ' / ' + limit + '자';
-    el.className = 'char-count ' + (len > limit ? 'over' : 'ok');
-  } else {
-    el.textContent = len + '자';
-    el.className = 'char-count ok';
-  }
-}
-
-function cancelGenerate() {
-  if (abortController) { abortController.abort(); abortController = null; }
-  const btn = document.getElementById('gen-btn');
-  const cancelBtn = document.getElementById('cancel-btn');
-  btn.disabled = false;
-  btn.innerHTML = '✨ AI 답글 생성';
-  cancelBtn.style.display = 'none';
-}
-
-function buildPrompt(text) {
-  const typeStr = reviewType === 'delivery' ? '배달 리뷰' : '방문자 리뷰';
-  const starStr = starNone ? '별점 없음' : `${star}점`;
-  const ownerMsg = document.getElementById('owner-msg').value.trim();
-  const ownerStr = ownerMsg ? `\n가게 특징: ${ownerMsg}` : '';
-  const keywordMsg = document.getElementById('keyword-msg').value.trim();
-  const keywordStr = keywordMsg ? `\n답글에 포함할 키워드: ${keywordMsg}` : '';
-
-  const lenGuide = length === 'short' ? '2문장으로 간결하게' : length === 'medium' ? '3~4문장으로' : '5문장 이상 자세하게';
-
-  let toneGuide = '';
-  if (tone === '친절') toneGuide = '친절하고 다정한 따뜻한 말투로';
-  else if (tone === '전문') toneGuide = '전문적이고 진중한 격식체로';
-  else if (tone === '유머') toneGuide = '유머러스하고 친근한 편안한 말투로';
-  else toneGuide = '진심으로 사과하고 반성하는 톤으로';
-
-  let starGuide = '';
-  if (starNone || reviewType === 'visit' && starNone) {
-    starGuide = '리뷰 내용을 분석해서 긍정적이면 감사하게, 부정적이면 사과하는 톤으로';
-  } else {
-    if (star >= 4) starGuide = '감사하고 재방문/재주문을 유도하는';
-    else if (star === 3) starGuide = '감사하되 더 나은 서비스를 약속하는';
-    else starGuide = '진심으로 사과하고 개선 의지를 보여주는';
-  }
-
-  const startWord = reviewType === 'delivery' ? '"주문해 주셔서 감사합니다"' : '"방문해 주셔서 감사합니다"';
-
-  // 언어 감지
-  const hasKorean = /[가-힣]/.test(text);
-  const hasEnglish = /[a-zA-Z]{3,}/.test(text) && !hasKorean;
-  const langGuide = hasEnglish ? '리뷰가 영어로 작성되었으니 영어로 답글을 작성하세요.' : '한국어로 답글을 작성하세요.';
-
-  return `당신은 ${category === '선택안함' ? '' : category + ' '}사장님입니다. 고객의 ${typeStr}에 답글을 작성해주세요.
-별점: ${starStr}${ownerStr}${keywordStr}
-고객 리뷰: ${text}
-
-작성 지침:
-- ${toneGuide} 작성
-- ${starGuide} 내용으로
-- ${lenGuide} 작성
-- 반드시 ${startWord} 표현을 자연스럽게 포함
-- "고객님"으로 시작
-- 리뷰 내용에 직접 반응
-- 가게 이름이나 브랜드명은 절대 언급하지 마세요
-- 비슷한 의미의 감사 표현을 중복 사용하지 마세요 (예: "정말 감사합니다, 진심으로 감사합니다" 같은 중복 금지)
-- 비속어, 과한 홍보성 문구(예: "최고의 맛!", "강추!", "꼭 드셔보세요!") 사용 금지
-- 가독성을 위해 2~3문장마다 줄바꿈을 해주세요
-- ${langGuide}
-- 답글 내용만 출력`;
-}
-
-async function generate() {
-  const errEl = document.getElementById('err');
-  errEl.innerHTML = '';
-
-  // 2번째 생성 시도 시 쿠팡 모달 표시 (12시간마다 리셋)
-  genCount = getGenCount();
-  if (genCount === 1 && !sessionStorage.getItem('couponShown')) {
-    pendingGenerate = true;
-    document.getElementById('coupon-modal').style.display = 'flex';
-    return;
-  }
-
-  let messages = [];
-  if (mode === 'image') {
-    if (!imgB64) { errEl.innerHTML='<div class="error-box">스크린샷을 먼저 업로드해주세요.</div>'; return; }
-    messages = [{ role:'user', content:[
-      { type:'image', source:{ type:'base64', media_type:imgType, data:imgB64 } },
-      { type:'text', text:`이미지의 리뷰 텍스트를 읽고 아래 지침으로 답글을 작성해주세요.\n\n${buildPrompt('[이미지의 리뷰 내용을 직접 읽어서 답글 작성]')}` }
-    ]}];
-  } else {
-    const rv = document.getElementById('review').value.trim();
-    if (!rv) { errEl.innerHTML='<div class="error-box">리뷰 내용을 입력해주세요.</div>'; return; }
-    messages = [{ role:'user', content: buildPrompt(rv) }];
-  }
-
-  abortController = new AbortController();
-  const btn = document.getElementById('gen-btn');
-  const cancelBtn = document.getElementById('cancel-btn');
-  btn.disabled=true; btn.innerHTML='<span class="loading-dots"><span></span><span></span><span></span></span>';
-  cancelBtn.style.display = 'block';
-  document.getElementById('result-card').style.display='none';
-
-  try {
-    const res = await fetch('/.netlify/functions/reply', {
-      method:'POST',
-      headers:{ 'Content-Type':'application/json' },
-      body: JSON.stringify({ messages }),
-      signal: abortController ? abortController.signal : undefined
-    });
-    if (!res.ok) {
-      const errText = await res.text();
-      throw new Error('서버 오류: ' + res.status + ' ' + errText);
-    }
-    const data = await res.json();
-    if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
-    const reply = data.content[0].text.trim();
-    document.getElementById('result-text').value = reply;
-    updateCharCount();
-    document.getElementById('result-card').style.display = 'block';
-    document.getElementById('copy-btn').textContent = '복사하기';
-    document.getElementById('copy-btn').classList.remove('copied');
-
-    genCount = getGenCount() + 1;
-    localStorage.setItem('genCount', genCount.toString());
-
-    const sd = starNone ? '별점없음' : '★'.repeat(star)+'☆'.repeat(5-star);
-    const rv = mode==='image' ? '[스크린샷]' : (document.getElementById('review').value.slice(0,20)+'...');
-    hist.unshift({ type:reviewType, cat:category, sd, review:rv, reply, time:new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'}) });
-    if (hist.length>10) hist.pop();
-    localStorage.setItem('rh', JSON.stringify(hist));
-    renderHist();
-    document.getElementById('result-card').scrollIntoView({ behavior:'smooth', block:'nearest' });
-  } catch(e) {
-    errEl.innerHTML=`<div class="error-box">오류: ${e.message}</div>`;
-  } finally {
-    btn.disabled=false; btn.innerHTML='✨ AI 답글 생성';
-    document.getElementById('cancel-btn').style.display='none';
-    abortController = null;
-  }
-}
-
-function copyReply() {
-  navigator.clipboard.writeText(document.getElementById('result-text').value).then(()=>{
-    const btn=document.getElementById('copy-btn');
-    btn.textContent='✓ 복사됐어요!'; btn.classList.add('copied');
-    setTimeout(()=>{ btn.textContent='복사하기'; btn.classList.remove('copied'); }, 2000);
+function selectTone(btn){
+  tone=btn.dataset.tone;
+  document.querySelectorAll(".tone-btn").forEach(b=>{
+    const a=b===btn;
+    b.classList.toggle("tone-active",a);b.classList.toggle("border-gray-100",!a);b.classList.toggle("bg-gray-50",!a);b.classList.toggle("text-gray-500",!a);
   });
 }
 
-function saveFav() {
-  const text = document.getElementById('result-text').value;
-  if (!text) return;
-  favs.unshift({ text, time: new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'}) });
-  if (favs.length > 20) favs.pop();
-  localStorage.setItem('favs', JSON.stringify(favs));
-  renderFav();
-  const btn = document.querySelector('.btn-save-fav');
-  btn.textContent = '✓ 저장됐어요!';
-  setTimeout(()=>{ btn.textContent='⭐ 즐겨찾기에 저장'; }, 1500);
+function selectLength(btn){
+  length=btn.dataset.len;
+  document.querySelectorAll(".length-btn").forEach(b=>{
+    const a=b===btn;
+    b.classList.toggle("len-active",a);b.classList.toggle("border-gray-100",!a);b.classList.toggle("bg-gray-50",!a);b.classList.toggle("text-gray-500",!a);
+    const sp=b.querySelector("span:last-child");
+    if(sp)sp.className=a?"text-[10px] text-[#4ECDC4] font-normal":"text-[10px] text-gray-300 font-normal";
+  });
 }
 
-function delFav(i) {
-  favs.splice(i, 1);
-  localStorage.setItem('favs', JSON.stringify(favs));
-  renderFav();
+function handleFile(file){
+  if(!file)return;
+  const r=new FileReader();
+  r.onload=e=>{imgType=file.type;imgB64=e.target.result.split(",")[1];const img=document.getElementById("preview-img");img.src=e.target.result;img.classList.remove("hidden");};
+  r.readAsDataURL(file);
 }
 
-function copyFav(i) {
-  navigator.clipboard.writeText(favs[i].text);
+function buildPrompt(text){
+  const typeStr=reviewType==="delivery"?"배달 리뷰":"방문자 리뷰";
+  const starStr=starNone?"별점 없음":`${star}점`;
+  const ownerMsg=document.getElementById("owner-msg").value.trim();
+  const keywordMsg=document.getElementById("keyword-msg").value.trim();
+  const ownerStr=ownerMsg?`\n가게 특징: ${ownerMsg}`:"";
+  const keywordStr=keywordMsg?`\n답글에 포함할 키워드: ${keywordMsg}`:"";
+  const lenGuide=length==="short"?"2문장으로 간결하게":length==="medium"?"3~4문장으로":"5문장 이상 자세하게";
+  const toneGuide=tone==="친절"?"친절하고 다정한 따뜻한 말투로":tone==="전문"?"전문적이고 진중한 격식체로":tone==="유머"?"유머러스하고 친근한 말투로":"진심으로 사과하고 반성하는 톤으로";
+  const starGuide=starNone?"리뷰 내용을 분석해서 긍정적이면 감사하게, 부정적이면 사과하는 톤으로":star>=4?"감사하고 재방문/재주문을 유도하는":star===3?"감사하되 더 나은 서비스를 약속하는":"진심으로 사과하고 개선 의지를 보여주는";
+  const startWord=reviewType==="delivery"?'"주문해 주셔서 감사합니다"':'"방문해 주셔서 감사합니다"';
+  const hasEnglish=/[a-zA-Z]{3,}/.test(text)&&!/[가-힣]/.test(text);
+  const langGuide=hasEnglish?"리뷰가 영어로 작성되었으니 영어로 답글을 작성하세요.":"한국어로 답글을 작성하세요.";
+  const catStr=category==="기타/일반"?"":category+" ";
+  return `당신은 ${catStr}사장님입니다. 고객의 ${typeStr}에 답글을 작성해주세요.\n별점: ${starStr}${ownerStr}${keywordStr}\n고객 리뷰: ${text}\n\n작성 지침:\n- ${toneGuide} 작성\n- ${starGuide} 내용으로\n- ${lenGuide} 작성\n- 반드시 ${startWord} 표현을 자연스럽게 포함\n- "고객님"으로 시작\n- 리뷰 내용에 직접 반응\n- 비슷한 의미의 감사 표현 중복 금지\n- 과한 홍보성 문구 금지\n- 가게 이름이나 브랜드명 절대 언급 금지\n- 2~3문장마다 줄바꿈으로 가독성 확보\n- ${langGuide}\n- 답글 내용만 출력${generalGuide}`;
 }
 
-function renderFav() {
-  const card = document.getElementById('fav-card');
-  const list = document.getElementById('fav-list');
-  if (!favs.length) { card.style.display='none'; return; }
-  card.style.display='block';
-  list.innerHTML = favs.map((f,i)=>`
-    <div class="fav-item">
-      <p>${f.text}</p>
-      <button class="fav-copy" onclick="copyFav(${i})">복사</button>
-      <button class="fav-del" onclick="delFav(${i})">삭제</button>
-    </div>`).join('');
+async function generate(){
+  const apiKey=localStorage.getItem("ak")||document.getElementById("api-key").value.trim();
+  const errEl=document.getElementById("err");errEl.innerHTML="";
+  genCount=getGenCount();
+  if(genCount===1&&!sessionStorage.getItem("couponShown")){
+    pendingGenerate=true;
+    document.getElementById("coupon-modal").classList.remove("hidden");
+    document.getElementById("coupon-modal").classList.add("flex");
+    return;
+  }
+  if(!apiKey){errEl.innerHTML='<div class="bg-red-50 border border-red-100 rounded-2xl p-3 text-sm text-red-500 mt-2">API 키를 먼저 입력하고 저장해주세요.</div>';return;}
+  let messages=[];
+  if(mode==="image"){
+    if(!imgB64){errEl.innerHTML='<div class="bg-red-50 border border-red-100 rounded-2xl p-3 text-sm text-red-500 mt-2">스크린샷을 먼저 업로드해주세요.</div>';return;}
+    messages=[{role:"user",content:[{type:"image",source:{type:"base64",media_type:imgType,data:imgB64}},{type:"text",text:`이미지의 리뷰 텍스트를 읽고 아래 지침으로 답글을 작성해주세요.\n\n${buildPrompt("[이미지의 리뷰 내용을 직접 읽어서 답글 작성]")}`}]}];
+  }else{
+    const rv=document.getElementById("review").value.trim();
+    if(!rv){errEl.innerHTML='<div class="bg-red-50 border border-red-100 rounded-2xl p-3 text-sm text-red-500 mt-2">리뷰 내용을 입력해주세요.</div>';return;}
+    messages=[{role:"user",content:buildPrompt(rv)}];
+  }
+  abortController=new AbortController();
+  const btn=document.getElementById("gen-btn");const cb=document.getElementById("cancel-btn");
+  btn.disabled=true;btn.innerHTML='<div class="flex items-center justify-center gap-2"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>';
+  cb.classList.remove("hidden");document.getElementById("result-card").classList.add("hidden");
+  try{
+    const res=await fetch("/.netlify/functions/reply",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({messages}),signal:abortController.signal});
+    if(!res.ok)throw new Error("서버 오류: "+res.status);
+    const data=await res.json();
+    if(data.error)throw new Error(data.error.message||JSON.stringify(data.error));
+    const reply=data.content[0].text.trim();
+    document.getElementById("result-text").value=reply;
+    document.getElementById("result-card").classList.remove("hidden");
+    document.getElementById("copy-btn").textContent="복사하기";
+    updateCharCount();
+    genCount=getGenCount()+1;localStorage.setItem("genCount",genCount.toString());
+    const rv2=mode==="image"?"[스크린샷]":(document.getElementById("review").value.slice(0,20)+"...");
+    hist.unshift({type:reviewType,cat:category,star:starNone?"없음":star,review:rv2,reply,time:new Date().toLocaleTimeString("ko-KR",{hour:"2-digit",minute:"2-digit"})});
+    if(hist.length>10)hist.pop();
+    localStorage.setItem("rh",JSON.stringify(hist));renderHist();
+    document.getElementById("result-card").scrollIntoView({behavior:"smooth",block:"nearest"});
+  }catch(e){
+    if(e.name==="AbortError")return;
+    errEl.innerHTML=`<div class="bg-red-50 border border-red-100 rounded-2xl p-3 text-sm text-red-500 mt-2">오류: ${e.message}</div>`;
+  }finally{
+    btn.disabled=false;btn.innerHTML="✨ AI 답글 생성";cb.classList.add("hidden");abortController=null;
+  }
 }
 
-function renderHist() {
-  const card=document.getElementById('hist-card'), list=document.getElementById('hist-list');
-  if (!hist.length) { card.style.display='none'; return; }
-  card.style.display='block';
-  list.innerHTML=hist.map(h=>`
-    <div class="history-item">
-      <div class="h-meta">
-        <span class="h-tag">${h.cat||''}</span>
-        <span class="h-tag">${h.type==='delivery'?'배달':'방문'}</span>
-        <span class="h-stars">${h.sd||''}</span>
-        <span class="h-review">${h.review}</span>
-        <span class="h-time">${h.time||''}</span>
-      </div>
-      <div class="h-reply">${h.reply}</div>
-    </div>`).join('');
+function cancelGenerate(){if(abortController){abortController.abort();abortController=null;}document.getElementById("gen-btn").disabled=false;document.getElementById("gen-btn").innerHTML="✨ AI 답글 생성";document.getElementById("cancel-btn").classList.add("hidden");}
+
+function onCouponClick(){
+  sessionStorage.setItem("couponShown","1");
+  document.getElementById("coupon-modal").classList.add("hidden");
+  document.getElementById("coupon-modal").classList.remove("flex");
+  if(pendingGenerate){pendingGenerate=false;setTimeout(generate,300);}
+}
+
+function updateCharCount(){
+  const text=document.getElementById("result-text").value;const len=text.length;
+  const el=document.getElementById("char-count");
+  const limit=reviewType==="delivery"?300:0;
+  if(limit>0){el.textContent=len+" / "+limit+"자";el.className=len>limit?"text-xs text-red-400 font-bold":"text-xs text-gray-400";}
+  else{el.textContent=len+"자";el.className="text-xs text-gray-400";}
+}
+
+function copyReply(){
+  navigator.clipboard.writeText(document.getElementById("result-text").value).then(()=>{
+    const btn=document.getElementById("copy-btn");btn.textContent="✓ 복사됐어요!";btn.classList.add("bg-green-500");btn.classList.remove("bg-[#4ECDC4]");
+    setTimeout(()=>{btn.textContent="복사하기";btn.classList.remove("bg-green-500");btn.classList.add("bg-[#4ECDC4]");},2000);
+  });
+}
+
+function saveFav(){
+  const text=document.getElementById("result-text").value;if(!text)return;
+  favs.unshift({text,time:new Date().toLocaleTimeString("ko-KR",{hour:"2-digit",minute:"2-digit"})});
+  if(favs.length>20)favs.pop();localStorage.setItem("favs",JSON.stringify(favs));renderFav();
+  const btn=document.getElementById("fav-btn");btn.textContent="✓ 저장됐어요!";
+  setTimeout(()=>{btn.textContent="⭐ 즐겨찾기 저장";},1500);
+}
+
+function renderFav(){
+  const card=document.getElementById("fav-card");const list=document.getElementById("fav-list");
+  if(!favs.length){card.classList.add("hidden");return;}
+  card.classList.remove("hidden");
+  list.innerHTML=favs.map((f,i)=>`<div class="bg-yellow-50 rounded-2xl p-3 border border-yellow-100 relative"><p class="text-sm text-gray-700 leading-relaxed pr-14">${f.text}</p><div class="absolute top-3 right-3 flex gap-1"><button onclick="navigator.clipboard.writeText(favs[${i}].text)" class="text-xs text-[#4ECDC4] font-bold px-2 py-1 rounded-lg bg-white border border-[#4ECDC4]/20">복사</button><button onclick="favs.splice(${i},1);localStorage.setItem('favs',JSON.stringify(favs));renderFav()" class="text-xs text-red-300 font-bold px-2 py-1 rounded-lg bg-white border border-red-100">삭제</button></div></div>`).join("");
+}
+
+function renderHist(){
+  const card=document.getElementById("hist-card");const list=document.getElementById("hist-list");
+  if(!hist.length){card.classList.add("hidden");return;}
+  card.classList.remove("hidden");
+  list.innerHTML=hist.map(h=>`<div class="py-3 first:pt-0 last:pb-0"><div class="flex items-center gap-1.5 mb-1"><span class="text-[10px] px-2 py-0.5 rounded-full bg-red-50 text-red-400 font-bold">${h.cat||"기타"}</span><span class="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-400">${h.type==="delivery"?"배달":"방문"}</span><span class="text-xs text-yellow-400">${typeof h.star==="number"?"★".repeat(h.star):h.star}</span><span class="text-[10px] text-gray-300 ml-auto">${h.time||""}</span></div><p class="text-xs text-gray-400 truncate mb-1">${h.review}</p><p class="text-sm text-gray-600 leading-relaxed">${h.reply}</p></div>`).join("");
 }
 </script>
 </body>
 </html>
+const keywordPool={
+  "한식":["정갈한 손맛","국내산 재료","엄마의 손맛","매일 직접 끓이는 육수","정성 가득한 한 상","전통 레시피","신선한 제철 재료","건강한 집밥 같은 맛","깊고 진한 국물","화학조미료 무첨가","당일 손질 재료","깔끔한 뒷맛","정직한 재료","든든한 한 끼","오래된 단골 맛집","어머니 손맛 그대로","재래시장 직거래 재료","저염 건강식","푸짐한 양","계절 별미"],
+  "중식":["불 조절의 비법","신선한 해산물","직접 만든 탕수육 소스","중화풍 깊은 감칠맛","매일 새벽 반죽","고온 웍 조리","진한 육수 베이스","바삭한 튀김","풍부한 재료","정통 중화 레시피","쫄깃한 면발","알싸한 마라 향","신선 채소 듬뿍","넉넉한 포션","빠른 배달"],
+  "일식/회":["당일 직송 활어","제철 회 코스","신선도 최우선","일본 직수입 재료","장인의 칼질","국내산 싱싱한 횟감","산지 직배송","오늘 들어온 생선","깔끔한 간장 소스","숙성 회","참치 전문","킹크랩 직거래","계절 특선","소믈리에 사케 추천","청결한 위생"],
+  "양식/레스토랑":["셰프 출신 사장님","매일 직접 굽는 빵","수입 식재료","파스타 면 직접 제조","스테이크 드라이에이징","계절 코스 요리","와인 페어링","로컬 제철 채소","수제 소스","분위기 있는 공간","특별한 날 추천","예약 우선","데이트 코스","기념일 케이크","레스토랑 수준의 퀄리티"],
+  "고기/구이":["당일 도축 신선육","한우 1등급","두툼한 두께","참숯 직화","자체 숙성","마블링 가득","가성비 고기집","무한리필","특수 부위 전문","직접 구워드리는 서비스","국내산 돼지","셀프바 운영","쌈 채소 무제한","된장찌개 서비스","잡내 없는 육질"],
+  "치킨":["바삭한 튀김옷","국내산 닭","당일 제조 양념","촉촉한 속살","황금빛 컬러","순살 전문","반반 가능","배달 특화 포장","맥주 페어링 추천","매콤달콤한 소스","파닭 전문","오리지널 레시피","당일 주문 생산","사이드 서비스","치킨무 듬뿍"],
+  "피자":["당일 반죽","도우 직접 제조","100% 모짜렐라","풍성한 토핑","얇고 바삭한 씬","두툼한 팬피자","수제 토마토 소스","화덕 피자","가성비 라지 사이즈","콤비네이션 전문","반반 주문 가능","빠른 배달","사이드 서비스","프리미엄 토핑","글루텐프리 도우"],
+  "족발/보쌈":["국내산 돼지","당일 직접 삶는","부드러운 육질","비법 양념","두툰한 슬라이스","쫄깃한 껍데기","보쌈 김치 직접 담금","새우젓 특선","앞다리 전문","매운 족발","막걸리 페어링","야식으로 최고","오래 우린 육수","콜라겐 가득","깔끔한 뒷처리"],
+  "분식":["추억의 맛","직접 뽑은 쫄면","국물 떡볶이 비법","쫄깃한 순대","당일 제조","분식 세트 가성비","컵라면 사리 서비스","치즈 토핑","엽기 소스","매운맛 조절 가능","고기 순대","오징어 튀김","야채 듬뿍","옛날 감성","학교 앞 맛집 감성"],
+  "패스트푸드":["빠른 조리","바삭한 패티","신선한 채소","소스 직접 제조","세트 구성 알참","배달 최적화 포장","따뜻하게 유지","감자튀김 바삭","음료 선택 다양","가성비 세트","어린이 메뉴","늦은 시간도 운영","단체 주문 환영","할인 쿠폰 자주","드라이브스루"],
+  "카페/베이커리":["스페셜티 원두","당일 직접 로스팅","매일 아침 직접 구움","천연 발효 빵","시즌 라떼","디카페인 가능","대체유 선택","수제 잼","홈메이드 케이크","포근한 인테리어","독서하기 좋은","작업하기 좋은","콘센트 완비","반려동물 동반","공부 카페"],
+  "디저트":["수제 케이크","당일 제조","천연 재료","SNS 인기","비건 옵션","알레르기 표시","맞춤 주문 케이크","시즌 한정","부드러운 식감","달지 않은 디저트","프리미엄 재료","포장 예쁜","선물 포장 가능","인증샷 성지","달콤한 힐링"],
+  "아이스크림":["직접 만든 젤라또","천연 과일","당일 제조","유기농 우유","부드러운 질감","시즌 한정 맛","커스텀 토핑","1인 소용량 가능","대용량 파티팩","비건 아이스크림","저당 옵션","인스타 감성","테이크아웃 특화","달달한 디저트","시원한 여름 메뉴"],
+  "호프/맥주":["수제맥주 전문","생맥주 항상 신선","안주 직접 제조","치맥 성지","오징어 직구입","소시지 자체 제작","야구 경기 중계","혼술 가능","조용한 분위기","다양한 수입맥주","소규모 파티룸","퇴근 후 한잔","소맥 황금비율","안주 무한리필","드래프트 8종"],
+  "이자카야/포차":["일본 감성 분위기","사케 직수입","오마카세 안주","야끼토리 직화","닭꼬치 수제 소스","하이볼 전문","저소음 분위기","단체석 완비","혼술 환영","심야까지 운영","일본 가정식 스타일","숯불 향 가득","다양한 사케 라인업","포장마차 감성","오픈 키친"],
+  "미용/뷰티":["15년 경력 원장","트렌드 스타일","두피 케어 전문","천연 염색제","손상 없는 시술","맞춤형 컨설팅","최신 기기 도입","위생 철저","예약 우선제","인생 머리 완성","스타일 변신 성공","꼼꼼한 시술","재방문율 높은","친절한 상담","합리적 가격"],
+  "헬스/스포츠":["1:1 맞춤 PT","영양 상담 무료","최신 기구 완비","24시간 운영","샤워실 완비","체성분 분석","그룹 레슨","초보자 환영","연간 회원 혜택","체험 수업 무료","클린 환경","전문 트레이너","다이어트 특화","근성장 프로그램","식단 관리 병행"],
+  "필라테스/요가":["코어 강화 효과","유연성 향상","몸매 교정","1:1 맞춤 수업","소도구 필라테스","마인드풀니스 요가","체형 교정 전문","초보자 환영","쾌적한 스튜디오","릴렉스 힐링","호흡 집중","바른 자세 교정","그룹 레슨 인기","체험 수업 무료","근육 밸런스 회복"],
+  "스크린골프":["실내 라운딩 가능","최신 시뮬레이터","세계 유명 코스","스윙 분석 서비스","레슨 병행 가능","혼자도 편하게","쾌적한 온도","그룹 예약 가능","음료 서비스","24시간 운영","심야 라운딩","초보자 환영","프로 코치 상주","리얼한 그래픽","친구들과 즐기는"],
+  "PC방":["최신 사양 PC","쾌적한 환경","청결한 좌석","다양한 게임 지원","음식 주문 가능","1인 개인 부스","심야 할인","와이파이 완비","대형 모니터","기계식 키보드","냉난방 완비","혼자도 편한","빠른 인터넷","커피/음료 서비스","넓은 개인 공간"],
+  "노래방":["최신 음향 시스템","신곡 즉시 업데이트","방음 시설 최고","1인 개인 방 가능","단체 대형 방","음료 배달 가능","마이크 소독 철저","청결한 인테리어","분위기 조명","심야 할인","생일 이벤트","스트레스 해소 최고","무제한 탬버린","예약 편리","코인 시스템"],
+  "기타업종":["친절한 서비스","청결한 환경","합리적 가격","빠른 응대","전문 기술","단골 우대","정직한 운영","꼼꼼한 관리","고객 맞춤 서비스","오랜 경험","재방문 감사","품질 보장","AS 철저","믿을 수 있는","지역 주민 사랑"],
+  "기타/일반":["친절한 서비스","정성 담긴 음식","깔끔한 포장","빠른 응대","위생 철저","합리적인 가격","단골 우대","재방문 감사","고객 맞춤 서비스","오랜 경험","꼼꼼한 관리","정직한 운영","품질 보장","믿을 수 있는","지역 주민 사랑"]
+};
+
+function getRandomKws(sub,count){
+  const pool=keywordPool[sub]||[];
+  if(!pool.length)return[];
+  const shuffled=[...pool].sort(()=>Math.random()-0.5);
+  return shuffled.slice(0,Math.min(count,pool.length));
+}
+
+
