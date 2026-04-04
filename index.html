@@ -537,7 +537,7 @@ async function generate(){
   btn.disabled=true;btn.innerHTML='<div class="flex items-center justify-center gap-2"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>';
   cb.classList.remove("hidden");document.getElementById("result-card").classList.add("hidden");
   try{
-    const res=await fetch("/.netlify/functions/reply",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({messages}),signal:abortController.signal});
+    const res=await fetch("/api/reply",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({messages}),signal:abortController.signal});
     if(!res.ok)throw new Error("서버 오류: "+res.status);
     const data=await res.json();
     if(data.error)throw new Error(data.error.message||JSON.stringify(data.error));
