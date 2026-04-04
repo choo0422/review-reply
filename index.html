@@ -13,40 +13,56 @@
 <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet">
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0;}
-body{font-family:"Pretendard",-apple-system,sans-serif;background:#F8F9FA;min-height:100vh;padding-bottom:56px;color:#111;}
-.card{background:#fff;border-radius:20px;box-shadow:0 2px 16px rgba(0,0,0,0.05);padding:20px;margin-bottom:12px;}
-.sec-label{font-size:11px;font-weight:700;color:#BBBEC4;letter-spacing:0.6px;text-transform:uppercase;margin-bottom:14px;}
+body{font-family:"Pretendard",-apple-system,sans-serif;background:#F8F9FA;min-height:100vh;padding-bottom:60px;color:#111;}
+
+.card{background:#fff;border-radius:20px;box-shadow:0 2px 16px rgba(0,0,0,0.05);padding:20px;margin-bottom:10px;}
+.sec-label{font-size:11px;font-weight:700;color:#BBBEC4;letter-spacing:0.6px;text-transform:uppercase;margin-bottom:10px;}
 .btn{cursor:pointer;font-family:inherit;border:none;outline:none;background:none;transition:all 0.12s;-webkit-appearance:none;}
 .btn:active{transform:scale(0.95);}
+.sec-divider{height:1px;background:#F0F0F0;margin:16px 0;}
+
+/* 섹션 번호 배지 */
+.sec-num{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#F97316;color:#fff;font-size:11px;font-weight:900;margin-right:7px;flex-shrink:0;}
+.sec-header{display:flex;align-items:center;font-size:12px;font-weight:700;color:#374151;margin-bottom:14px;}
+
+/* 아코디언 */
+.accordion-card{background:#fff;border-radius:20px;box-shadow:0 2px 16px rgba(0,0,0,0.05);margin-bottom:10px;overflow:hidden;}
+.accordion-head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;cursor:pointer;user-select:none;}
+.accordion-head:active{background:#FAFAFA;}
+.accordion-left{display:flex;align-items:center;gap:4px;}
+.accordion-texts{display:flex;flex-direction:column;gap:2px;}
+.accordion-title{font-size:13px;font-weight:700;color:#111;}
+.accordion-sub{font-size:11px;color:#9CA3AF;}
+.accordion-arrow{font-size:12px;color:#BBBEC4;transition:transform 0.22s ease;line-height:1;}
+.accordion-arrow.open{transform:rotate(180deg);}
+.accordion-body{padding:0 20px 20px;}
+.accordion-body.closed{display:none;}
+.saved-badge{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:999px;background:#FFF7ED;border:1px solid #FED7AA;font-size:10px;font-weight:700;color:#C2410C;margin-left:6px;}
 
 /* 대분류 칩 */
-.cat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:4px;}
+.cat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
 .cat-chip{display:flex;flex-direction:column;align-items:center;gap:5px;padding:12px 4px;border-radius:14px;border:1.5px solid #E8EAED;background:#fff;font-size:11px;font-weight:600;color:#888;width:100%;transition:all 0.12s;}
 .cat-chip .cat-icon-wrap{width:36px;height:36px;border-radius:50%;background:#F3F4F6;display:flex;align-items:center;justify-content:center;font-size:18px;transition:all 0.12s;}
 .cat-chip:active{transform:scale(0.94);}
 .cat-chip.on{border-color:#F97316;background:#FFF7ED;color:#C2410C;font-weight:700;}
 .cat-chip.on .cat-icon-wrap{background:#FED7AA;}
 
-/* 세부 업종 */
+/* 소분류 포인터 + 그룹박스 */
+.sub-pointer-wrap{position:relative;height:12px;margin-top:10px;}
+.sub-pointer{width:0;height:0;border-left:11px solid transparent;border-right:11px solid transparent;border-bottom:12px solid #FED7AA;position:absolute;top:0;left:40px;transition:left 0.25s cubic-bezier(0.34,1.56,0.64,1);}
+.sub-pointer::after{content:"";width:0;height:0;border-left:9px solid transparent;border-right:9px solid transparent;border-bottom:10px solid #FFFBF7;position:absolute;top:3px;left:-9px;}
+.sub-group-box{border:1.5px solid #FED7AA;border-radius:16px;background:#FFFBF7;padding:14px;animation:fadeIn 0.18s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+.sub-group-label{font-size:10px;font-weight:700;color:#F97316;letter-spacing:0.5px;margin-bottom:10px;display:flex;align-items:center;gap:4px;text-transform:uppercase;}
 .sub-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
 .sub-card{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px 4px 12px;border-radius:16px;border:1.5px solid #EBEBEB;background:#FAFAFA;font-size:11px;font-weight:600;color:#999;text-align:center;gap:8px;min-height:84px;transition:all 0.12s;width:100%;}
 .sub-card .sub-emoji{font-size:26px;line-height:1;}
 .sub-card:active{transform:scale(0.93);}
 .sub-card.on{border-color:#F97316!important;background:#FFF7ED!important;color:#C2410C!important;font-weight:700!important;box-shadow:0 2px 12px rgba(249,115,22,0.15);}
-.sub-card .check{display:none;position:absolute;top:6px;right:6px;width:18px;height:18px;background:#F97316;border-radius:50%;color:#fff;font-size:10px;font-weight:900;align-items:center;justify-content:center;line-height:1;}
+.sub-card .check{display:none;position:absolute;top:6px;right:6px;width:18px;height:18px;background:#F97316;border-radius:50%;color:#fff;font-size:10px;font-weight:900;align-items:center;justify-content:center;}
 .sub-card.on .check{display:flex;}
-
-/* 최근 선택 */
 .recent-label{font-size:11px;font-weight:700;color:#F59E0B;margin-bottom:10px;display:none;align-items:center;gap:4px;}
 .recent-label.show{display:flex;}
-
-/* 소분류 포인터 + 그룹 박스 */
-.sub-pointer-wrap{position:relative;height:12px;margin-top:8px;}
-.sub-pointer{width:0;height:0;border-left:11px solid transparent;border-right:11px solid transparent;border-bottom:12px solid #FED7AA;position:absolute;top:0;left:40px;transition:left 0.25s cubic-bezier(0.34,1.56,0.64,1);}
-.sub-pointer::after{content:"";width:0;height:0;border-left:9px solid transparent;border-right:9px solid transparent;border-bottom:10px solid #FFFBF7;position:absolute;top:3px;left:-9px;}
-.sub-group-box{border:1.5px solid #FED7AA;border-radius:16px;background:#FFFBF7;padding:14px;animation:fadeSlideIn 0.18s ease;}
-@keyframes fadeSlideIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
-.sub-group-label{font-size:10px;font-weight:700;color:#F97316;letter-spacing:0.5px;margin-bottom:10px;display:flex;align-items:center;gap:5px;text-transform:uppercase;}
 
 /* 키워드 말풍선 */
 .kw-box{display:none;position:relative;margin-top:14px;background:#FFFBEA;border:1.5px solid #FDE68A;border-radius:16px;padding:14px;}
@@ -56,10 +72,14 @@ body{font-family:"Pretendard",-apple-system,sans-serif;background:#F8F9FA;min-he
 .kw-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
 .kw-badges{display:flex;flex-wrap:wrap;gap:8px;}
 .kw-badge{padding:7px 14px;border-radius:999px;border:1.5px solid #FCD34D;background:#fff;color:#78350F;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:all 0.12s;}
-.kw-badge:hover{background:#FEF3C7;}
 .kw-badge:active{transform:scale(0.95);}
-.kw-refresh{padding:5px 10px;border-radius:999px;border:1px solid #FDE68A;background:#fff;color:#92400E;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;transition:all 0.12s;}
-.kw-refresh:active{transform:scale(0.95);}
+.kw-refresh{padding:5px 10px;border-radius:999px;border:1px solid #FDE68A;background:#fff;color:#92400E;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;}
+
+/* 리뷰 유형 */
+.type-btn{display:flex;flex-direction:column;align-items:center;padding:16px 8px;border-radius:16px;border:1.5px solid #EBEBEB;background:#F8F9FA;gap:6px;transition:all 0.12s;width:100%;}
+.type-btn.on{border-color:#F97316;background:#FFF7ED;}
+.type-btn.on .type-label{color:#C2410C;}
+.type-label{font-size:12px;font-weight:700;color:#9CA3AF;}
 
 /* 별점 */
 .star-btn{flex:1;height:50px;border-radius:14px;border:1.5px solid #EBEBEB;background:#F8F8F8;font-size:22px;display:flex;align-items:center;justify-content:center;transition:all 0.12s;}
@@ -67,8 +87,10 @@ body{font-family:"Pretendard",-apple-system,sans-serif;background:#F8F9FA;min-he
 .star-btn:active{transform:scale(0.88);}
 @keyframes starPop{0%{transform:scale(1)}40%{transform:scale(1.4)}70%{transform:scale(0.88)}100%{transform:scale(1)}}
 .star-pop{animation:starPop 0.3s ease;}
+.star-none-btn{width:100%;padding:10px;border-radius:14px;border:1.5px solid #EBEBEB;background:#F8F9FA;font-size:12px;font-weight:700;color:#9CA3AF;margin-bottom:8px;cursor:pointer;font-family:inherit;transition:all 0.12s;}
+.star-none-btn.on{border-color:#F97316;background:#FFF7ED;color:#C2410C;}
 
-/* 토글 버튼 */
+/* 토글 */
 .toggle-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
 .toggle-grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
 .toggle-btn{padding:13px 4px;border-radius:14px;border:1.5px solid #EBEBEB;background:#F8F8F8;font-size:12px;font-weight:600;color:#999;text-align:center;transition:all 0.12s;}
@@ -76,17 +98,9 @@ body{font-family:"Pretendard",-apple-system,sans-serif;background:#F8F9FA;min-he
 .toggle-btn.on-coral{border-color:#F97316;background:#FFF7ED;color:#C2410C;font-weight:700;}
 .toggle-btn.on-mint{border-color:#14B8A6;background:#F0FDFA;color:#0F766E;font-weight:700;}
 
-/* 리뷰 유형 버튼 */
-.type-btn{display:flex;flex-direction:column;align-items:center;padding:16px 8px;border-radius:16px;border:1.5px solid #EBEBEB;background:#F8F9FA;gap:6px;transition:all 0.12s;width:100%;}
-.type-btn.on{border-color:#F97316;background:#FFF7ED;}
-.type-btn.on span.type-label{color:#C2410C;}
-.type-btn span.type-label{font-size:12px;font-weight:700;color:#9CA3AF;}
-
-/* 텍스트 영역 */
+/* 입력 */
 .txt-area{width:100%;background:#F8F9FA;border:1.5px solid #EBEBEB;border-radius:14px;padding:14px;font-size:14px;color:#333;line-height:1.7;resize:none;font-family:inherit;outline:none;transition:border-color 0.15s;}
 .txt-area:focus{border-color:#F97316;}
-
-/* 업로드 */
 .upload-zone{border:2px dashed #D1D5DB;border-radius:16px;padding:32px 16px;text-align:center;cursor:pointer;transition:all 0.15s;}
 .upload-zone:active{border-color:#14B8A6;background:#F0FDFA;}
 
@@ -95,9 +109,8 @@ body{font-family:"Pretendard",-apple-system,sans-serif;background:#F8F9FA;min-he
 .gen-btn:active{transform:scale(0.98);}
 .gen-btn:disabled{opacity:0.5;cursor:not-allowed;}
 .cancel-btn{width:100%;padding:12px;border-radius:16px;border:1.5px solid #E5E7EB;background:#fff;font-size:13px;font-weight:700;color:#9CA3AF;cursor:pointer;font-family:inherit;display:none;margin-bottom:8px;transition:all 0.12s;}
-.cancel-btn:active{transform:scale(0.98);}
 
-/* 도트 로딩 */
+/* 도트 */
 .dot{width:8px;height:8px;border-radius:50%;background:#fff;display:inline-block;}
 @keyframes dotB{0%,80%,100%{transform:scale(0.6);opacity:.4}40%{transform:scale(1);opacity:1}}
 .dot:nth-child(1){animation:dotB 1s ease-in-out infinite;}
@@ -109,18 +122,19 @@ body{font-family:"Pretendard",-apple-system,sans-serif;background:#F8F9FA;min-he
 .copy-btn{flex:1;padding:13px;border-radius:14px;border:none;background:#14B8A6;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:all 0.12s;}
 .copy-btn:active{transform:scale(0.95);}
 .retry-btn{flex:1;padding:13px;border-radius:14px;border:1.5px solid #EBEBEB;background:#F8F9FA;font-size:14px;font-weight:700;color:#555;cursor:pointer;font-family:inherit;transition:all 0.12s;}
-.retry-btn:active{transform:scale(0.95);}
 .fav-btn{width:100%;padding:11px;border-radius:14px;border:1.5px solid #FDE68A;background:#FFFBEA;font-size:12px;font-weight:700;color:#78350F;cursor:pointer;font-family:inherit;margin-top:8px;transition:all 0.12s;}
-.fav-btn:active{transform:scale(0.98);}
+.char-bar{height:3px;border-radius:2px;background:#E5E7EB;margin-top:6px;margin-bottom:8px;overflow:hidden;}
+.char-bar-fill{height:100%;border-radius:2px;background:#14B8A6;transition:width 0.2s,background 0.2s;}
+.char-bar-fill.warn{background:#F97316;}
+.char-bar-fill.over{background:#EF4444;}
 
 /* 에러 */
 .err-box{background:#FFF1F2;border:1px solid #FECDD3;border-radius:14px;padding:12px;font-size:13px;color:#BE123C;margin-bottom:10px;}
 
 /* 즐겨찾기/히스토리 */
 .fav-item{background:#FFFBEA;border:1px solid #FDE68A;border-radius:14px;padding:12px;position:relative;margin-bottom:8px;}
-.fav-item p{font-size:13px;color:#333;line-height:1.6;padding-right:76px;}
 .hist-item{background:#F8F9FA;border:1px solid #EBEBEB;border-radius:14px;padding:12px;position:relative;margin-bottom:8px;}
-.hist-item p{font-size:13px;color:#333;line-height:1.6;padding-right:80px;}
+.fav-item p,.hist-item p{font-size:13px;color:#333;line-height:1.6;padding-right:76px;}
 .tag{font-size:10px;padding:2px 8px;border-radius:999px;font-weight:700;}
 .tag-orange{background:#FFF7ED;color:#C2410C;}
 .tag-gray{background:#F3F4F6;color:#6B7280;}
@@ -129,21 +143,9 @@ body{font-family:"Pretendard",-apple-system,sans-serif;background:#F8F9FA;min-he
 .item-copy-btn{padding:5px 10px;border-radius:8px;border:none;background:#14B8A6;color:#fff;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;}
 .item-del-btn{padding:5px 10px;border-radius:8px;border:none;background:#FEE2E2;color:#DC2626;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;}
 
-/* 별점 없음 버튼 */
-.star-none-btn{width:100%;padding:10px;border-radius:14px;border:1.5px solid #EBEBEB;background:#F8F9FA;font-size:12px;font-weight:700;color:#9CA3AF;transition:all 0.12s;margin-bottom:8px;cursor:pointer;font-family:inherit;}
-.star-none-btn.on{border-color:#F97316;background:#FFF7ED;color:#C2410C;}
-
-/* 글자수 제한 바 */
-.char-bar{height:3px;border-radius:2px;background:#E5E7EB;margin-top:6px;margin-bottom:8px;overflow:hidden;}
-.char-bar-fill{height:100%;border-radius:2px;background:#14B8A6;transition:width 0.2s,background 0.2s;}
-.char-bar-fill.warn{background:#F97316;}
-.char-bar-fill.over{background:#EF4444;}
-
 /* 쿠팡 모달 */
 #coupon-modal{display:none;position:fixed;inset:0;z-index:50;background:rgba(0,0,0,0.5);align-items:center;justify-content:center;padding:20px;}
 #coupon-modal.show{display:flex;}
-
-@keyframes bounce2{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
 
 /* 토스트 */
 .toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#111;color:#fff;padding:10px 20px;border-radius:999px;font-size:13px;font-weight:700;z-index:100;opacity:0;transition:opacity 0.2s;pointer-events:none;white-space:nowrap;}
@@ -151,9 +153,9 @@ body{font-family:"Pretendard",-apple-system,sans-serif;background:#F8F9FA;min-he
 </style>
 </head>
 <body>
-
-<!-- 앱 -->
 <div id="app">
+
+  <!-- 헤더 -->
   <div style="background:#fff;border-bottom:1px solid #F0F0F0;position:sticky;top:0;z-index:10;">
     <div style="max-width:480px;margin:0 auto;padding:14px 20px;display:flex;align-items:center;gap:12px;">
       <span style="font-size:24px;">🍽️</span>
@@ -165,15 +167,118 @@ body{font-family:"Pretendard",-apple-system,sans-serif;background:#F8F9FA;min-he
     </div>
   </div>
 
-  <div style="max-width:480px;margin:0 auto;padding:16px;">
+  <div style="max-width:480px;margin:0 auto;padding:14px 16px;">
 
-    <!-- 입력 방식 -->
+    <!-- ① 기본 세팅 (아코디언) -->
+    <div class="accordion-card">
+      <div class="accordion-head" onclick="toggleAccordion()">
+        <div class="accordion-left">
+          <span class="sec-num">1</span>
+          <div class="accordion-texts">
+            <div style="display:flex;align-items:center;">
+              <span class="accordion-title">기본 세팅</span>
+              <span id="saved-badge" class="saved-badge" style="display:none;">✓ 저장됨</span>
+            </div>
+            <div id="sec1-sub" class="accordion-sub">업종과 가게 특징을 설정하세요</div>
+          </div>
+        </div>
+        <span class="accordion-arrow open" id="acc-arrow">▼</span>
+      </div>
+
+      <div id="acc-body" class="accordion-body">
+
+        <!-- 업종 선택 -->
+        <div class="sec-label">업종 선택</div>
+        <div class="cat-grid">
+          <button data-major="식사/요리" onclick="selectMajor(this)" class="btn cat-chip">
+            <div class="cat-icon-wrap">🍽️</div><span>식사/요리</span>
+          </button>
+          <button data-major="배달인기" onclick="selectMajor(this)" class="btn cat-chip">
+            <div class="cat-icon-wrap">🛵</div><span>배달 인기</span>
+          </button>
+          <button data-major="카페/간식" onclick="selectMajor(this)" class="btn cat-chip">
+            <div class="cat-icon-wrap">☕</div><span>카페/간식</span>
+          </button>
+          <button data-major="주류/펍" onclick="selectMajor(this)" class="btn cat-chip">
+            <div class="cat-icon-wrap">🍺</div><span>주류/펍</span>
+          </button>
+          <button data-major="서비스/여가" onclick="selectMajor(this)" class="btn cat-chip">
+            <div class="cat-icon-wrap">✨</div><span>서비스/여가</span>
+          </button>
+          <button data-major="기타" onclick="selectMajor(this)" class="btn cat-chip">
+            <div class="cat-icon-wrap">🏪</div><span>기타</span>
+          </button>
+        </div>
+
+        <div id="sub-wrap" style="display:none;">
+          <div class="sub-pointer-wrap">
+            <div id="sub-pointer" class="sub-pointer" style="left:40px;"></div>
+          </div>
+          <div class="sub-group-box">
+            <div id="sub-group-label" class="sub-group-label">📂 세부 업종 선택</div>
+            <p id="recent-lbl" class="recent-label">⭐ 최근 선택</p>
+            <div id="sub-grid" class="sub-grid"></div>
+            <div id="kw-box" class="kw-box">
+              <div class="kw-header">
+                <div style="display:flex;align-items:center;gap:6px;">
+                  <span style="font-size:16px;">💡</span>
+                  <p style="font-size:11px;color:#92400E;font-weight:700;">AI 추천 키워드</p>
+                </div>
+                <button onclick="refreshKw()" class="btn kw-refresh">🔄 새로고침</button>
+              </div>
+              <div id="kw-badges" class="kw-badges"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sec-divider"></div>
+
+        <!-- 우리 가게 특징 -->
+        <div class="sec-label">우리 가게 특징 <span style="font-weight:400;color:#D1D5DB;text-transform:none;font-size:10px;">(자동저장)</span></div>
+        <textarea id="owner-msg" rows="2" placeholder="예) 국내산 재료만 사용, 20년 전통, 직접 만든 소스..." class="txt-area" oninput="saveOwnerMsg()"></textarea>
+
+      </div>
+    </div>
+
+    <!-- ② 상황 정의 -->
     <div class="card">
-      <div class="sec-label">입력 방식</div>
+      <div class="sec-header"><span class="sec-num">2</span>상황 정의</div>
+
+      <div class="sec-label">리뷰 유형</div>
+      <div class="toggle-grid-2" style="margin-bottom:16px;">
+        <button id="type-delivery" onclick="selectType('delivery')" class="btn type-btn on">
+          <span style="font-size:24px;">🛵</span>
+          <span class="type-label" style="color:#C2410C;">배달 리뷰</span>
+        </button>
+        <button id="type-visit" onclick="selectType('visit')" class="btn type-btn">
+          <span style="font-size:24px;">🚶</span>
+          <span class="type-label">방문자 리뷰</span>
+        </button>
+      </div>
+
+      <div class="sec-divider"></div>
+
+      <div class="sec-label">별점</div>
+      <button id="star-none-btn" class="star-none-btn" onclick="selectStarNone()" style="display:none;">⭕ 별점 없음</button>
+      <div id="star-select" style="display:flex;gap:8px;">
+        <button class="star-btn btn" data-v="1">⭐</button>
+        <button class="star-btn btn" data-v="2">⭐</button>
+        <button class="star-btn btn" data-v="3">⭐</button>
+        <button class="star-btn btn" data-v="4">⭐</button>
+        <button class="star-btn btn on" data-v="5">⭐</button>
+      </div>
+      <p id="star-lbl" style="text-align:center;font-size:12px;color:#9CA3AF;margin-top:8px;">⭐⭐⭐⭐⭐ 5점</p>
+    </div>
+
+    <!-- ③ 핵심 입력 -->
+    <div class="card">
+      <div class="sec-header"><span class="sec-num">3</span>리뷰 입력</div>
+
       <div class="toggle-grid-2" style="margin-bottom:14px;">
         <button id="mode-text" onclick="selectMode('text')" class="btn toggle-btn on-coral">✏️ 텍스트 입력</button>
         <button id="mode-image" onclick="selectMode('image')" class="btn toggle-btn">📷 스크린샷</button>
       </div>
+
       <div id="text-area">
         <textarea id="review" rows="5" placeholder="리뷰를 복사해서 붙여넣으세요..." class="txt-area"></textarea>
       </div>
@@ -188,106 +293,25 @@ body{font-family:"Pretendard",-apple-system,sans-serif;background:#F8F9FA;min-he
       </div>
     </div>
 
-    <!-- 리뷰 유형 -->
+    <!-- ④ 세부 옵션 -->
     <div class="card">
-      <div class="sec-label">리뷰 유형</div>
-      <div class="toggle-grid-2">
-        <button id="type-delivery" data-type="delivery" onclick="selectType('delivery')" class="btn type-btn on">
-          <span style="font-size:24px;">🛵</span>
-          <span class="type-label" style="color:#C2410C;">배달 리뷰</span>
-        </button>
-        <button id="type-visit" data-type="visit" onclick="selectType('visit')" class="btn type-btn">
-          <span style="font-size:24px;">🚶</span>
-          <span class="type-label">방문자 리뷰</span>
-        </button>
-      </div>
-    </div>
+      <div class="sec-header"><span class="sec-num">4</span>세부 옵션</div>
 
-    <!-- 업종 선택 -->
-    <div class="card">
-      <div class="sec-label">업종 선택</div>
-      <div class="cat-grid">
-        <button data-major="식사/요리" onclick="selectMajor(this)" class="btn cat-chip">
-          <div class="cat-icon-wrap">🍽️</div><span>식사/요리</span>
-        </button>
-        <button data-major="배달인기" onclick="selectMajor(this)" class="btn cat-chip">
-          <div class="cat-icon-wrap">🛵</div><span>배달 인기</span>
-        </button>
-        <button data-major="카페/간식" onclick="selectMajor(this)" class="btn cat-chip">
-          <div class="cat-icon-wrap">☕</div><span>카페/간식</span>
-        </button>
-        <button data-major="주류/펍" onclick="selectMajor(this)" class="btn cat-chip">
-          <div class="cat-icon-wrap">🍺</div><span>주류/펍</span>
-        </button>
-        <button data-major="서비스/여가" onclick="selectMajor(this)" class="btn cat-chip">
-          <div class="cat-icon-wrap">✨</div><span>서비스/여가</span>
-        </button>
-        <button data-major="기타" onclick="selectMajor(this)" class="btn cat-chip">
-          <div class="cat-icon-wrap">🏪</div><span>기타</span>
-        </button>
-      </div>
-      <!-- 포인터 + 소분류 그룹 -->
-      <div id="sub-wrap" style="display:none;">
-        <div class="sub-pointer-wrap">
-          <div id="sub-pointer" class="sub-pointer" style="left:40px;"></div>
-        </div>
-        <div class="sub-group-box">
-          <div id="sub-group-label" class="sub-group-label">📂 세부 업종 선택</div>
-          <p id="recent-lbl" class="recent-label">⭐ 최근 선택</p>
-          <div id="sub-grid" class="sub-grid"></div>
-          <div id="kw-box" class="kw-box">
-            <div class="kw-header">
-              <div style="display:flex;align-items:center;gap:6px;">
-                <span style="font-size:16px;">💡</span>
-                <p style="font-size:11px;color:#92400E;font-weight:700;">AI 추천 키워드</p>
-              </div>
-              <button onclick="refreshKw()" class="btn kw-refresh">🔄 새로고침</button>
-            </div>
-            <div id="kw-badges" class="kw-badges"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 별점 -->
-    <div class="card" id="star-card">
-      <div class="sec-label">별점</div>
-      <button id="star-none-btn" class="star-none-btn" onclick="selectStarNone()" style="display:none;">⭕ 별점 없음</button>
-      <div id="star-select" style="display:flex;gap:8px;">
-        <button class="star-btn btn" data-v="1">⭐</button>
-        <button class="star-btn btn" data-v="2">⭐</button>
-        <button class="star-btn btn" data-v="3">⭐</button>
-        <button class="star-btn btn" data-v="4">⭐</button>
-        <button class="star-btn btn on" data-v="5">⭐</button>
-      </div>
-      <p id="star-lbl" style="text-align:center;font-size:12px;color:#9CA3AF;margin-top:8px;">⭐⭐⭐⭐⭐ 5점</p>
-    </div>
-
-    <!-- 가게 특징 -->
-    <div class="card">
-      <div class="sec-label">우리 가게 특징 <span style="font-weight:400;color:#D1D5DB;text-transform:none;font-size:10px;">(선택)</span></div>
-      <textarea id="owner-msg" rows="2" placeholder="예) 국내산 재료만 사용, 20년 전통, 직접 만든 소스..." class="txt-area"></textarea>
-    </div>
-
-    <!-- 키워드 -->
-    <div class="card">
       <div class="sec-label">넣고 싶은 키워드 <span style="font-weight:400;color:#D1D5DB;text-transform:none;font-size:10px;">(선택)</span></div>
-      <textarea id="keyword-msg" rows="2" placeholder="예) 재방문 감사, 포장 무료, 리뷰 이벤트 진행중..." class="txt-area"></textarea>
-    </div>
+      <textarea id="keyword-msg" rows="2" placeholder="예) 재방문 감사, 포장 무료, 리뷰 이벤트 진행중..." class="txt-area" style="margin-bottom:16px;"></textarea>
 
-    <!-- 답글 톤 -->
-    <div class="card">
+      <div class="sec-divider"></div>
+
       <div class="sec-label">답글 톤</div>
-      <div class="toggle-grid-2">
+      <div class="toggle-grid-2" style="margin-bottom:16px;">
         <button id="tone-친절" onclick="selectTone('친절')" class="btn toggle-btn on-coral">😊 친절/다정</button>
         <button id="tone-전문" onclick="selectTone('전문')" class="btn toggle-btn">🎩 전문적/진중</button>
         <button id="tone-유머" onclick="selectTone('유머')" class="btn toggle-btn">😄 유머러스/친근</button>
         <button id="tone-사과" onclick="selectTone('사과')" class="btn toggle-btn">🙏 사과/반성</button>
       </div>
-    </div>
 
-    <!-- 답글 길이 -->
-    <div class="card">
+      <div class="sec-divider"></div>
+
       <div class="sec-label">답글 길이</div>
       <div class="toggle-grid-3">
         <button id="len-short" onclick="selectLength('short')" class="btn toggle-btn">✂️ 짧게<br><span style="font-size:10px;font-weight:400;color:#9CA3AF;">2문장</span></button>
@@ -296,6 +320,7 @@ body{font-family:"Pretendard",-apple-system,sans-serif;background:#F8F9FA;min-he
       </div>
     </div>
 
+    <!-- ⑤ 실행 -->
     <button id="gen-btn" class="gen-btn" onclick="generate()">✨ AI 답글 생성</button>
     <button id="cancel-btn" class="cancel-btn btn" onclick="cancelGenerate()">✕ 생성 취소</button>
     <div id="err"></div>
@@ -349,612 +374,393 @@ body{font-family:"Pretendard",-apple-system,sans-serif;background:#F8F9FA;min-he
 
   </div>
 </div>
-
-<!-- 토스트 -->
 <div id="toast" class="toast"></div>
 
 <script>
-// ── 상태 변수 ──────────────────────────────────────────────
-let star = 5, starNone = false;
-let reviewType = "delivery";
-let category = "선택안함";
-let tone = "친절";
-let length = "medium";
-let mode = "text";
-let imgB64 = "", imgType = "";
-let pendingGenerate = false;
-let currentMajor = "";
+// ── 상태 ──────────────────────────────────────────────────────
+let star=5, starNone=false, reviewType="delivery", category="선택안함";
+let tone="친절", length="medium", mode="text";
+let imgB64="", imgType="", isCancelled=false, pendingGenerate=false, currentMajor="";
+let hist=[], favs=[], ownerTimer=null, accOpen=true;
 
-let hist = [];
-let favs = [];
-
-// ── 초기화 ──────────────────────────────────────────────────
+// ── 초기화 ────────────────────────────────────────────────────
 window.onload = () => {
-  try { hist = JSON.parse(localStorage.getItem("rh") || "[]"); } catch(e) { hist = []; }
-  try { favs = JSON.parse(localStorage.getItem("favs") || "[]"); } catch(e) { favs = []; }
-  getGenCount();
+  try{ hist=JSON.parse(localStorage.getItem("rh")||"[]"); }catch(e){ hist=[]; }
+  try{ favs=JSON.parse(localStorage.getItem("favs")||"[]"); }catch(e){ favs=[]; }
+  restoreSettings();
   updateStars();
   renderHist();
   renderFav();
   updateGenCountDisplay();
 };
 
-// ── 생성 횟수 관리 ──────────────────────────────────────────
-function getGenCount() {
-  const lr = parseInt(localStorage.getItem("genResetTime") || "0");
-  if (Date.now() - lr > 12 * 60 * 60 * 1000) {
-    localStorage.setItem("genCount", "0");
-    localStorage.setItem("genResetTime", Date.now().toString());
-    sessionStorage.removeItem("couponShown");
+// ── 저장/복원 ─────────────────────────────────────────────────
+function restoreSettings() {
+  // 가게 특징
+  const owner = localStorage.getItem("ownerMsg") || "";
+  if (owner) { document.getElementById("owner-msg").value = owner; }
+
+  // 업종
+  const savedMajor = localStorage.getItem("savedMajor") || "";
+  const savedCat   = localStorage.getItem("savedCategory") || "";
+  if (savedMajor) {
+    const btn = document.querySelector(`.cat-chip[data-major="${savedMajor}"]`);
+    if (btn) selectMajor(btn, savedCat);
   }
-  return parseInt(localStorage.getItem("genCount") || "0");
+
+  // 저장된 내용 있으면 요약 업데이트 + 접기
+  updateSec1(savedCat, owner);
+  if (savedCat || owner.trim()) {
+    setTimeout(() => setAccordion(false), 80);
+  }
 }
 
+function saveOwnerMsg() {
+  clearTimeout(ownerTimer);
+  ownerTimer = setTimeout(() => {
+    const v = document.getElementById("owner-msg").value;
+    localStorage.setItem("ownerMsg", v);
+    updateSec1(category, v);
+  }, 600);
+}
+
+function updateSec1(cat, owner) {
+  const parts = [];
+  if (cat && cat !== "선택안함") parts.push(cat);
+  if (owner && owner.trim()) parts.push("가게 특징 입력됨");
+  document.getElementById("sec1-sub").textContent = parts.length ? parts.join(" · ") : "업종과 가게 특징을 설정하세요";
+  document.getElementById("saved-badge").style.display = parts.length ? "inline-flex" : "none";
+}
+
+// ── 아코디언 ──────────────────────────────────────────────────
+function toggleAccordion() { setAccordion(!accOpen); }
+
+function setAccordion(open) {
+  accOpen = open;
+  const body  = document.getElementById("acc-body");
+  const arrow = document.getElementById("acc-arrow");
+  if (open) {
+    body.classList.remove("closed");
+    arrow.classList.add("open");
+  } else {
+    body.classList.add("closed");
+    arrow.classList.remove("open");
+  }
+}
+
+// ── 생성 횟수 ─────────────────────────────────────────────────
+function getGenCount() {
+  const lr = parseInt(localStorage.getItem("genResetTime")||"0");
+  if (Date.now()-lr > 12*60*60*1000) {
+    localStorage.setItem("genCount","0");
+    localStorage.setItem("genResetTime",Date.now().toString());
+    sessionStorage.removeItem("couponShown");
+  }
+  return parseInt(localStorage.getItem("genCount")||"0");
+}
 function updateGenCountDisplay() {
   const c = getGenCount();
   const el = document.getElementById("gen-count-display");
-  if (el) el.textContent = c > 0 ? `생성 ${c}회` : "";
+  if (el) el.textContent = c>0 ? `생성 ${c}회` : "";
 }
 
-// ── 입력 방식 ────────────────────────────────────────────────
+// ── 입력 방식 ─────────────────────────────────────────────────
 function selectMode(m) {
   mode = m;
-  document.getElementById("mode-text").className = "btn toggle-btn" + (m === "text" ? " on-coral" : "");
-  document.getElementById("mode-image").className = "btn toggle-btn" + (m === "image" ? " on-coral" : "");
-  document.getElementById("text-area").style.display = m === "text" ? "block" : "none";
-  document.getElementById("image-area").style.display = m === "image" ? "block" : "none";
+  document.getElementById("mode-text").className = "btn toggle-btn"+(m==="text"?" on-coral":"");
+  document.getElementById("mode-image").className = "btn toggle-btn"+(m==="image"?" on-coral":"");
+  document.getElementById("text-area").style.display = m==="text"?"block":"none";
+  document.getElementById("image-area").style.display = m==="image"?"block":"none";
 }
 
-// ── 리뷰 유형 ────────────────────────────────────────────────
+// ── 리뷰 유형 ─────────────────────────────────────────────────
 function selectType(t) {
   reviewType = t;
-  ["delivery", "visit"].forEach(id => {
-    const btn = document.getElementById("type-" + id);
+  ["delivery","visit"].forEach(id => {
+    const btn = document.getElementById("type-"+id);
     const lbl = btn.querySelector(".type-label");
-    if (id === t) {
-      btn.classList.add("on");
-      lbl.style.color = "#C2410C";
-    } else {
-      btn.classList.remove("on");
-      lbl.style.color = "#9CA3AF";
-    }
+    if (id===t){ btn.classList.add("on"); lbl.style.color="#C2410C"; }
+    else { btn.classList.remove("on"); lbl.style.color="#9CA3AF"; }
   });
-  // 방문자 리뷰일 때만 별점 없음 표시
-  const noneBtn = document.getElementById("star-none-btn");
-  if (t === "visit") {
-    noneBtn.style.display = "block";
+  const nb = document.getElementById("star-none-btn");
+  if (t==="visit") {
+    nb.style.display="block";
   } else {
-    noneBtn.style.display = "none";
-    starNone = false;
-    noneBtn.classList.remove("on");
-    document.getElementById("star-select").style.display = "flex";
-    updateStars();
+    nb.style.display="none"; starNone=false; nb.classList.remove("on");
+    document.getElementById("star-select").style.display="flex"; updateStars();
   }
 }
 
-// ── 별점 없음 ────────────────────────────────────────────────
+// ── 별점 없음 ─────────────────────────────────────────────────
 function selectStarNone() {
   starNone = !starNone;
-  const btn = document.getElementById("star-none-btn");
-  const sel = document.getElementById("star-select");
-  if (starNone) {
-    btn.classList.add("on");
-    sel.style.display = "none";
-    document.getElementById("star-lbl").textContent = "별점 없음";
-  } else {
-    btn.classList.remove("on");
-    sel.style.display = "flex";
-    document.getElementById("star-lbl").textContent = starTxt[star];
-  }
+  const btn=document.getElementById("star-none-btn");
+  const sel=document.getElementById("star-select");
+  if (starNone){ btn.classList.add("on"); sel.style.display="none"; document.getElementById("star-lbl").textContent="별점 없음"; }
+  else { btn.classList.remove("on"); sel.style.display="flex"; document.getElementById("star-lbl").textContent=starTxt[star]; }
 }
 
-// ── 별점 ────────────────────────────────────────────────────
-const starTxt = {1:"⭐ 1점",2:"⭐⭐ 2점",3:"⭐⭐⭐ 3점",4:"⭐⭐⭐⭐ 4점",5:"⭐⭐⭐⭐⭐ 5점"};
-
+// ── 별점 ──────────────────────────────────────────────────────
+const starTxt={1:"⭐ 1점",2:"⭐⭐ 2점",3:"⭐⭐⭐ 3점",4:"⭐⭐⭐⭐ 4점",5:"⭐⭐⭐⭐⭐ 5점"};
 function updateStars() {
-  document.querySelectorAll(".star-btn").forEach(b => {
-    const v = parseInt(b.dataset.v);
-    if (v <= star) b.classList.add("on");
-    else b.classList.remove("on");
-  });
-  document.getElementById("star-lbl").textContent = starTxt[star];
+  document.querySelectorAll(".star-btn").forEach(b => parseInt(b.dataset.v)<=star?b.classList.add("on"):b.classList.remove("on"));
+  document.getElementById("star-lbl").textContent=starTxt[star];
 }
-
 document.querySelectorAll(".star-btn").forEach(btn => {
-  btn.addEventListener("click", () => {
-    star = parseInt(btn.dataset.v);
-    starNone = false;
+  btn.addEventListener("click",()=>{
+    star=parseInt(btn.dataset.v); starNone=false;
     document.getElementById("star-none-btn").classList.remove("on");
-    document.getElementById("star-select").style.display = "flex";
+    document.getElementById("star-select").style.display="flex";
     updateStars();
-    // 팝 애니메이션
-    document.querySelectorAll(".star-btn").forEach((b, i) => {
-      if (parseInt(b.dataset.v) <= star) {
-        setTimeout(() => {
-          b.classList.add("star-pop");
-          setTimeout(() => b.classList.remove("star-pop"), 350);
-        }, i * 50);
-      }
+    document.querySelectorAll(".star-btn").forEach((b,i)=>{
+      if(parseInt(b.dataset.v)<=star) setTimeout(()=>{ b.classList.add("star-pop"); setTimeout(()=>b.classList.remove("star-pop"),350); },i*50);
     });
   });
 });
 
-// ── 톤 ──────────────────────────────────────────────────────
+// ── 톤 / 길이 ─────────────────────────────────────────────────
 function selectTone(t) {
-  tone = t;
-  ["친절","전문","유머","사과"].forEach(id => {
-    const btn = document.getElementById("tone-" + id);
-    if (!btn) return;
-    btn.className = "btn toggle-btn" + (id === t ? " on-coral" : "");
-  });
+  tone=t;
+  ["친절","전문","유머","사과"].forEach(id=>{ const b=document.getElementById("tone-"+id); if(b) b.className="btn toggle-btn"+(id===t?" on-coral":""); });
 }
-
-// ── 길이 ────────────────────────────────────────────────────
 function selectLength(l) {
-  length = l;
-  ["short","medium","long"].forEach(id => {
-    const btn = document.getElementById("len-" + id);
-    if (!btn) return;
-    btn.className = "btn toggle-btn" + (id === l ? " on-mint" : "");
-  });
+  length=l;
+  ["short","medium","long"].forEach(id=>{ const b=document.getElementById("len-"+id); if(b) b.className="btn toggle-btn"+(id===l?" on-mint":""); });
 }
 
-// ── 키워드 풀 ────────────────────────────────────────────────
-const keywordPool = {
-  "한식":["정갈한 손맛","국내산 재료","엄마의 손맛","매일 직접 끓이는 육수","정성 가득한 한 상","전통 레시피","신선한 제철 재료","건강한 집밥 같은 맛","깊고 진한 국물","화학조미료 무첨가","당일 손질 재료","깔끔한 뒷맛","정직한 재료","든든한 한 끼","오래된 단골 맛집","재래시장 직거래 재료","저염 건강식","푸짐한 양","계절 별미"],
+// ── 키워드 풀 ─────────────────────────────────────────────────
+const keywordPool={
+  "한식":["정갈한 손맛","국내산 재료","엄마의 손맛","매일 직접 끓이는 육수","정성 가득한 한 상","전통 레시피","신선한 제철 재료","건강한 집밥 같은 맛","깊고 진한 국물","화학조미료 무첨가","당일 손질 재료","깔끔한 뒷맛","정직한 재료","든든한 한 끼","오래된 단골 맛집","저염 건강식","푸짐한 양","계절 별미"],
   "중식":["불 조절의 비법","신선한 해산물","직접 만든 탕수육 소스","중화풍 깊은 감칠맛","매일 새벽 반죽","고온 웍 조리","진한 육수 베이스","바삭한 튀김","정통 중화 레시피","쫄깃한 면발","알싸한 마라 향","신선 채소 듬뿍","넉넉한 포션","빠른 배달"],
   "일식/회":["당일 직송 활어","제철 회 코스","신선도 최우선","장인의 칼질","국내산 싱싱한 횟감","산지 직배송","오늘 들어온 생선","깔끔한 간장 소스","숙성 회","참치 전문","계절 특선","청결한 위생"],
   "양식/레스토랑":["셰프 출신 사장님","매일 직접 굽는 빵","파스타 면 직접 제조","스테이크 드라이에이징","계절 코스 요리","와인 페어링","로컬 제철 채소","수제 소스","분위기 있는 공간","특별한 날 추천","데이트 코스","레스토랑 수준의 퀄리티"],
-  "고기/구이":["당일 도축 신선육","한우 1등급","두툼한 두께","참숯 직화","자체 숙성","마블링 가득","가성비 고기집","무한리필","특수 부위 전문","국내산 돼지","쌈 채소 무제한","된장찌개 서비스","잡내 없는 육질"],
+  "고기/구이":["당일 도축 신선육","한우 1등급","두툼한 두께","참숯 직화","자체 숙성","마블링 가득","가성비 고기집","무한리필","특수 부위 전문","국내산 돼지","쌈 채소 무제한","잡내 없는 육질"],
   "치킨":["바삭한 튀김옷","국내산 닭","당일 제조 양념","촉촉한 속살","황금빛 컬러","순살 전문","반반 가능","배달 특화 포장","매콤달콤한 소스","파닭 전문","오리지널 레시피","치킨무 듬뿍"],
-  "피자":["당일 반죽","도우 직접 제조","100% 모짜렐라","풍성한 토핑","얇고 바삭한 씬","두툼한 팬피자","수제 토마토 소스","화덕 피자","가성비 라지 사이즈","반반 주문 가능","빠른 배달","프리미엄 토핑"],
-  "족발/보쌈":["국내산 돼지","당일 직접 삶는","부드러운 육질","비법 양념","두툼한 슬라이스","쫄깃한 껍데기","보쌈 김치 직접 담금","앞다리 전문","매운 족발","콜라겐 가득","깔끔한 뒷처리"],
-  "분식":["추억의 맛","직접 뽑은 쫄면","국물 떡볶이 비법","쫄깃한 순대","당일 제조","분식 세트 가성비","치즈 토핑","매운맛 조절 가능","고기 순대","오징어 튀김","야채 듬뿍","옛날 감성"],
-  "패스트푸드":["빠른 조리","바삭한 패티","신선한 채소","소스 직접 제조","세트 구성 알참","배달 최적화 포장","가성비 세트","어린이 메뉴","늦은 시간도 운영","단체 주문 환영"],
+  "피자":["당일 반죽","도우 직접 제조","100% 모짜렐라","풍성한 토핑","얇고 바삭한 씬","두툼한 팬피자","수제 토마토 소스","화덕 피자","가성비 라지 사이즈","반반 주문 가능","프리미엄 토핑"],
+  "족발/보쌈":["국내산 돼지","당일 직접 삶는","부드러운 육질","비법 양념","쫄깃한 껍데기","보쌈 김치 직접 담금","앞다리 전문","매운 족발","콜라겐 가득"],
+  "분식":["추억의 맛","국물 떡볶이 비법","쫄깃한 순대","당일 제조","분식 세트 가성비","치즈 토핑","매운맛 조절 가능","고기 순대","오징어 튀김","야채 듬뿍"],
+  "패스트푸드":["빠른 조리","바삭한 패티","신선한 채소","소스 직접 제조","세트 구성 알참","배달 최적화 포장","가성비 세트","어린이 메뉴","단체 주문 환영"],
   "카페/베이커리":["스페셜티 원두","당일 직접 로스팅","매일 아침 직접 구움","천연 발효 빵","시즌 라떼","디카페인 가능","대체유 선택","수제 잼","홈메이드 케이크","포근한 인테리어","작업하기 좋은","콘센트 완비"],
-  "디저트":["수제 케이크","당일 제조","천연 재료","비건 옵션","알레르기 표시","맞춤 주문 케이크","시즌 한정","부드러운 식감","달지 않은 디저트","포장 예쁜","선물 포장 가능"],
-  "아이스크림":["직접 만든 젤라또","천연 과일","당일 제조","유기농 우유","부드러운 질감","시즌 한정 맛","커스텀 토핑","비건 아이스크림","저당 옵션","인스타 감성"],
-  "호프/맥주":["수제맥주 전문","생맥주 항상 신선","안주 직접 제조","치맥 성지","다양한 수입맥주","혼술 가능","드래프트 8종","소맥 황금비율","안주 무한리필"],
-  "이자카야/포차":["일본 감성 분위기","사케 직수입","오마카세 안주","야끼토리 직화","하이볼 전문","단체석 완비","혼술 환영","심야까지 운영","숯불 향 가득"],
-  "미용/뷰티":["15년 경력 원장","트렌드 스타일","두피 케어 전문","천연 염색제","손상 없는 시술","맞춤형 컨설팅","최신 기기 도입","위생 철저","예약 우선제","꼼꼼한 시술","합리적 가격"],
-  "헬스/스포츠":["1:1 맞춤 PT","영양 상담 무료","최신 기구 완비","24시간 운영","체성분 분석","그룹 레슨","초보자 환영","전문 트레이너","다이어트 특화","식단 관리 병행"],
-  "필라테스/요가":["코어 강화 효과","유연성 향상","몸매 교정","1:1 맞춤 수업","소도구 필라테스","마인드풀니스 요가","초보자 환영","쾌적한 스튜디오","릴렉스 힐링","바른 자세 교정"],
-  "스크린골프":["실내 라운딩 가능","최신 시뮬레이터","세계 유명 코스","스윙 분석 서비스","레슨 병행 가능","24시간 운영","초보자 환영","리얼한 그래픽"],
-  "PC방":["최신 사양 PC","쾌적한 환경","청결한 좌석","음식 주문 가능","1인 개인 부스","심야 할인","대형 모니터","기계식 키보드","빠른 인터넷"],
-  "노래방":["최신 음향 시스템","신곡 즉시 업데이트","방음 시설 최고","1인 개인 방 가능","단체 대형 방","마이크 소독 철저","생일 이벤트","스트레스 해소 최고"],
-  "기타업종":["친절한 서비스","청결한 환경","합리적 가격","빠른 응대","전문 기술","단골 우대","정직한 운영","꼼꼼한 관리","오랜 경험","재방문 감사","품질 보장","믿을 수 있는"],
-  "기타/일반":["친절한 서비스","정성 담긴 음식","깔끔한 포장","빠른 응대","위생 철저","합리적인 가격","단골 우대","재방문 감사","오랜 경험","꼼꼼한 관리","정직한 운영","믿을 수 있는"]
+  "디저트":["수제 케이크","당일 제조","천연 재료","비건 옵션","맞춤 주문 케이크","시즌 한정","부드러운 식감","달지 않은 디저트","선물 포장 가능"],
+  "아이스크림":["직접 만든 젤라또","천연 과일","당일 제조","유기농 우유","부드러운 질감","시즌 한정 맛","커스텀 토핑","비건 아이스크림","저당 옵션"],
+  "호프/맥주":["수제맥주 전문","생맥주 항상 신선","안주 직접 제조","다양한 수입맥주","혼술 가능","드래프트 8종","소맥 황금비율","안주 무한리필"],
+  "이자카야/포차":["일본 감성 분위기","사케 직수입","오마카세 안주","야끼토리 직화","하이볼 전문","단체석 완비","혼술 환영","심야까지 운영"],
+  "미용/뷰티":["15년 경력 원장","트렌드 스타일","두피 케어 전문","천연 염색제","손상 없는 시술","맞춤형 컨설팅","위생 철저","예약 우선제","꼼꼼한 시술"],
+  "헬스/스포츠":["1:1 맞춤 PT","영양 상담 무료","최신 기구 완비","24시간 운영","체성분 분석","초보자 환영","전문 트레이너","식단 관리 병행"],
+  "필라테스/요가":["코어 강화 효과","유연성 향상","몸매 교정","1:1 맞춤 수업","소도구 필라테스","초보자 환영","쾌적한 스튜디오","릴렉스 힐링"],
+  "스크린골프":["최신 시뮬레이터","세계 유명 코스","스윙 분석 서비스","레슨 병행 가능","24시간 운영","초보자 환영"],
+  "PC방":["최신 사양 PC","쾌적한 환경","청결한 좌석","1인 개인 부스","심야 할인","대형 모니터","빠른 인터넷"],
+  "노래방":["최신 음향 시스템","신곡 즉시 업데이트","방음 시설 최고","마이크 소독 철저","생일 이벤트","스트레스 해소 최고"],
+  "기타업종":["친절한 서비스","청결한 환경","합리적 가격","빠른 응대","전문 기술","단골 우대","정직한 운영","꼼꼼한 관리","재방문 감사","믿을 수 있는"],
+  "기타/일반":["친절한 서비스","정성 담긴 음식","깔끔한 포장","빠른 응대","위생 철저","합리적인 가격","단골 우대","재방문 감사","꼼꼼한 관리","정직한 운영"]
 };
+const subEmojis={"한식":"🍚","중식":"🥟","일식/회":"🐟","양식/레스토랑":"🍝","고기/구이":"🥩","치킨":"🍗","피자":"🍕","족발/보쌈":"🐷","분식":"🍜","패스트푸드":"🍔","카페/베이커리":"☕","디저트":"🍰","아이스크림":"🍦","호프/맥주":"🍺","이자카야/포차":"🍶","미용/뷰티":"💄","헬스/스포츠":"💪","필라테스/요가":"🧘","스크린골프":"⛳","PC방":"🖥️","노래방":"🎤","기타업종":"🏪","기타/일반":"➕"};
+const majorData={"식사/요리":["한식","중식","일식/회","양식/레스토랑","고기/구이","기타/일반"],"배달인기":["치킨","피자","족발/보쌈","분식","패스트푸드","기타/일반"],"카페/간식":["카페/베이커리","디저트","아이스크림","기타/일반"],"주류/펍":["호프/맥주","이자카야/포차","기타/일반"],"서비스/여가":["미용/뷰티","헬스/스포츠","필라테스/요가","스크린골프","PC방","노래방","기타/일반"],"기타":["기타업종","기타/일반"]};
 
-const subEmojis = {"한식":"🍚","중식":"🥟","일식/회":"🐟","양식/레스토랑":"🍝","고기/구이":"🥩","치킨":"🍗","피자":"🍕","족발/보쌈":"🐷","분식":"🍜","패스트푸드":"🍔","카페/베이커리":"☕","디저트":"🍰","아이스크림":"🍦","호프/맥주":"🍺","이자카야/포차":"🍶","미용/뷰티":"💄","헬스/스포츠":"💪","필라테스/요가":"🧘","스크린골프":"⛳","PC방":"🖥️","노래방":"🎤","기타업종":"🏪","기타/일반":"➕"};
-
-const majorData = {
-  "식사/요리": ["한식","중식","일식/회","양식/레스토랑","고기/구이","기타/일반"],
-  "배달인기":  ["치킨","피자","족발/보쌈","분식","패스트푸드","기타/일반"],
-  "카페/간식": ["카페/베이커리","디저트","아이스크림","기타/일반"],
-  "주류/펍":   ["호프/맥주","이자카야/포차","기타/일반"],
-  "서비스/여가":["미용/뷰티","헬스/스포츠","필라테스/요가","스크린골프","PC방","노래방","기타/일반"],
-  "기타":      ["기타업종","기타/일반"]
-};
-
-// ── 대분류 선택 ──────────────────────────────────────────────
-function selectMajor(btn) {
+// ── 대분류 선택 ───────────────────────────────────────────────
+function selectMajor(btn, preSelect) {
   const major = btn.dataset.major;
   currentMajor = major;
-  category = "선택안함";
+  if (!preSelect) category = "선택안함";
 
-  // 대분류 칩 UI 업데이트
-  document.querySelectorAll(".cat-chip").forEach(c => c.classList.remove("on"));
+  document.querySelectorAll(".cat-chip").forEach(c=>c.classList.remove("on"));
   btn.classList.add("on");
 
-  // 그룹 라벨 업데이트
-  const majorLabel = {"식사/요리":"식사/요리","배달인기":"배달 인기","카페/간식":"카페/간식","주류/펍":"주류/펍","서비스/여가":"서비스/여가","기타":"기타"};
-  document.getElementById("sub-group-label").textContent = "📂 " + (majorLabel[major] || major) + " 세부 업종 선택";
+  const majorLabel={"식사/요리":"식사/요리","배달인기":"배달 인기","카페/간식":"카페/간식","주류/펍":"주류/펍","서비스/여가":"서비스/여가","기타":"기타"};
+  document.getElementById("sub-group-label").textContent="📂 "+(majorLabel[major]||major)+" 세부 업종 선택";
 
-  // 세부 업종 렌더링
-  const subs = majorData[major] || [];
-  const recentCat = localStorage.getItem("recentCat") || "";
+  const subs = majorData[major]||[];
+  const recent = localStorage.getItem("recentCat")||"";
   const grid = document.getElementById("sub-grid");
-  grid.innerHTML = "";
-  subs.forEach(sub => {
-    const card = document.createElement("button");
-    card.className = "btn sub-card" + (sub === recentCat ? " recent" : "");
-    card.innerHTML = `<span class="sub-emoji">${subEmojis[sub] || "🏪"}</span><span>${sub}</span><span class="check">✓</span>`;
-    card.onclick = () => selectSub(card, sub);
+  grid.innerHTML="";
+  subs.forEach(sub=>{
+    const card=document.createElement("button");
+    card.className="btn sub-card"+(sub===recent?" recent":"");
+    card.innerHTML=`<span class="sub-emoji">${subEmojis[sub]||"🏪"}</span><span>${sub}</span><span class="check">✓</span>`;
+    card.onclick=()=>selectSub(card,sub);
     grid.appendChild(card);
   });
 
+  // 복원 시 자동 선택
+  if (preSelect && subs.includes(preSelect)) {
+    grid.querySelectorAll(".sub-card").forEach((c,i)=>{ if(subs[i]===preSelect){ c.classList.add("on"); category=preSelect; showKw(preSelect); } });
+  }
+
   document.getElementById("kw-box").classList.remove("show");
-  document.getElementById("recent-lbl").className = "recent-label" + (recentCat && subs.includes(recentCat) ? " show" : "");
+  document.getElementById("recent-lbl").className="recent-label"+(recent&&subs.includes(recent)?" show":"");
+  document.getElementById("sub-wrap").style.display="block";
+  localStorage.setItem("savedMajor",major);
 
-  // sub-wrap 먼저 표시 → 그 다음 프레임에서 정확한 좌표로 포인터 계산
-  const subWrap = document.getElementById("sub-wrap");
-  subWrap.style.display = "block";
-
-  requestAnimationFrame(() => {
-    const catGrid = document.querySelector(".cat-grid");
-    const gridRect = catGrid.getBoundingClientRect();
-    const btnRect = btn.getBoundingClientRect();
-    const centerX = btnRect.left - gridRect.left + btnRect.width / 2;
-    // 포인터 삼각형 너비 11px이므로 중앙 정렬
-    const pointerLeft = Math.max(11, Math.min(centerX - 11, catGrid.offsetWidth - 22));
-    document.getElementById("sub-pointer").style.left = pointerLeft + "px";
+  requestAnimationFrame(()=>{
+    const grid2=document.querySelector(".cat-grid");
+    if(!grid2)return;
+    const gr=grid2.getBoundingClientRect(), br=btn.getBoundingClientRect();
+    const cx=br.left-gr.left+br.width/2;
+    document.getElementById("sub-pointer").style.left=Math.max(11,Math.min(cx-11,grid2.offsetWidth-22))+"px";
   });
+
+  updateSec1(category, document.getElementById("owner-msg").value);
 }
 
-// ── 세부 업종 선택 ──────────────────────────────────────────
 function selectSub(card, sub) {
-  document.querySelectorAll(".sub-card").forEach(c => c.classList.remove("on"));
+  document.querySelectorAll(".sub-card").forEach(c=>c.classList.remove("on"));
   card.classList.add("on");
-  category = sub;
-  localStorage.setItem("recentCat", sub);
+  category=sub;
+  localStorage.setItem("recentCat",sub);
+  localStorage.setItem("savedCategory",sub);
+  updateSec1(sub, document.getElementById("owner-msg").value);
   showKw(sub);
 }
 
 function showKw(sub) {
-  const pool = keywordPool[sub] || [];
-  if (!pool.length) return;
-  const kws = [...pool].sort(() => Math.random() - 0.5).slice(0, 3);
-  const badges = document.getElementById("kw-badges");
-  badges.innerHTML = kws.map(kw =>
-    `<button class="btn kw-badge" onclick="insertKw('${kw}')">${kw}</button>`
-  ).join("");
+  const pool=keywordPool[sub]||[];
+  if(!pool.length)return;
+  const kws=[...pool].sort(()=>Math.random()-0.5).slice(0,3);
+  document.getElementById("kw-badges").innerHTML=kws.map(kw=>`<button class="btn kw-badge" onclick="insertKw('${kw.replace(/'/g,"\\'")}')">${kw}</button>`).join("");
   document.getElementById("kw-box").classList.add("show");
 }
+function refreshKw(){ if(category&&category!=="선택안함")showKw(category); }
+function insertKw(kw){ const ta=document.getElementById("keyword-msg"); ta.value=ta.value.trim()?ta.value.trim()+", "+kw:kw; ta.focus(); }
 
-function refreshKw() {
-  if (category && category !== "선택안함") showKw(category);
-}
-
-function insertKw(kw) {
-  const ta = document.getElementById("keyword-msg");
-  const cur = ta.value.trim();
-  ta.value = cur ? cur + ", " + kw : kw;
-  ta.focus();
-}
-
-// ── 파일 업로드 ──────────────────────────────────────────────
-function handleFile(file) {
-  if (!file) return;
-  const r = new FileReader();
-  r.onload = e => {
-    imgType = file.type;
-    imgB64 = e.target.result.split(",")[1];
-    const img = document.getElementById("preview-img");
-    img.src = e.target.result;
-    img.style.display = "block";
-  };
+// ── 파일 업로드 ───────────────────────────────────────────────
+function handleFile(file){
+  if(!file)return;
+  const r=new FileReader();
+  r.onload=e=>{ imgType=file.type; imgB64=e.target.result.split(",")[1]; const img=document.getElementById("preview-img"); img.src=e.target.result; img.style.display="block"; };
   r.readAsDataURL(file);
 }
 
-// ── 프롬프트 빌더 ────────────────────────────────────────────
-function buildPrompt(text) {
-  const typeStr = reviewType === "delivery" ? "배달 리뷰" : "방문자 리뷰";
-  const starStr = starNone ? "별점 없음" : `${star}점`;
-  const ownerMsg = document.getElementById("owner-msg").value.trim();
-  const keywordMsg = document.getElementById("keyword-msg").value.trim();
-  const ownerStr = ownerMsg ? `\n가게 특징: ${ownerMsg}` : "";
-  const keywordStr = keywordMsg ? `\n답글에 포함할 키워드: ${keywordMsg}` : "";
-  const lenGuide = length === "short" ? "2문장으로 간결하게" : length === "medium" ? "3~4문장으로" : "5문장 이상 자세하게";
-  const toneGuide = tone === "친절" ? "친절하고 다정한 따뜻한 말투로" : tone === "전문" ? "전문적이고 진중한 격식체로" : tone === "유머" ? "유머러스하고 친근한 말투로" : "진심으로 사과하고 반성하는 톤으로";
-  const starGuide = starNone ? "리뷰 내용을 분석해서 긍정적이면 감사하게, 부정적이면 사과하는 톤으로" : star >= 4 ? "감사하고 재방문/재주문을 유도하는" : star === 3 ? "감사하되 더 나은 서비스를 약속하는" : "진심으로 사과하고 개선 의지를 보여주는";
-  const startWord = reviewType === "delivery" ? '"주문해 주셔서 감사합니다"' : '"방문해 주셔서 감사합니다"';
-  const hasEnglish = /[a-zA-Z]{3,}/.test(text) && !/[가-힣]/.test(text);
-  const langGuide = hasEnglish ? "리뷰가 영어로 작성되었으니 영어로 답글을 작성하세요." : "한국어로 답글을 작성하세요.";
-  const catStr = (category === "기타/일반" || category === "선택안함") ? "" : category + " ";
-  const isGeneral = category === "기타/일반" || category === "선택안함";
-  const generalGuide = isGeneral ? "\n- 특정 메뉴보다 친절한 서비스, 정성 담긴 음식, 깔끔한 포장, 빠른 응대 등 보편적 가치를 자연스럽게 강조해주세요" : "";
-
+// ── 프롬프트 ──────────────────────────────────────────────────
+function buildPrompt(text){
+  const typeStr=reviewType==="delivery"?"배달 리뷰":"방문자 리뷰";
+  const starStr=starNone?"별점 없음":`${star}점`;
+  const ownerMsg=document.getElementById("owner-msg").value.trim();
+  const keywordMsg=document.getElementById("keyword-msg").value.trim();
+  const ownerStr=ownerMsg?`\n가게 특징: ${ownerMsg}`:"";
+  const keywordStr=keywordMsg?`\n답글에 포함할 키워드: ${keywordMsg}`:"";
+  const lenGuide=length==="short"?"2문장으로 간결하게":length==="medium"?"3~4문장으로":"5문장 이상 자세하게";
+  const toneGuide=tone==="친절"?"친절하고 다정한 따뜻한 말투로":tone==="전문"?"전문적이고 진중한 격식체로":tone==="유머"?"유머러스하고 친근한 말투로":"진심으로 사과하고 반성하는 톤으로";
+  const starGuide=starNone?"리뷰 내용을 분석해서 긍정적이면 감사하게, 부정적이면 사과하는 톤으로":star>=4?"감사하고 재방문/재주문을 유도하는":star===3?"감사하되 더 나은 서비스를 약속하는":"진심으로 사과하고 개선 의지를 보여주는";
+  const startWord=reviewType==="delivery"?'"주문해 주셔서 감사합니다"':'"방문해 주셔서 감사합니다"';
+  const hasEnglish=/[a-zA-Z]{3,}/.test(text)&&!/[가-힣]/.test(text);
+  const langGuide=hasEnglish?"리뷰가 영어로 작성되었으니 영어로 답글을 작성하세요.":"한국어로 답글을 작성하세요.";
+  const catStr=(category==="기타/일반"||category==="선택안함")?"":category+" ";
+  const generalGuide=(category==="기타/일반"||category==="선택안함")?"\n- 특정 메뉴보다 친절한 서비스, 정성 담긴 음식, 깔끔한 포장, 빠른 응대 등 보편적 가치를 자연스럽게 강조해주세요":"";
   return `당신은 ${catStr}사장님입니다. 고객의 ${typeStr}에 답글을 작성해주세요.\n별점: ${starStr}${ownerStr}${keywordStr}\n고객 리뷰: ${text}\n\n작성 지침:\n- ${toneGuide} 작성\n- ${starGuide} 내용으로\n- ${lenGuide} 작성\n- 반드시 ${startWord} 표현을 자연스럽게 포함\n- "고객님"으로 시작\n- 리뷰 내용에 직접 반응\n- 비슷한 의미의 감사 표현 중복 금지\n- 과한 홍보성 문구 금지\n- 가게 이름이나 브랜드명 절대 언급 금지\n- 2~3문장마다 줄바꿈으로 가독성 확보\n- ${langGuide}\n- 답글 내용만 출력${generalGuide}`;
 }
 
-// ── 생성 ─────────────────────────────────────────────────────
-let isCancelled = false;
+// ── 생성 ──────────────────────────────────────────────────────
+async function generate(){
+  const errEl=document.getElementById("err"); errEl.innerHTML="";
+  const genCount=getGenCount();
+  if(genCount===1&&!sessionStorage.getItem("couponShown")){ pendingGenerate=true; document.getElementById("coupon-modal").classList.add("show"); return; }
 
-async function generate() {
-  const errEl = document.getElementById("err");
-  errEl.innerHTML = "";
-
-  const genCount = getGenCount();
-
-  // 쿠팡 모달 (2번째 생성 시, 아직 안 봤으면)
-  if (genCount === 1 && !sessionStorage.getItem("couponShown")) {
-    pendingGenerate = true;
-    document.getElementById("coupon-modal").classList.add("show");
-    return;
-  }
-
-  let messages = [];
-
-  if (mode === "image") {
-    if (!imgB64) {
-      errEl.innerHTML = '<div class="err-box">스크린샷을 먼저 업로드해주세요.</div>';
-      return;
-    }
-    messages = [{
-      role: "user",
-      content: [
-        { type: "image", source: { type: "base64", media_type: imgType, data: imgB64 } },
-        { type: "text", text: `이미지의 리뷰 텍스트를 읽고 아래 지침으로 답글을 작성해주세요.\n\n${buildPrompt("[이미지의 리뷰 내용을 직접 읽어서 답글 작성]")}` }
-      ]
-    }];
+  let messages=[];
+  if(mode==="image"){
+    if(!imgB64){ errEl.innerHTML='<div class="err-box">스크린샷을 먼저 업로드해주세요.</div>'; return; }
+    messages=[{role:"user",content:[{type:"image",source:{type:"base64",media_type:imgType,data:imgB64}},{type:"text",text:`이미지의 리뷰 텍스트를 읽고 아래 지침으로 답글을 작성해주세요.\n\n${buildPrompt("[이미지의 리뷰 내용을 직접 읽어서 답글 작성]")}`}]}];
   } else {
-    const rv = document.getElementById("review").value.trim();
-    if (!rv) {
-      errEl.innerHTML = '<div class="err-box">리뷰 내용을 입력해주세요.</div>';
-      return;
-    }
-    messages = [{ role: "user", content: buildPrompt(rv) }];
+    const rv=document.getElementById("review").value.trim();
+    if(!rv){ errEl.innerHTML='<div class="err-box">리뷰 내용을 입력해주세요.</div>'; return; }
+    messages=[{role:"user",content:buildPrompt(rv)}];
   }
 
-  isCancelled = false;
-  const btn = document.getElementById("gen-btn");
-  const cb = document.getElementById("cancel-btn");
+  isCancelled=false;
+  const btn=document.getElementById("gen-btn"), cb=document.getElementById("cancel-btn");
+  btn.disabled=true; btn.innerHTML='<div style="display:flex;align-items:center;justify-content:center;gap:6px;"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>';
+  cb.style.display="block"; document.getElementById("result-card").style.display="none";
 
-  btn.disabled = true;
-  btn.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;gap:6px;"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>';
-  cb.style.display = "block";
-  document.getElementById("result-card").style.display = "none";
+  try{
+    const res=await fetch("/api/reply",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({messages})});
+    if(isCancelled)return;
+    if(!res.ok){ const ed=await res.json().catch(()=>({})); throw new Error(ed.error?.message||`서버 오류 (${res.status})`); }
+    const data=await res.json();
+    if(isCancelled)return;
+    if(data.error)throw new Error(data.error.message||JSON.stringify(data.error));
 
-  try {
-    const res = await fetch("/api/reply", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ messages })
-    });
+    const reply=data.content[0].text.trim();
+    document.getElementById("result-text").value=reply;
+    document.getElementById("result-card").style.display="block";
+    document.getElementById("copy-btn").textContent="복사하기";
+    document.getElementById("fav-btn").textContent="⭐ 즐겨찾기에 저장";
+    autoResize(document.getElementById("result-text")); updateCharCount();
 
-    if (isCancelled) return;
+    localStorage.setItem("genCount",(genCount+1).toString()); updateGenCountDisplay();
 
-    if (!res.ok) {
-      const errData = await res.json().catch(() => ({}));
-      throw new Error(errData.error?.message || `서버 오류 (${res.status})`);
-    }
+    const rv2=mode==="image"?"[스크린샷]":(document.getElementById("review").value.slice(0,20)+"...");
+    const sd=starNone?"별점없음":"⭐".repeat(star);
+    hist.unshift({type:reviewType,cat:category,star:starNone?"없음":star,sd,review:rv2,reply,time:new Date().toLocaleTimeString("ko-KR",{hour:"2-digit",minute:"2-digit"})});
+    if(hist.length>10)hist.pop(); localStorage.setItem("rh",JSON.stringify(hist)); renderHist();
+    document.getElementById("result-card").scrollIntoView({behavior:"smooth",block:"nearest"});
 
-    const data = await res.json();
-    if (isCancelled) return;
-    if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
-
-    const reply = data.content[0].text.trim();
-    document.getElementById("result-text").value = reply;
-    document.getElementById("result-card").style.display = "block";
-    document.getElementById("copy-btn").textContent = "복사하기";
-    document.getElementById("fav-btn").textContent = "⭐ 즐겨찾기에 저장";
-    // auto-resize + 글자수 갱신
-    const rta = document.getElementById("result-text");
-    autoResize(rta);
-    updateCharCount();
-
-    // 카운트 증가
-    const newCount = genCount + 1;
-    localStorage.setItem("genCount", newCount.toString());
-    updateGenCountDisplay();
-
-    // 히스토리 저장
-    const rv2 = mode === "image" ? "[스크린샷]" : (document.getElementById("review").value.slice(0, 20) + "...");
-    const sd = starNone ? "별점없음" : "⭐".repeat(star);
-    hist.unshift({
-      type: reviewType,
-      cat: category,
-      star: starNone ? "없음" : star,
-      sd,
-      review: rv2,
-      reply,
-      time: new Date().toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })
-    });
-    if (hist.length > 10) hist.pop();
-    localStorage.setItem("rh", JSON.stringify(hist));
-    renderHist();
-
-    document.getElementById("result-card").scrollIntoView({ behavior: "smooth", block: "nearest" });
-
-  } catch (e) {
-    if (isCancelled) return;
-    errEl.innerHTML = `<div class="err-box">⚠️ ${e.message}</div>`;
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = "✨ AI 답글 생성";
-    cb.style.display = "none";
+  }catch(e){
+    if(isCancelled)return;
+    errEl.innerHTML=`<div class="err-box">⚠️ ${e.message}</div>`;
+  }finally{
+    btn.disabled=false; btn.innerHTML="✨ AI 답글 생성"; cb.style.display="none";
   }
 }
 
-function cancelGenerate() {
-  isCancelled = true;
-  document.getElementById("gen-btn").disabled = false;
-  document.getElementById("gen-btn").innerHTML = "✨ AI 답글 생성";
-  document.getElementById("cancel-btn").style.display = "none";
-  showToast("생성을 취소했어요");
+function cancelGenerate(){ isCancelled=true; document.getElementById("gen-btn").disabled=false; document.getElementById("gen-btn").innerHTML="✨ AI 답글 생성"; document.getElementById("cancel-btn").style.display="none"; showToast("생성을 취소했어요"); }
+function retryGenerate(){ document.getElementById("result-card").style.display="none"; generate(); }
+
+// ── 쿠팡 모달 ─────────────────────────────────────────────────
+function onCouponClick(){ sessionStorage.setItem("couponShown","1"); closeCouponModal(); if(pendingGenerate){pendingGenerate=false;setTimeout(generate,300);} }
+function closeCouponModal(){ sessionStorage.setItem("couponShown","1"); document.getElementById("coupon-modal").classList.remove("show"); if(pendingGenerate){pendingGenerate=false;setTimeout(generate,300);} }
+
+// ── auto-resize + 글자수 ──────────────────────────────────────
+function autoResize(ta){ ta.style.height="0px"; ta.style.height=Math.max(100,ta.scrollHeight)+"px"; }
+function updateCharCount(){
+  const ta=document.getElementById("result-text"); autoResize(ta);
+  const len=ta.value.length, el=document.getElementById("char-count"), fill=document.getElementById("char-bar-fill");
+  const limit=reviewType==="delivery"?300:500, pct=Math.min((len/limit)*100,100);
+  fill.style.width=pct+"%";
+  if(len>limit){fill.className="char-bar-fill over";el.style.color="#EF4444";el.textContent=`${len} / ${limit}자 (권장 초과)`;}
+  else if(len>limit*0.8){fill.className="char-bar-fill warn";el.style.color="#F97316";el.textContent=`${len} / ${limit}자`;}
+  else{fill.className="char-bar-fill";el.style.color="#9CA3AF";el.textContent=`${len}자`;}
 }
 
-function retryGenerate() {
-  document.getElementById("result-card").style.display = "none";
-  generate();
-}
-
-// ── 쿠팡 모달 ────────────────────────────────────────────────
-function onCouponClick() {
-  sessionStorage.setItem("couponShown", "1");
-  closeCouponModal();
-  if (pendingGenerate) { pendingGenerate = false; setTimeout(generate, 300); }
-}
-
-function closeCouponModal() {
-  sessionStorage.setItem("couponShown", "1");
-  document.getElementById("coupon-modal").classList.remove("show");
-  if (pendingGenerate) { pendingGenerate = false; setTimeout(generate, 300); }
-}
-
-// ── 글자 수 + Auto-resize ────────────────────────────────────
-function autoResize(ta) {
-  // 패딩 포함 정확한 높이: height:auto 먼저 적용 후 scrollHeight 읽기
-  ta.style.height = "0px";
-  const newH = Math.max(100, ta.scrollHeight);
-  ta.style.height = newH + "px";
-}
-
-function updateCharCount() {
-  const ta = document.getElementById("result-text");
-  autoResize(ta);
-
-  const text = ta.value;
-  const len = text.length;
-  const el = document.getElementById("char-count");
-  const fill = document.getElementById("char-bar-fill");
-
-  const limit = reviewType === "delivery" ? 300 : 500;
-  const pct = Math.min((len / limit) * 100, 100);
-
-  fill.style.width = pct + "%";
-  if (len > limit) {
-    fill.className = "char-bar-fill over";
-    el.style.color = "#EF4444";
-    el.textContent = `${len} / ${limit}자 (권장 초과)`;
-  } else if (len > limit * 0.8) {
-    fill.className = "char-bar-fill warn";
-    el.style.color = "#F97316";
-    el.textContent = `${len} / ${limit}자`;
-  } else {
-    fill.className = "char-bar-fill";
-    el.style.color = "#9CA3AF";
-    el.textContent = `${len}자`;
-  }
-}
-
-// ── 복사 ─────────────────────────────────────────────────────
-function copyReply() {
-  const text = document.getElementById("result-text").value;
-  if (!text) return;
-  navigator.clipboard.writeText(text).then(() => {
-    document.getElementById("copy-btn").textContent = "✅ 복사됨!";
-    setTimeout(() => document.getElementById("copy-btn").textContent = "복사하기", 2000);
-    showToast("클립보드에 복사됐어요 ✅");
-  }).catch(() => {
-    // fallback
-    const ta = document.createElement("textarea");
-    ta.value = text;
-    ta.style.position = "fixed";
-    ta.style.top = "-9999px";
-    document.body.appendChild(ta);
-    ta.select();
-    document.execCommand("copy");
-    document.body.removeChild(ta);
-    document.getElementById("copy-btn").textContent = "✅ 복사됨!";
-    setTimeout(() => document.getElementById("copy-btn").textContent = "복사하기", 2000);
-    showToast("클립보드에 복사됐어요 ✅");
+// ── 복사 ──────────────────────────────────────────────────────
+function copyReply(){
+  const text=document.getElementById("result-text").value; if(!text)return;
+  navigator.clipboard.writeText(text).then(()=>{ document.getElementById("copy-btn").textContent="✅ 복사됨!"; setTimeout(()=>document.getElementById("copy-btn").textContent="복사하기",2000); showToast("클립보드에 복사됐어요 ✅"); }).catch(()=>{
+    const ta=document.createElement("textarea"); ta.value=text; ta.style.position="fixed"; ta.style.top="-9999px"; document.body.appendChild(ta); ta.select(); document.execCommand("copy"); document.body.removeChild(ta);
+    document.getElementById("copy-btn").textContent="✅ 복사됨!"; setTimeout(()=>document.getElementById("copy-btn").textContent="복사하기",2000); showToast("클립보드에 복사됐어요 ✅");
   });
 }
 
-// ── 토스트 ───────────────────────────────────────────────────
-function showToast(msg) {
-  const t = document.getElementById("toast");
-  t.textContent = msg;
-  t.classList.add("show");
-  setTimeout(() => t.classList.remove("show"), 2000);
+// ── 토스트 ────────────────────────────────────────────────────
+function showToast(msg){ const t=document.getElementById("toast"); t.textContent=msg; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),2000); }
+
+// ── 즐겨찾기 ─────────────────────────────────────────────────
+function saveFav(){
+  const text=document.getElementById("result-text").value.trim(); if(!text)return;
+  if(favs.some(f=>f.reply===text)){showToast("이미 즐겨찾기에 있어요");return;}
+  const sd=starNone?"별점없음":"⭐".repeat(star);
+  favs.unshift({cat:category,star:starNone?"없음":star,sd,reply:text,time:new Date().toLocaleString("ko-KR",{month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit"})});
+  if(favs.length>20)favs.pop(); localStorage.setItem("favs",JSON.stringify(favs)); renderFav();
+  document.getElementById("fav-btn").textContent="⭐ 저장됨!"; showToast("즐겨찾기에 저장됐어요 ⭐");
+}
+function deleteFav(i){favs.splice(i,1);localStorage.setItem("favs",JSON.stringify(favs));renderFav();showToast("삭제했어요");}
+function clearFavs(){if(!confirm("즐겨찾기를 전부 삭제할까요?"))return;favs=[];localStorage.setItem("favs","[]");renderFav();}
+function renderFav(){
+  const card=document.getElementById("fav-card"),list=document.getElementById("fav-list");
+  if(!favs.length){card.style.display="none";return;}
+  card.style.display="block";
+  list.innerHTML=favs.map((f,i)=>`<div class="fav-item"><div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px;"><span class="tag tag-orange">${f.cat||"미분류"}</span><span class="tag tag-gray">${f.sd||""}</span><span class="tag tag-time">${f.time||""}</span></div><p>${f.reply.slice(0,60)}${f.reply.length>60?"…":""}</p><div class="item-actions"><button class="item-copy-btn" onclick="copyItem(\`${f.reply.replace(/`/g,"'")}\`)">복사</button><button class="item-del-btn" onclick="deleteFav(${i})">삭제</button></div></div>`).join("");
 }
 
-// ── 즐겨찾기 ────────────────────────────────────────────────
-function saveFav() {
-  const text = document.getElementById("result-text").value.trim();
-  if (!text) return;
-  const sd = starNone ? "별점없음" : "⭐".repeat(star);
-  const item = {
-    cat: category,
-    star: starNone ? "없음" : star,
-    sd,
-    reply: text,
-    time: new Date().toLocaleString("ko-KR", { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" })
-  };
-  // 중복 체크
-  if (favs.some(f => f.reply === text)) {
-    showToast("이미 즐겨찾기에 있어요");
-    return;
-  }
-  favs.unshift(item);
-  if (favs.length > 20) favs.pop();
-  localStorage.setItem("favs", JSON.stringify(favs));
-  renderFav();
-  document.getElementById("fav-btn").textContent = "⭐ 저장됨!";
-  showToast("즐겨찾기에 저장됐어요 ⭐");
+// ── 히스토리 ──────────────────────────────────────────────────
+function deleteHist(i){hist.splice(i,1);localStorage.setItem("rh",JSON.stringify(hist));renderHist();showToast("삭제했어요");}
+function clearHist(){if(!confirm("최근 기록을 전부 삭제할까요?"))return;hist=[];localStorage.setItem("rh","[]");renderHist();}
+function renderHist(){
+  const card=document.getElementById("hist-card"),list=document.getElementById("hist-list");
+  if(!hist.length){card.style.display="none";return;}
+  card.style.display="block";
+  list.innerHTML=hist.map((h,i)=>`<div class="hist-item"><div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px;"><span class="tag tag-orange">${h.cat||"미분류"}</span><span class="tag tag-gray">${h.sd||""}</span><span class="tag tag-time">${h.time||""}</span></div><p style="font-size:11px;color:#9CA3AF;margin-bottom:4px;">리뷰: ${escHtml(h.review||"")}</p><p>${escHtml(h.reply?h.reply.slice(0,60):"")}${h.reply&&h.reply.length>60?"…":""}</p><div class="item-actions"><button class="item-copy-btn" onclick="copyItem(\`${h.reply?h.reply.replace(/`/g,"'"):""}\`)">복사</button><button class="item-del-btn" onclick="deleteHist(${i})">삭제</button></div></div>`).join("");
 }
-
-function deleteFav(idx) {
-  favs.splice(idx, 1);
-  localStorage.setItem("favs", JSON.stringify(favs));
-  renderFav();
-  showToast("삭제했어요");
-}
-
-function clearFavs() {
-  if (!confirm("즐겨찾기를 전부 삭제할까요?")) return;
-  favs = [];
-  localStorage.setItem("favs", "[]");
-  renderFav();
-}
-
-function renderFav() {
-  const card = document.getElementById("fav-card");
-  const list = document.getElementById("fav-list");
-  if (!favs.length) { card.style.display = "none"; return; }
-  card.style.display = "block";
-  list.innerHTML = favs.map((f, i) => `
-    <div class="fav-item">
-      <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px;">
-        <span class="tag tag-orange">${f.cat || "미분류"}</span>
-        <span class="tag tag-gray">${f.sd || ""}</span>
-        <span class="tag tag-time">${f.time || ""}</span>
-      </div>
-      <p>${f.reply.slice(0, 60)}${f.reply.length > 60 ? "…" : ""}</p>
-      <div class="item-actions">
-        <button class="item-copy-btn" onclick="copyItem('${escHtml(f.reply)}')">복사</button>
-        <button class="item-del-btn" onclick="deleteFav(${i})">삭제</button>
-      </div>
-    </div>
-  `).join("");
-}
-
-// ── 히스토리 ────────────────────────────────────────────────
-function deleteHist(idx) {
-  hist.splice(idx, 1);
-  localStorage.setItem("rh", JSON.stringify(hist));
-  renderHist();
-  showToast("삭제했어요");
-}
-
-function clearHist() {
-  if (!confirm("최근 기록을 전부 삭제할까요?")) return;
-  hist = [];
-  localStorage.setItem("rh", "[]");
-  renderHist();
-}
-
-function renderHist() {
-  const card = document.getElementById("hist-card");
-  const list = document.getElementById("hist-list");
-  if (!hist.length) { card.style.display = "none"; return; }
-  card.style.display = "block";
-  list.innerHTML = hist.map((h, i) => `
-    <div class="hist-item">
-      <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px;">
-        <span class="tag tag-orange">${h.cat || "미분류"}</span>
-        <span class="tag tag-gray">${h.sd || ""}</span>
-        <span class="tag tag-time">${h.time || ""}</span>
-      </div>
-      <p style="font-size:11px;color:#9CA3AF;margin-bottom:4px;">리뷰: ${escHtml(h.review || "")}</p>
-      <p>${escHtml(h.reply ? h.reply.slice(0, 60) : "")}${h.reply && h.reply.length > 60 ? "…" : ""}</p>
-      <div class="item-actions">
-        <button class="item-copy-btn" onclick="copyItem(\`${h.reply ? h.reply.replace(/`/g, "'") : ""}\`)">복사</button>
-        <button class="item-del-btn" onclick="deleteHist(${i})">삭제</button>
-      </div>
-    </div>
-  `).join("");
-}
-
-function copyItem(text) {
-  navigator.clipboard.writeText(text).then(() => showToast("복사됐어요 ✅")).catch(() => {});
-}
-
-function escHtml(str) {
-  return String(str).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
-}
+function copyItem(text){navigator.clipboard.writeText(text).then(()=>showToast("복사됐어요 ✅")).catch(()=>{});}
+function escHtml(str){return String(str).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
 </script>
 </body>
 </html>
