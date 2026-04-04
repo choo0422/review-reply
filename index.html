@@ -135,19 +135,14 @@ body{font-family:"Pretendard",-apple-system,sans-serif;background:#F8F9FA;min-he
 
   <div style="max-width:480px;margin:0 auto;padding:16px;">
 
-    <!-- API 키 -->
-    <div class="card" id="api-card">
-      <div class="sec-label">API 키 설정</div>
-      <div style="background:#FFFBEA;border:1px solid #FDE68A;border-radius:12px;padding:10px 12px;margin-bottom:10px;">
+    <div style="background:#FFFBEA;border:1px solid #FDE68A;border-radius:12px;padding:10px 12px;margin-bottom:10px;">
         <p style="font-size:12px;color:#78350F;line-height:1.6;">최초 1회만 입력하면 저장돼요.<br><strong>console.anthropic.com</strong> → API Keys에서 발급</p>
       </div>
       <div style="display:flex;gap:8px;">
-        <input id="api-key" type="password" placeholder="sk-ant-..."
-          style="flex:1;font-size:12px;background:#F8F9FA;border:1.5px solid #EBEBEB;border-radius:12px;padding:10px 12px;font-family:inherit;outline:none;">
-        <button onclick="saveKey()" class="btn"
-          style="padding:10px 16px;border-radius:12px;background:#14B8A6;color:#fff;font-size:12px;font-weight:700;">저장</button>
+        
+        
       </div>
-      <p id="api-ok" style="font-size:11px;color:#14B8A6;margin-top:6px;display:none;">✓ API 키 저장됨</p>
+      
     </div>
 
     <!-- 입력 방식 -->
@@ -306,7 +301,7 @@ body{font-family:"Pretendard",-apple-system,sans-serif;background:#F8F9FA;min-he
         <button id="copy-btn" onclick="copyReply()" class="btn copy-btn">복사하기</button>
         <button onclick="generate()" class="btn retry-btn">다시 생성</button>
       </div>
-      <button onclick="saveFav()" class="btn fav-btn">⭐ 즐겨찾기에 저장</button>
+      <button id="fav-btn" onclick="saveFav()" class="btn fav-btn">⭐ 즐겨찾기에 저장</button>
     </div>
 
     <!-- 즐겨찾기 -->
@@ -349,8 +344,8 @@ function unlock() {
 }
 window.onload = () => {
   unlock();
-  const k = localStorage.getItem("ak");
-  if (k) { document.getElementById("api-key").value = k; document.getElementById("api-ok").style.display = "block"; }
+  
+  
   renderHist(); renderFav();
 };
 const keywordPool={
@@ -413,18 +408,12 @@ function getGenCount(){
 }
 
 window.onload=()=>{
-  const k=localStorage.getItem("ak");
-  if(k){document.getElementById("api-key").value=k;document.getElementById("api-ok").classList.remove("hidden");}
+  
+  
   recentCat=localStorage.getItem("recentCat")||"";
   updateStars();renderHist();renderFav();
 };
 
-function saveKey(){
-  const k=document.getElementById("api-key").value.trim();if(!k)return;
-  localStorage.setItem("ak",k);
-  const el=document.getElementById("api-ok");el.classList.remove("hidden");el.textContent="✓ 저장됐어요!";
-  setTimeout(()=>{el.textContent="✓ API 키 저장됨";},1500);
-}
 
 function selectMode(btn){
   mode=btn.dataset.mode;
@@ -450,54 +439,10 @@ function selectType(btn){
   else{nw.classList.add("hidden");starNone=false;document.getElementById("star-none-btn").classList.remove("sub-active");document.getElementById("star-select").classList.remove("hidden");}
 }
 
-function selectMajor(btn){
-  document.querySelectorAll(".major-chip").forEach(b=>{
-    const a=b===btn;
-    b.classList.toggle("chip-active",a);b.classList.toggle("border-gray-100",!a);b.classList.toggle("bg-gray-50",!a);b.classList.toggle("text-gray-500",!a);b.classList.toggle("font-semibold",!a);b.classList.toggle("font-bold",a);
-  });
-  const major=btn.dataset.major;
-  const wrap=document.getElementById("sub-cat-wrap");const grid=document.getElementById("sub-grid");
-  wrap.classList.remove("hidden");
-  const data=majorData[major];grid.innerHTML="";
-  data.subs.forEach(sub=>{
-    const isA=sub===category,isR=sub===recentCat&&sub!=="기타/일반";
-    const card=document.createElement("button");
-    card.className="flex flex-col items-center justify-center gap-2 py-4 px-2 rounded-2xl border-2 text-[11px] font-bold transition-all active:scale-95 min-h-[78px] "+(isA?"sub-active":isR?"border-red-200 bg-red-50 text-red-400":"border-gray-100 bg-gray-50 text-gray-500");
-    card.innerHTML=`<span class="text-2xl">${subEmojis[sub]||"🏪"}</span><span>${sub}</span>`;
-    card.onclick=()=>selectSubCat(card,sub,major);
-    grid.appendChild(card);
-  });
-  document.getElementById("recent-label").classList.toggle("hidden",!recentCat||recentCat==="기타/일반");
-  document.getElementById("keyword-hint").classList.add("hidden");
-}
 
-function selectSubCat(card,sub,major){
-  category=sub;currentMajorForKw=sub;
-  document.querySelectorAll(".sub-card").forEach(b=>{b.classList.remove("on","recent");});
-  card.classList.add("on");
-  recentCat=sub;localStorage.setItem("recentCat",sub);
-  const pool=keywordPool[sub]||[];
-  const hint=document.getElementById("keyword-hint");
-  if(pool.length>0){
-    showKeywordBadges(getRandomKws(sub,3));
-    hint.style.display="block";
-  } else {
-    hint.style.display="none";
-  }
-}
-function showKeywordBadges(kws){
-  const container=document.getElementById("keyword-badges");
-  if(!container)return;
-  container.innerHTML=kws.map(kw=>`<button onclick="applyKeyword('${kw.replace(/'/g,"\\'")}')" class="btn" style="padding:7px 14px;border-radius:999px;border:1.5px solid #FFD700;background:white;color:#554400;font-size:12px;font-weight:700;transition:all 0.15s;" onmouseover="this.style.background='#FFF8CC'" onmouseout="this.style.background='white'">${kw}</button>`).join("");
-}
-function refreshKeywords(){
-  if(!currentMajorForKw)return;
-  showKeywordBadges(getRandomKws(currentMajorForKw,3));
-}
-function applyKeyword(kw){
-  const cur=document.getElementById("keyword-msg").value.trim();
-  document.getElementById("keyword-msg").value=cur?(cur+", "+kw):kw;
-}
+
+
+
 
 function selectStarNone(){
   starNone=!starNone;
@@ -521,7 +466,7 @@ document.querySelectorAll(".star-btn").forEach(btn=>{
     document.getElementById("star-select").classList.remove("hidden");
     updateStars();
     document.querySelectorAll(".star-btn").forEach((b,i)=>{if(parseInt(b.dataset.v)<=star){setTimeout(()=>{b.classList.add("star-pop");setTimeout(()=>b.classList.remove("star-pop"),350);},i*50);}});
-    document.getElementById("star-label").textContent=starTxt[star];
+    document.getElementById("star-lbl").textContent=starTxt[star];
   });
 });
 
@@ -568,7 +513,7 @@ function buildPrompt(text){
 }
 
 async function generate(){
-  const apiKey=localStorage.getItem("ak")||document.getElementById("api-key").value.trim();
+  
   const errEl=document.getElementById("err");errEl.innerHTML="";
   genCount=getGenCount();
   if(genCount===1&&!sessionStorage.getItem("couponShown")){
@@ -577,7 +522,7 @@ async function generate(){
     document.getElementById("coupon-modal").classList.add("flex");
     return;
   }
-  if(!apiKey){errEl.innerHTML='<div class="bg-red-50 border border-red-100 rounded-2xl p-3 text-sm text-red-500 mt-2">API 키를 먼저 입력하고 저장해주세요.</div>';return;}
+  
   let messages=[];
   if(mode==="image"){
     if(!imgB64){errEl.innerHTML='<div class="bg-red-50 border border-red-100 rounded-2xl p-3 text-sm text-red-500 mt-2">스크린샷을 먼저 업로드해주세요.</div>';return;}
@@ -734,6 +679,10 @@ document.querySelectorAll('.star-btn').forEach(btn => {
     document.getElementById('star-lbl').textContent = ['','⭐','⭐⭐','⭐⭐⭐','⭐⭐⭐⭐','⭐⭐⭐⭐⭐'][star] + ' ' + star + '점';
   });
 });
+
+function saveSettings(){
+  localStorage.setItem("userSettings",JSON.stringify({tone,length}));
+}
 </script>
 <style>@keyframes bounce2{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}</style>
 </body>
