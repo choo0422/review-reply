@@ -13,7 +13,54 @@
 <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet">
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0;}
-body{font-family:"Pretendard",-apple-system,sans-serif;background:#F8F9FA;min-height:100vh;padding-bottom:60px;color:#111;}
+body{font-family:"Pretendard",-apple-system,sans-serif;background:#F8F9FA;min-height:100vh;padding-bottom:130px;color:#111;}
+
+/* ── Sticky Footer 배너 ── */
+#sticky-banner{
+  position:fixed;bottom:0;left:0;right:0;z-index:40;
+  background:#fff;border-top:1px solid #F0F0F0;
+  box-shadow:0 -4px 20px rgba(0,0,0,0.07);
+  padding:8px 16px 10px;
+  max-width:100%;
+}
+#sticky-banner .banner-inner{max-width:480px;margin:0 auto;}
+#sticky-banner .banner-title{
+  font-size:10px;font-weight:700;color:#F97316;
+  letter-spacing:0.5px;text-transform:uppercase;
+  margin-bottom:6px;display:flex;align-items:center;gap:5px;
+}
+#sticky-banner .banner-products{
+  display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;
+}
+#sticky-banner .banner-products::-webkit-scrollbar{display:none;}
+.banner-product{
+  flex:0 0 auto;display:flex;align-items:center;gap:7px;
+  background:#FAFAFA;border:1px solid #F0F0F0;border-radius:12px;
+  padding:7px 10px;text-decoration:none;min-width:160px;max-width:180px;
+  transition:background 0.12s;
+}
+.banner-product:active{background:#FFF7ED;}
+.banner-product img{width:40px;height:40px;border-radius:8px;object-fit:cover;flex-shrink:0;}
+.banner-product .bp-info{flex:1;min-width:0;}
+.banner-product .bp-name{
+  font-size:11px;font-weight:600;color:#222;line-height:1.3;
+  overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+  margin-bottom:3px;
+}
+.banner-product .bp-price{font-size:12px;font-weight:900;color:#F97316;}
+.banner-product .bp-rocket{font-size:9px;font-weight:700;color:#1B64DA;background:#E8F0FE;padding:1px 5px;border-radius:4px;margin-left:3px;}
+#sticky-banner .banner-notice{
+  font-size:9px;color:#BBBEC4;margin-top:5px;text-align:center;
+}
+/* 배너 로딩 스켈레톤 */
+.banner-skeleton{
+  flex:0 0 160px;height:56px;background:linear-gradient(90deg,#F3F4F6 25%,#E5E7EB 50%,#F3F4F6 75%);
+  background-size:200% 100%;animation:shimmer 1.2s infinite;border-radius:12px;
+}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+/* 상품 갱신 페이드 */
+@keyframes bannerFadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.banner-product{animation:bannerFadeIn 0.25s ease;}
 
 .card{background:#fff;border-radius:20px;box-shadow:0 2px 16px rgba(0,0,0,0.05);padding:20px;margin-bottom:10px;}
 .sec-label{font-size:11px;font-weight:700;color:#BBBEC4;letter-spacing:0.6px;text-transform:uppercase;margin-bottom:10px;}
@@ -981,6 +1028,8 @@ function selectSub(card, sub) {
   localStorage.setItem("savedCategory",sub);
   updateSec1(sub, document.getElementById("owner-msg").value);
   showKw(sub);
+  // 배너 상품 업데이트
+  updateBanner(sub);
 }
 
 function showKw(sub) {
@@ -1235,6 +1284,130 @@ function renderHist(){
 }
 function copyItem(text){navigator.clipboard.writeText(text).then(()=>showToast("복사됐어요 ✅")).catch(()=>{});}
 function escHtml(str){return String(str).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+
+// ── Sticky Footer 배너 ───────────────────────────────────────
+let bannerCurrentCategory = "";
+let bannerLoading = false;
+
+// 업종별 배너 검색 키워드
+const bannerKeyword = {
+  "한식":"업소용 식자재","중식":"중화 식재료","일식/회":"업소용 회 포장 용기",
+  "양식/레스토랑":"업소용 올리브오일","고기/구이":"업소용 참숯","치킨":"에어프라이어",
+  "피자":"피자 오븐 팬","족발/보쌈":"업소용 냄비","분식":"떡볶이 밀키트",
+  "패스트푸드":"업소용 포장 용기","카페/베이커리":"커피 원두","디저트":"케이크 도구",
+  "아이스크림":"젤라또 컵","호프/맥주":"생맥주 글라스","이자카야/포차":"사케 잔 세트",
+  "미용/뷰티":"헤어 드라이어","헬스/스포츠":"헬스 용품","필라테스/요가":"요가 매트",
+  "스크린골프":"골프 용품","PC방":"게이밍 마우스","노래방":"무선 마이크",
+  "기타업종":"업소용 물티슈","기타/일반":"사무용품"
+};
+
+const bannerCategoryLabel = {
+  "한식":"한식 맞춤","중식":"중식 맞춤","일식/회":"일식 맞춤","양식/레스토랑":"양식 맞춤",
+  "고기/구이":"고기집 맞춤","치킨":"치킨집 맞춤","피자":"피자 맞춤","족발/보쌈":"족발집 맞춤",
+  "분식":"분식집 맞춤","패스트푸드":"패스트푸드 맞춤","카페/베이커리":"카페 맞춤",
+  "디저트":"디저트 맞춤","아이스크림":"아이스크림 맞춤","호프/맥주":"호프집 맞춤",
+  "이자카야/포차":"이자카야 맞춤","미용/뷰티":"미용실 맞춤","헬스/스포츠":"헬스장 맞춤",
+  "필라테스/요가":"필라테스 맞춤","스크린골프":"골프 맞춤","PC방":"PC방 맞춤",
+  "노래방":"노래방 맞춤","기타업종":"사장님 맞춤","기타/일반":"사장님 맞춤"
+};
+
+async function updateBanner(cat) {
+  if (!cat || cat === "선택안함" || bannerLoading) return;
+  if (cat === bannerCurrentCategory) return; // 같은 업종이면 skip
+  bannerCurrentCategory = cat;
+  bannerLoading = true;
+
+  const keyword = bannerKeyword[cat] || "업소용 물티슈";
+  const label = bannerCategoryLabel[cat] || "사장님 맞춤";
+
+  // 타이틀 업데이트
+  document.getElementById("banner-title-text").textContent = label + " 특가";
+
+  // 스켈레톤 표시
+  const container = document.getElementById("banner-products");
+  container.innerHTML = `
+    <div class="banner-skeleton"></div>
+    <div class="banner-skeleton"></div>
+    <div class="banner-skeleton"></div>`;
+
+  try {
+    const res = await fetch("/api/coupang", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ keyword })
+    });
+    const data = await res.json();
+
+    if (!res.ok || !data.products?.length) throw new Error("상품 없음");
+
+    container.innerHTML = data.products.map(p => `
+      <a href="${p.productUrl}" target="_blank" referrerpolicy="unsafe-url"
+        class="banner-product" onclick="onBannerProductClick()">
+        <img src="${p.productImage}" alt="${p.productName}"
+          onerror="this.src='https://via.placeholder.com/40x40?text=상품'">
+        <div class="bp-info">
+          <div class="bp-name">${p.productName}</div>
+          <div class="bp-price">${Number(p.productPrice).toLocaleString()}원
+            ${p.isRocket ? '<span class="bp-rocket">🚀로켓</span>' : ""}
+          </div>
+        </div>
+      </a>
+    `).join("");
+
+  } catch (e) {
+    // 실패 시 기본 링크 표시
+    container.innerHTML = `
+      <a href="https://link.coupang.com/a/egBt7O" target="_blank" referrerpolicy="unsafe-url"
+        class="banner-product" style="min-width:200px;" onclick="onBannerProductClick()">
+        <div style="font-size:24px;width:40px;text-align:center;">🛒</div>
+        <div class="bp-info">
+          <div class="bp-name">쿠팡 ${label} 특가 보러가기</div>
+          <div class="bp-price" style="color:#9CA3AF;font-size:11px;font-weight:600;">탭하여 확인 →</div>
+        </div>
+      </a>`;
+  } finally {
+    bannerLoading = false;
+  }
+}
+
+function onBannerProductClick() {
+  // 배너 클릭 시 광고 확인으로 처리 (쿠팡 모달 광고 카운트 인정)
+  if (length !== "short") markCouponShown(length);
+}
+
+// 초기 로드 시 기본 상품 표시
+window.addEventListener("load", () => {
+  setTimeout(() => {
+    // 저장된 업종이 있으면 해당 키워드로, 없으면 기본
+    const savedCat = localStorage.getItem("savedCategory") || "";
+    if (savedCat && bannerKeyword[savedCat]) {
+      updateBanner(savedCat);
+    } else {
+      // 기본: 인기 상품 (업소용 물티슈)
+      bannerCurrentCategory = "__init__";
+      bannerLoading = false;
+      updateBanner("기타업종");
+    }
+  }, 500);
+});
 </script>
+
+<!-- ── Sticky Footer 배너 ── -->
+<div id="sticky-banner">
+  <div class="banner-inner">
+    <div class="banner-title">
+      <span>🛒</span>
+      <span id="banner-title-text">사장님 맞춤 특가</span>
+    </div>
+    <div id="banner-products" class="banner-products">
+      <div class="banner-skeleton"></div>
+      <div class="banner-skeleton"></div>
+      <div class="banner-skeleton"></div>
+    </div>
+    <div class="banner-notice">이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.</div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
 </body>
 </html>
