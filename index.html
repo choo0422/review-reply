@@ -328,19 +328,48 @@ body{font-family:"Pretendard",-apple-system,sans-serif;background:#F8F9FA;min-he
     <button id="cancel-btn" class="cancel-btn btn" onclick="cancelGenerate()">✕ 생성 취소</button>
     <div id="err"></div>
 
-    <!-- 쿠팡 모달 -->
+    <!-- 쿠팡 상품 모달 -->
     <div id="coupon-modal">
-      <div style="background:#fff;border-radius:24px;padding:24px;width:100%;max-width:320px;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,0.2);">
-        <p style="font-size:16px;font-weight:900;color:#111;margin-bottom:6px;">잠깐! 쿠팡 특가 확인 🛒</p>
-        <p style="font-size:12px;color:#9CA3AF;margin-bottom:16px;line-height:1.6;">아래 버튼을 누르고<br>답글 생성을 계속해주세요</p>
-        <a href="https://link.coupang.com/a/egBt7O" target="_blank" referrerpolicy="unsafe-url" onclick="onCouponClick()"
-          style="display:block;width:100%;padding:15px;border-radius:16px;color:#fff;font-size:14px;font-weight:700;text-decoration:none;background:linear-gradient(135deg,#FF6B6B,#F97316);margin-bottom:8px;">
-          🛒 쿠팡 특가 보고 계속하기
-        </a>
-        <button onclick="closeCouponModal()" style="width:100%;padding:11px;border-radius:14px;border:1.5px solid #E5E7EB;background:#F8F9FA;font-size:13px;font-weight:700;color:#9CA3AF;cursor:pointer;font-family:inherit;">
+      <div style="background:#fff;border-radius:24px;padding:20px;width:100%;max-width:360px;box-shadow:0 24px 60px rgba(0,0,0,0.2);max-height:90vh;overflow-y:auto;">
+
+        <!-- 헤더 -->
+        <div style="text-align:center;margin-bottom:14px;">
+          <p id="coupon-title" style="font-size:15px;font-weight:900;color:#111;margin-bottom:4px;">🛒 지금 뜨는 쿠팡 특가!</p>
+          <p id="coupon-desc" style="font-size:11px;color:#9CA3AF;line-height:1.5;">상품을 확인하고 계속 이용하세요</p>
+        </div>
+
+        <!-- 로딩 -->
+        <div id="coupon-loading" style="text-align:center;padding:24px 0;">
+          <div style="display:flex;align-items:center;justify-content:center;gap:6px;">
+            <div class="dot" style="background:#F97316;"></div>
+            <div class="dot" style="background:#F97316;"></div>
+            <div class="dot" style="background:#F97316;"></div>
+          </div>
+          <p style="font-size:12px;color:#9CA3AF;margin-top:10px;">상품 불러오는 중...</p>
+        </div>
+
+        <!-- 에러 -->
+        <div id="coupon-error" style="display:none;text-align:center;padding:16px 0;">
+          <p style="font-size:13px;color:#9CA3AF;margin-bottom:12px;">😅 상품을 불러오지 못했어요</p>
+          <a href="https://link.coupang.com/a/egBt7O" target="_blank" referrerpolicy="unsafe-url" onclick="onCouponClick()"
+            style="display:inline-block;padding:11px 20px;border-radius:14px;color:#fff;font-size:13px;font-weight:700;text-decoration:none;background:linear-gradient(135deg,#FF6B6B,#F97316);">
+            🛒 쿠팡 특가 보러가기
+          </a>
+        </div>
+
+        <!-- 상품 카드 목록 -->
+        <div id="coupon-products" style="display:none;"></div>
+
+        <!-- 계속하기 버튼 -->
+        <button id="coupon-continue-btn" onclick="onCouponContinue()"
+          style="display:none;width:100%;padding:13px;border-radius:14px;border:none;background:linear-gradient(135deg,#FF6B6B,#F97316);color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:10px;">
+          ✅ 확인했어요! 답글 생성 계속하기
+        </button>
+        <button onclick="closeCouponModal()"
+          style="width:100%;padding:10px;border-radius:14px;border:1.5px solid #E5E7EB;background:#F8F9FA;font-size:12px;font-weight:700;color:#9CA3AF;cursor:pointer;font-family:inherit;margin-top:6px;">
           그냥 계속하기
         </button>
-        <p style="font-size:9px;color:#D1D5DB;margin-top:8px;">이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.</p>
+        <p style="font-size:9px;color:#D1D5DB;margin-top:8px;text-align:center;">이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.</p>
       </div>
     </div>
 
@@ -451,20 +480,55 @@ function setAccordion(open) {
   }
 }
 
-// ── 생성 횟수 ─────────────────────────────────────────────────
-function getGenCount() {
+// ── 길이별 생성 횟수 관리 ──────────────────────────────────────
+// short: 무제한 / medium: 3회째 광고 1번 / long: 2회째 광고 1번
+const COUPON_AT = { short: Infinity, medium: 3, long: 2 };
+
+function resetCountsIfExpired() {
   const lr = parseInt(localStorage.getItem("genResetTime")||"0");
-  if (Date.now()-lr > 12*60*60*1000) {
-    localStorage.setItem("genCount","0");
+  if (Date.now()-lr > 6*60*60*1000) {  // 6시간
+    localStorage.setItem("genCount_short","0");
+    localStorage.setItem("genCount_medium","0");
+    localStorage.setItem("genCount_long","0");
+    localStorage.removeItem("couponDone_medium");
+    localStorage.removeItem("couponDone_long");
     localStorage.setItem("genResetTime",Date.now().toString());
-    sessionStorage.removeItem("couponShown");
   }
-  return parseInt(localStorage.getItem("genCount")||"0");
 }
+
+function getCount(len) {
+  resetCountsIfExpired();
+  return parseInt(localStorage.getItem("genCount_"+len)||"0");
+}
+
+function incrementCount(len) {
+  const c = getCount(len) + 1;
+  localStorage.setItem("genCount_"+len, c.toString());
+  return c;
+}
+
+// N회째 딱 한 번만 광고 (이후 무제한)
+function needsCoupon(len) {
+  if (len === "short") return false;
+  const countAfter = getCount(len) + 1; // 이번 생성 후 카운트
+  const target = COUPON_AT[len];
+  const done = localStorage.getItem("couponDone_"+len);
+  return countAfter === target && !done;
+}
+
+function markCouponShown(len) {
+  localStorage.setItem("couponDone_"+len, "1");
+}
+
 function updateGenCountDisplay() {
-  const c = getGenCount();
+  resetCountsIfExpired();
+  const sm = getCount("medium"), sl = getCount("long");
   const el = document.getElementById("gen-count-display");
-  if (el) el.textContent = c>0 ? `생성 ${c}회` : "";
+  if (!el) return;
+  const parts = [];
+  if (sm > 0) parts.push(`보통 ${sm}회`);
+  if (sl > 0) parts.push(`길게 ${sl}회`);
+  el.textContent = parts.length ? parts.join(" · ") : "";
 }
 
 // ── 입력 방식 ─────────────────────────────────────────────────
@@ -959,8 +1023,13 @@ function buildPrompt(text){
 // ── 생성 ──────────────────────────────────────────────────────
 async function generate(){
   const errEl=document.getElementById("err"); errEl.innerHTML="";
-  const genCount=getGenCount();
-  if(genCount===1&&!sessionStorage.getItem("couponShown")){ pendingGenerate=true; document.getElementById("coupon-modal").classList.add("show"); return; }
+
+  // 길이별 광고 트리거 (짧게는 무제한)
+  if (needsCoupon(length)) {
+    pendingGenerate = true;
+    showCouponModal(length);
+    return;
+  }
 
   let messages=[];
   if(mode==="image"){
@@ -992,7 +1061,7 @@ async function generate(){
     document.getElementById("fav-btn").textContent="⭐ 즐겨찾기에 저장";
     autoResize(document.getElementById("result-text")); updateCharCount();
 
-    localStorage.setItem("genCount",(genCount+1).toString()); updateGenCountDisplay();
+    incrementCount(length); updateGenCountDisplay();
 
     const rv2=mode==="image"?"[스크린샷]":(document.getElementById("review").value.slice(0,20)+"...");
     const sd=starNone?"별점없음":"⭐".repeat(star);
@@ -1012,8 +1081,106 @@ function cancelGenerate(){ isCancelled=true; document.getElementById("gen-btn").
 function retryGenerate(){ document.getElementById("result-card").style.display="none"; generate(); }
 
 // ── 쿠팡 모달 ─────────────────────────────────────────────────
-function onCouponClick(){ sessionStorage.setItem("couponShown","1"); closeCouponModal(); if(pendingGenerate){pendingGenerate=false;setTimeout(generate,300);} }
-function closeCouponModal(){ sessionStorage.setItem("couponShown","1"); document.getElementById("coupon-modal").classList.remove("show"); if(pendingGenerate){pendingGenerate=false;setTimeout(generate,300);} }
+// ── 쿠팡 상품 모달 ────────────────────────────────────────────
+
+// 업종 → 검색 키워드 매핑
+const categoryKeyword = {
+  "한식":"국내산 식재료","중식":"중화 식재료","일식/회":"회 포장 용기","양식/레스토랑":"파스타 올리브오일",
+  "고기/구이":"참숯 바베큐","치킨":"에어프라이어","피자":"피자 오븐","족발/보쌈":"족발 냄비",
+  "분식":"떡볶이 밀키트","패스트푸드":"버거 포장 용기","카페/베이커리":"커피 원두","디저트":"케이크 도구",
+  "아이스크림":"젤라또 도구","호프/맥주":"생맥주 글라스","이자카야/포차":"사케 잔",
+  "미용/뷰티":"헤어 드라이어","헬스/스포츠":"헬스 용품","필라테스/요가":"요가 매트",
+  "스크린골프":"골프 용품","PC방":"게이밍 마우스","노래방":"무선 마이크",
+  "기타업종":"사무용품","기타/일반":"생활용품"
+};
+
+async function showCouponModal(len) {
+  // 상태 초기화
+  document.getElementById("coupon-loading").style.display = "block";
+  document.getElementById("coupon-error").style.display = "none";
+  document.getElementById("coupon-products").style.display = "none";
+  document.getElementById("coupon-continue-btn").style.display = "none";
+  document.getElementById("coupon-modal").classList.add("show");
+
+  // 업종에 맞는 키워드 결정
+  const keyword = categoryKeyword[category] || "주방 용품";
+
+  // 모달 안내 문구
+  const labelMap = { medium:"보통", long:"길게" };
+  document.getElementById("coupon-title").textContent = "🛒 " + keyword + " 특가!";
+  document.getElementById("coupon-desc").textContent =
+    `${labelMap[len]} 답글 ${COUPON_AT[len]}회째 이용 중이에요 · 상품 확인 후 계속 무제한 사용 가능해요 😊`;
+
+  try {
+    const res = await fetch("/api/coupang", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ keyword })
+    });
+    const data = await res.json();
+
+    if (!res.ok || !data.products?.length) throw new Error(data.error || "상품 없음");
+
+    renderCouponProducts(data.products);
+  } catch (e) {
+    console.error("쿠팡 API 오류:", e);
+    document.getElementById("coupon-loading").style.display = "none";
+    document.getElementById("coupon-error").style.display = "block";
+    document.getElementById("coupon-continue-btn").style.display = "block";
+  }
+}
+
+function renderCouponProducts(products) {
+  document.getElementById("coupon-loading").style.display = "none";
+
+  const container = document.getElementById("coupon-products");
+  container.style.display = "block";
+  container.innerHTML = products.map(p => `
+    <a href="${p.productUrl}" target="_blank" referrerpolicy="unsafe-url"
+      onclick="onCouponProductClick()"
+      style="display:flex;align-items:center;gap:10px;padding:10px;border-radius:14px;border:1.5px solid #F0F0F0;background:#FAFAFA;margin-bottom:8px;text-decoration:none;">
+      <img src="${p.productImage}" alt="${p.productName}"
+        style="width:64px;height:64px;border-radius:10px;object-fit:cover;flex-shrink:0;"
+        onerror="this.src='https://via.placeholder.com/64x64?text=상품'">
+      <div style="flex:1;min-width:0;">
+        <p style="font-size:12px;font-weight:700;color:#111;line-height:1.4;margin-bottom:4px;
+          overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">
+          ${p.productName}
+        </p>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="font-size:14px;font-weight:900;color:#F97316;">${Number(p.productPrice).toLocaleString()}원</span>
+          ${p.isRocket ? '<span style="font-size:10px;font-weight:700;color:#1B64DA;background:#E8F0FE;padding:2px 6px;border-radius:4px;">🚀 로켓배송</span>' : ""}
+        </div>
+        ${p.rating ? `<p style="font-size:10px;color:#F59E0B;margin-top:2px;">⭐ ${p.rating}</p>` : ""}
+      </div>
+      <span style="font-size:16px;flex-shrink:0;">›</span>
+    </a>
+  `).join("");
+
+  document.getElementById("coupon-continue-btn").style.display = "block";
+}
+
+function onCouponProductClick() {
+  // 상품 클릭 = 광고 확인으로 처리
+  markCouponShown(length);
+}
+
+function onCouponContinue() {
+  markCouponShown(length);
+  document.getElementById("coupon-modal").classList.remove("show");
+  if (pendingGenerate) { pendingGenerate = false; setTimeout(generate, 300); }
+}
+
+function onCouponClick() {
+  markCouponShown(length);
+  closeCouponModal(true);
+}
+
+function closeCouponModal() {
+  markCouponShown(length);
+  document.getElementById("coupon-modal").classList.remove("show");
+  if (pendingGenerate) { pendingGenerate = false; setTimeout(generate, 300); }
+}
 
 // ── auto-resize + 글자수 ──────────────────────────────────────
 function autoResize(ta){ ta.style.height="0px"; ta.style.height=Math.max(100,ta.scrollHeight)+"px"; }
