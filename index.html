@@ -40,6 +40,14 @@ body{font-family:"Pretendard",-apple-system,sans-serif;background:#F8F9FA;min-he
 .recent-label{font-size:11px;font-weight:700;color:#F59E0B;margin-bottom:10px;display:none;align-items:center;gap:4px;}
 .recent-label.show{display:flex;}
 
+/* 소분류 포인터 + 그룹 박스 */
+.sub-pointer-wrap{position:relative;height:12px;margin-top:8px;}
+.sub-pointer{width:0;height:0;border-left:11px solid transparent;border-right:11px solid transparent;border-bottom:12px solid #FED7AA;position:absolute;top:0;left:40px;transition:left 0.25s cubic-bezier(0.34,1.56,0.64,1);}
+.sub-pointer::after{content:"";width:0;height:0;border-left:9px solid transparent;border-right:9px solid transparent;border-bottom:10px solid #FFFBF7;position:absolute;top:3px;left:-9px;}
+.sub-group-box{border:1.5px solid #FED7AA;border-radius:16px;background:#FFFBF7;padding:14px;animation:fadeSlideIn 0.18s ease;}
+@keyframes fadeSlideIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+.sub-group-label{font-size:10px;font-weight:700;color:#F97316;letter-spacing:0.5px;margin-bottom:10px;display:flex;align-items:center;gap:5px;text-transform:uppercase;}
+
 /* 키워드 말풍선 */
 .kw-box{display:none;position:relative;margin-top:14px;background:#FFFBEA;border:1.5px solid #FDE68A;border-radius:16px;padding:14px;}
 .kw-box::before{content:"";position:absolute;top:-9px;left:18px;border:8px solid transparent;border-bottom-color:#FDE68A;border-top:none;}
@@ -97,7 +105,7 @@ body{font-family:"Pretendard",-apple-system,sans-serif;background:#F8F9FA;min-he
 .dot:nth-child(3){animation:dotB 1s ease-in-out 0.32s infinite;}
 
 /* 결과 */
-.result-ta{width:100%;background:#F0FDFA;border:1.5px solid #99F6E4;border-radius:14px;padding:16px;font-size:14px;color:#134E4A;line-height:1.9;resize:vertical;min-height:100px;font-family:inherit;outline:none;}
+.result-ta{width:100%;background:#F0FDFA;border:1.5px solid #99F6E4;border-radius:14px;padding:16px;font-size:14px;color:#134E4A;line-height:1.9;resize:none;overflow:hidden;min-height:100px;font-family:inherit;outline:none;box-sizing:border-box;}
 .copy-btn{flex:1;padding:13px;border-radius:14px;border:none;background:#14B8A6;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:all 0.12s;}
 .copy-btn:active{transform:scale(0.95);}
 .retry-btn{flex:1;padding:13px;border-radius:14px;border:1.5px solid #EBEBEB;background:#F8F9FA;font-size:14px;font-weight:700;color:#555;cursor:pointer;font-family:inherit;transition:all 0.12s;}
@@ -218,18 +226,25 @@ body{font-family:"Pretendard",-apple-system,sans-serif;background:#F8F9FA;min-he
           <div class="cat-icon-wrap">🏪</div><span>기타</span>
         </button>
       </div>
-      <div id="sub-wrap" style="display:none;margin-top:14px;">
-        <p id="recent-lbl" class="recent-label">⭐ 최근 선택</p>
-        <div id="sub-grid" class="sub-grid"></div>
-        <div id="kw-box" class="kw-box">
-          <div class="kw-header">
-            <div style="display:flex;align-items:center;gap:6px;">
-              <span style="font-size:16px;">💡</span>
-              <p style="font-size:11px;color:#92400E;font-weight:700;">AI 추천 키워드</p>
+      <!-- 포인터 + 소분류 그룹 -->
+      <div id="sub-wrap" style="display:none;">
+        <div class="sub-pointer-wrap">
+          <div id="sub-pointer" class="sub-pointer" style="left:40px;"></div>
+        </div>
+        <div class="sub-group-box">
+          <div id="sub-group-label" class="sub-group-label">📂 세부 업종 선택</div>
+          <p id="recent-lbl" class="recent-label">⭐ 최근 선택</p>
+          <div id="sub-grid" class="sub-grid"></div>
+          <div id="kw-box" class="kw-box">
+            <div class="kw-header">
+              <div style="display:flex;align-items:center;gap:6px;">
+                <span style="font-size:16px;">💡</span>
+                <p style="font-size:11px;color:#92400E;font-weight:700;">AI 추천 키워드</p>
+              </div>
+              <button onclick="refreshKw()" class="btn kw-refresh">🔄 새로고침</button>
             </div>
-            <button onclick="refreshKw()" class="btn kw-refresh">🔄 새로고침</button>
+            <div id="kw-badges" class="kw-badges"></div>
           </div>
-          <div id="kw-badges" class="kw-badges"></div>
         </div>
       </div>
     </div>
@@ -347,7 +362,6 @@ let tone = "친절";
 let length = "medium";
 let mode = "text";
 let imgB64 = "", imgType = "";
-let abortController = null;
 let pendingGenerate = false;
 let currentMajor = "";
 
@@ -533,31 +547,39 @@ function selectMajor(btn) {
   document.querySelectorAll(".cat-chip").forEach(c => c.classList.remove("on"));
   btn.classList.add("on");
 
+  // 그룹 라벨 업데이트
+  const majorLabel = {"식사/요리":"식사/요리","배달인기":"배달 인기","카페/간식":"카페/간식","주류/펍":"주류/펍","서비스/여가":"서비스/여가","기타":"기타"};
+  document.getElementById("sub-group-label").textContent = "📂 " + (majorLabel[major] || major) + " 세부 업종 선택";
+
   // 세부 업종 렌더링
   const subs = majorData[major] || [];
   const recentCat = localStorage.getItem("recentCat") || "";
   const grid = document.getElementById("sub-grid");
   grid.innerHTML = "";
-
   subs.forEach(sub => {
-    const isRecent = sub === recentCat;
     const card = document.createElement("button");
-    card.className = "btn sub-card" + (isRecent ? " recent" : "");
-    card.innerHTML = `
-      <span class="sub-emoji">${subEmojis[sub] || "🏪"}</span>
-      <span>${sub}</span>
-      <span class="check">✓</span>
-    `;
+    card.className = "btn sub-card" + (sub === recentCat ? " recent" : "");
+    card.innerHTML = `<span class="sub-emoji">${subEmojis[sub] || "🏪"}</span><span>${sub}</span><span class="check">✓</span>`;
     card.onclick = () => selectSub(card, sub);
-    if (isRecent) {
-      document.getElementById("recent-lbl").classList.add("show");
-    }
     grid.appendChild(card);
   });
 
-  document.getElementById("sub-wrap").style.display = "block";
   document.getElementById("kw-box").classList.remove("show");
   document.getElementById("recent-lbl").className = "recent-label" + (recentCat && subs.includes(recentCat) ? " show" : "");
+
+  // sub-wrap 먼저 표시 → 그 다음 프레임에서 정확한 좌표로 포인터 계산
+  const subWrap = document.getElementById("sub-wrap");
+  subWrap.style.display = "block";
+
+  requestAnimationFrame(() => {
+    const catGrid = document.querySelector(".cat-grid");
+    const gridRect = catGrid.getBoundingClientRect();
+    const btnRect = btn.getBoundingClientRect();
+    const centerX = btnRect.left - gridRect.left + btnRect.width / 2;
+    // 포인터 삼각형 너비 11px이므로 중앙 정렬
+    const pointerLeft = Math.max(11, Math.min(centerX - 11, catGrid.offsetWidth - 22));
+    document.getElementById("sub-pointer").style.left = pointerLeft + "px";
+  });
 }
 
 // ── 세부 업종 선택 ──────────────────────────────────────────
@@ -627,6 +649,8 @@ function buildPrompt(text) {
 }
 
 // ── 생성 ─────────────────────────────────────────────────────
+let isCancelled = false;
+
 async function generate() {
   const errEl = document.getElementById("err");
   errEl.innerHTML = "";
@@ -663,7 +687,7 @@ async function generate() {
     messages = [{ role: "user", content: buildPrompt(rv) }];
   }
 
-  abortController = new AbortController();
+  isCancelled = false;
   const btn = document.getElementById("gen-btn");
   const cb = document.getElementById("cancel-btn");
 
@@ -676,9 +700,10 @@ async function generate() {
     const res = await fetch("/api/reply", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ messages }),
-      signal: abortController.signal
+      body: JSON.stringify({ messages })
     });
+
+    if (isCancelled) return;
 
     if (!res.ok) {
       const errData = await res.json().catch(() => ({}));
@@ -686,6 +711,7 @@ async function generate() {
     }
 
     const data = await res.json();
+    if (isCancelled) return;
     if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
 
     const reply = data.content[0].text.trim();
@@ -693,6 +719,9 @@ async function generate() {
     document.getElementById("result-card").style.display = "block";
     document.getElementById("copy-btn").textContent = "복사하기";
     document.getElementById("fav-btn").textContent = "⭐ 즐겨찾기에 저장";
+    // auto-resize + 글자수 갱신
+    const rta = document.getElementById("result-text");
+    autoResize(rta);
     updateCharCount();
 
     // 카운트 증가
@@ -719,21 +748,21 @@ async function generate() {
     document.getElementById("result-card").scrollIntoView({ behavior: "smooth", block: "nearest" });
 
   } catch (e) {
-    if (e.name === "AbortError") return;
+    if (isCancelled) return;
     errEl.innerHTML = `<div class="err-box">⚠️ ${e.message}</div>`;
   } finally {
     btn.disabled = false;
     btn.innerHTML = "✨ AI 답글 생성";
     cb.style.display = "none";
-    abortController = null;
   }
 }
 
 function cancelGenerate() {
-  if (abortController) { abortController.abort(); abortController = null; }
+  isCancelled = true;
   document.getElementById("gen-btn").disabled = false;
   document.getElementById("gen-btn").innerHTML = "✨ AI 답글 생성";
   document.getElementById("cancel-btn").style.display = "none";
+  showToast("생성을 취소했어요");
 }
 
 function retryGenerate() {
@@ -754,14 +783,23 @@ function closeCouponModal() {
   if (pendingGenerate) { pendingGenerate = false; setTimeout(generate, 300); }
 }
 
-// ── 글자 수 ──────────────────────────────────────────────────
+// ── 글자 수 + Auto-resize ────────────────────────────────────
+function autoResize(ta) {
+  // 패딩 포함 정확한 높이: height:auto 먼저 적용 후 scrollHeight 읽기
+  ta.style.height = "0px";
+  const newH = Math.max(100, ta.scrollHeight);
+  ta.style.height = newH + "px";
+}
+
 function updateCharCount() {
-  const text = document.getElementById("result-text").value;
+  const ta = document.getElementById("result-text");
+  autoResize(ta);
+
+  const text = ta.value;
   const len = text.length;
   const el = document.getElementById("char-count");
   const fill = document.getElementById("char-bar-fill");
 
-  // 배달 리뷰 기준 300자 권장
   const limit = reviewType === "delivery" ? 300 : 500;
   const pct = Math.min((len / limit) * 100, 100);
 
