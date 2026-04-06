@@ -578,6 +578,11 @@ function restoreSettings() {
   if (savedCat || owner.trim()) {
     setTimeout(() => setAccordion(false), 80);
   }
+
+  // 저장된 업종으로 배너 즉시 업데이트
+  if (savedCat && bannerKeywords[savedCat]) {
+    setTimeout(() => updateBanner(savedCat), 300);
+  }
 }
 
 function saveOwnerMsg() {
@@ -1631,17 +1636,15 @@ function onBannerProductClick() {
 // 초기 로드 시 기본 상품 표시
 window.addEventListener("load", () => {
   setTimeout(() => {
-    // 저장된 업종이 있으면 해당 키워드로, 없으면 기본
     const savedCat = localStorage.getItem("savedCategory") || "";
-    if (savedCat && bannerKeyword[savedCat]) {
+    if (savedCat && bannerKeywords[savedCat]) {
       updateBanner(savedCat);
     } else {
-      // 기본: 인기 상품 (업소용 물티슈)
       bannerCurrentCategory = "__init__";
       bannerLoading = false;
       updateBanner("기타업종");
     }
-  }, 500);
+  }, 800); // restoreSettings 완료 후 실행되도록 delay 증가
 });
 </script>
 
