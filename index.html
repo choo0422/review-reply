@@ -175,8 +175,22 @@ body{font-family:"Pretendard",-apple-system,sans-serif;background:#F8F9FA;min-he
 .char-bar-fill.warn{background:#F97316;}
 .char-bar-fill.over{background:#EF4444;}
 
-/* 에러 */
-.err-box{background:#FFF1F2;border:1px solid #FECDD3;border-radius:14px;padding:12px;font-size:13px;color:#BE123C;margin-bottom:10px;}
+/* 프리미엄 활성 배지 */
+.premium-badge{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:999px;background:linear-gradient(135deg,#F59E0B,#F97316);color:#fff;font-size:10px;font-weight:700;margin-left:6px;}
+#len-long.premium-on{border-color:#F59E0B;background:#FFFBEA;color:#92400E;font-weight:700;}
+#len-long.premium-on span{color:#B45309;}
+
+/* 카카오 공유 모달 */
+#kakao-modal{display:none;position:fixed;inset:0;z-index:60;background:rgba(0,0,0,0.55);align-items:center;justify-content:center;padding:20px;}
+#kakao-modal.show{display:flex;}
+.kakao-box{background:#fff;border-radius:24px;padding:28px 24px;width:100%;max-width:320px;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,0.2);}
+.kakao-crown{font-size:44px;margin-bottom:8px;}
+.kakao-title{font-size:17px;font-weight:900;color:#111;margin-bottom:6px;}
+.kakao-desc{font-size:13px;color:#6B7280;line-height:1.6;margin-bottom:20px;}
+.kakao-share-btn{width:100%;padding:15px;border-radius:16px;border:none;background:#FEE500;color:#111;font-size:15px;font-weight:900;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:8px;transition:all 0.12s;}
+.kakao-share-btn:active{transform:scale(0.98);}
+.kakao-skip-btn{width:100%;padding:11px;border-radius:14px;border:1.5px solid #E5E7EB;background:#F8F9FA;font-size:13px;font-weight:600;color:#9CA3AF;cursor:pointer;font-family:inherit;transition:all 0.12s;}
+.premium-timer{font-size:11px;color:#F59E0B;font-weight:700;margin-top:4px;}
 
 /* 즐겨찾기/히스토리 */
 .fav-item{background:#FFFBEA;border:1px solid #FDE68A;border-radius:14px;padding:12px;position:relative;margin-bottom:8px;}
@@ -210,7 +224,10 @@ body{font-family:"Pretendard",-apple-system,sans-serif;background:#F8F9FA;min-he
         <div style="font-size:16px;font-weight:900;color:#111;letter-spacing:-0.3px;">리뷰 답글 생성기</div>
         <div style="font-size:11px;color:#9CA3AF;margin-top:1px;">AI가 맞춤 답글을 작성해드려요</div>
       </div>
-      <div style="margin-left:auto;font-size:11px;color:#9CA3AF;" id="gen-count-display"></div>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:6px;">
+        <div id="premium-status" style="display:none;"></div>
+        <div style="font-size:11px;color:#9CA3AF;" id="gen-count-display"></div>
+      </div>
     </div>
   </div>
 
@@ -362,11 +379,17 @@ body{font-family:"Pretendard",-apple-system,sans-serif;background:#F8F9FA;min-he
 
       <div class="sec-divider"></div>
 
-      <div class="sec-label">답글 길이</div>
+      <div class="sec-label">답글 유형</div>
       <div class="toggle-grid-3">
-        <button id="len-short" onclick="selectLength('short')" class="btn toggle-btn">✂️ 짧게<br><span style="font-size:10px;font-weight:400;color:#9CA3AF;">2문장</span></button>
-        <button id="len-medium" onclick="selectLength('medium')" class="btn toggle-btn on-mint">📝 보통<br><span style="font-size:10px;font-weight:400;">3~4문장</span></button>
-        <button id="len-long" onclick="selectLength('long')" class="btn toggle-btn">📄 길게<br><span style="font-size:10px;font-weight:400;color:#9CA3AF;">5문장+</span></button>
+        <button id="len-short" onclick="selectLength('short')" class="btn toggle-btn">
+          ✂️ 간단 답글
+        </button>
+        <button id="len-medium" onclick="selectLength('medium')" class="btn toggle-btn on-mint">
+          📝 정성 답글
+        </button>
+        <button id="len-long" onclick="selectLength('long')" class="btn toggle-btn">
+          👑 프리미엄
+        </button>
       </div>
     </div>
 
@@ -374,6 +397,29 @@ body{font-family:"Pretendard",-apple-system,sans-serif;background:#F8F9FA;min-he
     <button id="gen-btn" class="gen-btn" onclick="generate()">✨ AI 답글 생성</button>
     <button id="cancel-btn" class="cancel-btn btn" onclick="cancelGenerate()">✕ 생성 취소</button>
     <div id="err"></div>
+
+    <!-- 카카오 공유 모달 (프리미엄 잠금해제) -->
+    <div id="kakao-modal">
+      <div class="kakao-box">
+        <div class="kakao-crown">👑</div>
+        <div class="kakao-title">프리미엄 답글을 이용하시려면</div>
+        <div class="kakao-desc">
+          카카오톡으로 <strong>1회만 공유</strong>해주시면<br>
+          <strong style="color:#F97316;font-size:15px;">3일 동안 무제한</strong>으로 이용할 수 있어요!<br><br>
+          <span style="font-size:12px;color:#9CA3AF;">
+            📌 3일 후에는 다시 1회 공유하면 갱신돼요<br>
+            공유 한 번으로 프리미엄 답글을 마음껏 써보세요 😊
+          </span>
+        </div>
+        <button class="kakao-share-btn" onclick="doKakaoShare()">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path d="M10 2C5.58 2 2 4.91 2 8.5c0 2.28 1.44 4.28 3.62 5.44L4.9 17.1a.4.4 0 00.56.5l3.7-2.46c.27.03.55.04.84.04 4.42 0 8-2.91 8-6.5C18 4.91 14.42 2 10 2z" fill="#111"/>
+          </svg>
+          카카오톡으로 공유하고 시작하기
+        </button>
+        <button class="kakao-skip-btn" onclick="closeKakaoModal()">다음에 할게요</button>
+      </div>
+    </div>
 
     <!-- 쿠팡 상품 모달 -->
     <div id="coupon-modal">
@@ -468,6 +514,7 @@ window.onload = () => {
   try{ favs=JSON.parse(localStorage.getItem("favs")||"[]"); }catch(e){ favs=[]; }
   restoreSettings();
   updateStars();
+  updatePremiumUI();
   renderHist();
   renderFav();
   updateGenCountDisplay();
@@ -527,6 +574,95 @@ function setAccordion(open) {
   }
 }
 
+// ── 프리미엄 (카카오 공유 7일 잠금해제) ──────────────────────
+const PREMIUM_DURATION = 3 * 24 * 60 * 60 * 1000; // 3일
+
+function isPremiumActive() {
+  const unlockTime = parseInt(localStorage.getItem("premiumUnlockTime") || "0");
+  return unlockTime > 0 && Date.now() - unlockTime < PREMIUM_DURATION;
+}
+
+function getPremiumDaysLeft() {
+  const unlockTime = parseInt(localStorage.getItem("premiumUnlockTime") || "0");
+  if (!unlockTime) return 0;
+  const msLeft = PREMIUM_DURATION - (Date.now() - unlockTime);
+  return Math.max(0, Math.ceil(msLeft / (24 * 60 * 60 * 1000)));
+}
+
+function activatePremium() {
+  localStorage.setItem("premiumUnlockTime", Date.now().toString());
+  updatePremiumUI();
+}
+
+function updatePremiumUI() {
+  const active = isPremiumActive();
+  const daysLeft = getPremiumDaysLeft();
+
+  // 프리미엄 버튼 스타일
+  const longBtn = document.getElementById("len-long");
+  if (longBtn) {
+    if (active) {
+      longBtn.classList.add("premium-on");
+    } else {
+      longBtn.classList.remove("premium-on");
+    }
+  }
+
+  // 헤더 배지
+  const statusEl = document.getElementById("premium-status");
+  if (statusEl) {
+    if (active) {
+      statusEl.style.display = "inline-flex";
+      statusEl.innerHTML = `<span class="premium-badge">👑 ${daysLeft}일</span>`;
+    } else {
+      statusEl.style.display = "none";
+    }
+  }
+}
+
+function showKakaoModal() {
+  document.getElementById("kakao-modal").classList.add("show");
+}
+
+function closeKakaoModal() {
+  document.getElementById("kakao-modal").classList.remove("show");
+}
+
+function doKakaoShare() {
+  const shareUrl = "https://review-reply-psi.vercel.app";
+  const shareText = "🍽️ 리뷰 답글 자동 생성기\n배달/방문 리뷰에 AI가 딱 맞는 답글을 써줘요!\n사장님들 강추 👍";
+
+  // 카카오 SDK가 있으면 사용, 없으면 URL 스킴으로 폴백
+  if (window.Kakao && window.Kakao.isInitialized && window.Kakao.isInitialized()) {
+    window.Kakao.Share.sendDefault({
+      objectType: "feed",
+      content: {
+        title: "🍽️ AI 리뷰 답글 생성기",
+        description: "배달·방문 리뷰에 맞춤 답글을 AI가 자동으로 써드려요! 사장님 강추 👍",
+        imageUrl: "https://raw.githubusercontent.com/choo0422/review-reply/main/thumbnail.png",
+        link: { mobileWebUrl: shareUrl, webUrl: shareUrl }
+      },
+      buttons: [{
+        title: "무료로 써보기",
+        link: { mobileWebUrl: shareUrl, webUrl: shareUrl }
+      }]
+    });
+  } else {
+    // 카카오 SDK 없을 때 → 카카오톡 URL 스킴
+    const kakaoUrl = `https://sharer.kakao.com/talk/friends/picker/link?app_key=none&text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
+    window.open(kakaoUrl, "_blank");
+  }
+
+  // 공유 버튼 클릭 즉시 프리미엄 활성화 (공유창이 떠도 완료로 처리)
+  setTimeout(() => {
+    activatePremium();
+    closeKakaoModal();
+    showToast("👑 프리미엄 7일 활성화됐어요!");
+    // 프리미엄 상태로 이어서 생성
+    if (pendingGenerate) { pendingGenerate = false; setTimeout(generate, 400); }
+  }, 1000);
+}
+
 // ── 길이별 생성 횟수 관리 ──────────────────────────────────────
 // short: 무제한 / medium: 3회째 광고 1번 / long: 2회째 광고 1번
 const COUPON_AT = { short: Infinity, medium: 3, long: 2 };
@@ -554,12 +690,12 @@ function incrementCount(len) {
   return c;
 }
 
-// N회째 딱 한 번만 광고 (이후 무제한)
+// N회째 딱 한 번만 광고 (이후 무제한) — long은 프리미엄 별도 처리
 function needsCoupon(len) {
-  if (len === "short") return false;
-  const countAfter = getCount(len) + 1; // 이번 생성 후 카운트
+  if (len === "short" || len === "long") return false;
+  const countAfter = getCount(len) + 1;
   const target = COUPON_AT[len];
-  const done = localStorage.getItem("couponDone_"+len);
+  const done = localStorage.getItem("couponDone_" + len);
   return countAfter === target && !done;
 }
 
@@ -1073,7 +1209,14 @@ function buildPrompt(text){
 async function generate(){
   const errEl=document.getElementById("err"); errEl.innerHTML="";
 
-  // 길이별 광고 트리거 (짧게는 무제한)
+  // 프리미엄(long) 잠금 체크
+  if (length === "long" && !isPremiumActive()) {
+    pendingGenerate = true;
+    showKakaoModal();
+    return;
+  }
+
+  // 길이별 광고 트리거 (짧게는 무제한, long은 프리미엄이므로 광고 없음)
   if (needsCoupon(length)) {
     pendingGenerate = true;
     showCouponModal(length);
