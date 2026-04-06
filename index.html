@@ -1470,16 +1470,31 @@ function escHtml(str){return String(str).replace(/&/g,"&amp;").replace(/</g,"&lt
 let bannerCurrentCategory = "";
 let bannerLoading = false;
 
-// 업종별 배너 검색 키워드
-const bannerKeyword = {
-  "한식":"업소용 식자재","중식":"중화 식재료","일식/회":"업소용 회 포장 용기",
-  "양식/레스토랑":"업소용 올리브오일","고기/구이":"업소용 참숯","치킨":"에어프라이어",
-  "피자":"피자 오븐 팬","족발/보쌈":"업소용 냄비","분식":"떡볶이 밀키트",
-  "패스트푸드":"업소용 포장 용기","카페/베이커리":"커피 원두","디저트":"케이크 도구",
-  "아이스크림":"젤라또 컵","호프/맥주":"생맥주 글라스","이자카야/포차":"사케 잔 세트",
-  "미용/뷰티":"헤어 드라이어","헬스/스포츠":"헬스 용품","필라테스/요가":"요가 매트",
-  "스크린골프":"골프 용품","PC방":"게이밍 마우스","노래방":"무선 마이크",
-  "기타업종":"업소용 물티슈","기타/일반":"사무용품"
+// 업종별 배너 검색 키워드 (복수 — 매번 랜덤 선택)
+const bannerKeywords = {
+  "한식":          ["업소용 식자재","업소용 물티슈","한식 앞치마","업소용 장갑","주방 위생 용품"],
+  "중식":          ["중화 식재료","업소용 웍","중화 양념","업소용 앞치마","주방 소모품"],
+  "일식/회":       ["업소용 회 포장 용기","초밥 도구","업소용 젓가락","회 접시","주방 위생 장갑"],
+  "양식/레스토랑": ["파스타 재료","레스토랑 식기","업소용 앞치마","주방 소모품","업소용 랩"],
+  "고기/구이":     ["업소용 참숯","고기집 집게","업소용 가위","환풍기 필터","업소용 장갑"],
+  "치킨":          ["에어프라이어","치킨 포장 박스","업소용 기름","치킨 소스 용기","주방 타이머"],
+  "피자":          ["피자 박스","피자 오븐 팬","업소용 치즈","피자 도구","배달 보온 가방"],
+  "족발/보쌈":     ["업소용 냄비","족발 포장 용기","업소용 고무장갑","주방 소모품","업소용 물티슈"],
+  "분식":          ["떡볶이 밀키트","업소용 냄비","분식 포장 용기","업소용 이쑤시개","주방 소모품"],
+  "패스트푸드":    ["업소용 포장 용기","배달 보온 가방","업소용 장갑","종이컵","업소용 물티슈"],
+  "카페/베이커리": ["커피 원두","테이크아웃 컵","업소용 빨대","커피 필터","카페 앞치마"],
+  "디저트":        ["케이크 도구","제과 포장 박스","업소용 비닐 장갑","케이크 받침대","제빵 소모품"],
+  "아이스크림":    ["아이스크림 컵","업소용 스푼","냉동 보관 용기","업소용 포장 봉투","주방 소모품"],
+  "호프/맥주":     ["생맥주 글라스","업소용 코스터","맥주잔 세척 용품","업소용 앞치마","바 소모품"],
+  "이자카야/포차": ["사케 잔","업소용 나무 젓가락","포장마차 용품","업소용 앞치마","주방 소모품"],
+  "미용/뷰티":     ["미용 가운","헤어 드라이어","미용실 소모품","염색 브러시","업소용 타월"],
+  "헬스/스포츠":   ["헬스 용품","운동 매트","체육관 소모품","폼롤러","운동 장갑"],
+  "필라테스/요가": ["요가 매트","필라테스 소도구","운동 타월","요가 블록","업소용 소독제"],
+  "스크린골프":    ["골프 장갑","골프 티","골프 공","실내 골프 소품","골프 연습 용품"],
+  "PC방":          ["마우스 패드","키보드 커버","모니터 클리너","헤드셋","PC방 소모품"],
+  "노래방":        ["마이크 커버","마이크 소독제","노래방 탬버린","업소용 물티슈","소독 스프레이"],
+  "기타업종":      ["업소용 물티슈","업소용 비닐 장갑","업소용 소독제","업소용 랩","사무용 소모품"],
+  "기타/일반":     ["업소용 물티슈","사무용품","업소용 소독제","업소용 비닐 장갑","포장 용품"]
 };
 
 const bannerCategoryLabel = {
@@ -1536,11 +1551,13 @@ function getTrustPhrase(catLabel) {
 
 async function updateBanner(cat) {
   if (!cat || cat === "선택안함" || bannerLoading) return;
-  if (cat === bannerCurrentCategory) return;
+  // 같은 업종이어도 매번 다른 키워드로 재호출 (캐시 제거)
   bannerCurrentCategory = cat;
   bannerLoading = true;
 
-  const keyword  = bannerKeyword[cat] || "업소용 물티슈";
+  // 업종별 키워드 풀에서 랜덤 1개 선택
+  const pool    = bannerKeywords[cat] || bannerKeywords["기타/일반"];
+  const keyword = pool[Math.floor(Math.random() * pool.length)];
   const catLabel = bannerCategoryLabel[cat] || "사장님";
   const copy     = bannerCopy[cat] || "실시간 최저가 갱신 중!";
 
@@ -1555,17 +1572,20 @@ async function updateBanner(cat) {
     <div class="banner-skeleton"></div>`;
 
   try {
+    // limit=10 받아서 프론트에서 셔플 후 3개 추출
     const res  = await fetch("/api/coupang", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ keyword })
+      body: JSON.stringify({ keyword, limit: 10 })
     });
     const data = await res.json();
     if (!res.ok || !data.products?.length) throw new Error("상품 없음");
 
+    // 결과 셔플 → 3개 추출
+    const shuffled = [...data.products].sort(() => Math.random() - 0.5).slice(0, 3);
     const hotLabels = ["🔥 HOT", "⚡ 마감임박", "🔥 인기", "⚡ 특가"];
 
-    container.innerHTML = data.products.map((p, i) => {
+    container.innerHTML = shuffled.map((p, i) => {
       const hot   = hotLabels[i % hotLabels.length];
       const trust = getTrustPhrase(catLabel);
       return `
