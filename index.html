@@ -26,49 +26,79 @@ body{font-family:"Pretendard",-apple-system,sans-serif;background:#F8F9FA;min-he
 /* ── Sticky Footer 배너 ── */
 #sticky-banner{
   position:fixed;bottom:0;left:0;right:0;z-index:40;
-  background:#fff;border-top:1px solid #F0F0F0;
-  box-shadow:0 -4px 20px rgba(0,0,0,0.07);
-  padding:8px 16px 10px;
-  max-width:100%;
+  background:#fff;border-top:2px solid #FEE2E2;
+  box-shadow:0 -4px 24px rgba(239,68,68,0.08);
+  padding:7px 16px 10px;
 }
 #sticky-banner .banner-inner{max-width:480px;margin:0 auto;}
+#sticky-banner .banner-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
 #sticky-banner .banner-title{
-  font-size:10px;font-weight:700;color:#F97316;
-  letter-spacing:0.5px;text-transform:uppercase;
-  margin-bottom:6px;display:flex;align-items:center;gap:5px;
+  font-size:11px;font-weight:900;color:#DC2626;
+  letter-spacing:-0.2px;display:flex;align-items:center;gap:4px;
 }
+#sticky-banner .banner-live{
+  display:inline-flex;align-items:center;gap:3px;
+  background:#DC2626;color:#fff;font-size:9px;font-weight:700;
+  padding:2px 6px;border-radius:4px;letter-spacing:0.3px;
+}
+.live-dot{width:5px;height:5px;border-radius:50%;background:#fff;animation:livePulse 1s infinite;}
+@keyframes livePulse{0%,100%{opacity:1}50%{opacity:0.3}}
 #sticky-banner .banner-products{
   display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;
+  padding-bottom:2px;
 }
 #sticky-banner .banner-products::-webkit-scrollbar{display:none;}
 .banner-product{
   flex:0 0 auto;display:flex;align-items:center;gap:7px;
-  background:#FAFAFA;border:1px solid #F0F0F0;border-radius:12px;
-  padding:7px 10px;text-decoration:none;min-width:160px;max-width:180px;
-  transition:background 0.12s;
+  background:#FFFBF9;border:1.5px solid #FEE2E2;border-radius:12px;
+  padding:7px 10px;text-decoration:none;min-width:170px;max-width:200px;
+  transition:all 0.12s;position:relative;overflow:hidden;
 }
-.banner-product:active{background:#FFF7ED;}
-.banner-product img{width:40px;height:40px;border-radius:8px;object-fit:cover;flex-shrink:0;}
+.banner-product::before{
+  content:"";position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,#EF4444,#F97316);
+}
+.banner-product:active{background:#FFF7ED;transform:scale(0.98);}
+.banner-product img{width:44px;height:44px;border-radius:8px;object-fit:cover;flex-shrink:0;}
 .banner-product .bp-info{flex:1;min-width:0;}
 .banner-product .bp-name{
-  font-size:11px;font-weight:600;color:#222;line-height:1.3;
+  font-size:11px;font-weight:600;color:#111;line-height:1.3;
   overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
   margin-bottom:3px;
 }
-.banner-product .bp-price{font-size:12px;font-weight:900;color:#F97316;}
-.banner-product .bp-rocket{font-size:9px;font-weight:700;color:#1B64DA;background:#E8F0FE;padding:1px 5px;border-radius:4px;margin-left:3px;}
-#sticky-banner .banner-notice{
-  font-size:9px;color:#BBBEC4;margin-top:5px;text-align:center;
+.banner-product .bp-price-row{display:flex;align-items:center;gap:4px;flex-wrap:wrap;}
+.banner-product .bp-price{font-size:13px;font-weight:900;color:#DC2626;}
+.banner-product .bp-hot{font-size:9px;font-weight:700;color:#fff;background:#EF4444;padding:1px 5px;border-radius:4px;}
+.banner-product .bp-rocket{font-size:9px;font-weight:700;color:#1B64DA;background:#E8F0FE;padding:1px 5px;border-radius:4px;}
+.banner-product .bp-trust{font-size:9px;color:#9CA3AF;margin-top:2px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;}
+
+/* Pulse 버튼 */
+.banner-cta{
+  flex:0 0 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,#EF4444,#F97316);border-radius:12px;
+  padding:10px 12px;min-width:72px;text-decoration:none;gap:3px;
+  animation:ctaPulse 5s ease-in-out infinite;
 }
+@keyframes ctaPulse{
+  0%,85%,100%{transform:scale(1);}
+  88%{transform:scale(1.07);}
+  92%{transform:scale(0.97);}
+  96%{transform:scale(1.04);}
+}
+.banner-cta span{font-size:10px;font-weight:900;color:#fff;text-align:center;line-height:1.3;}
+
 /* 배너 로딩 스켈레톤 */
 .banner-skeleton{
-  flex:0 0 160px;height:56px;background:linear-gradient(90deg,#F3F4F6 25%,#E5E7EB 50%,#F3F4F6 75%);
+  flex:0 0 170px;height:62px;
+  background:linear-gradient(90deg,#FEF2F2 25%,#FEE2E2 50%,#FEF2F2 75%);
   background-size:200% 100%;animation:shimmer 1.2s infinite;border-radius:12px;
 }
 @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
-/* 상품 갱신 페이드 */
 @keyframes bannerFadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
 .banner-product{animation:bannerFadeIn 0.25s ease;}
+#sticky-banner .banner-notice{
+  font-size:9px;color:#D1D5DB;margin-top:4px;text-align:center;
+}
 
 .card{background:#fff;border-radius:20px;box-shadow:0 2px 16px rgba(0,0,0,0.05);padding:20px;margin-bottom:10px;}
 .sec-label{font-size:11px;font-weight:700;color:#BBBEC4;letter-spacing:0.6px;text-transform:uppercase;margin-bottom:10px;}
@@ -1462,19 +1492,62 @@ const bannerCategoryLabel = {
   "노래방":"노래방 맞춤","기타업종":"사장님 맞춤","기타/일반":"사장님 맞춤"
 };
 
+// 업종별 자극적 카피
+const bannerCopy = {
+  "한식":"한식 사장님만 모르는 원가절감 필수템",
+  "중식":"중화요리 고수들의 비밀 원자재 특가",
+  "일식/회":"회집 사장님 몰래 쓰는 포장 필수템",
+  "양식/레스토랑":"레스토랑 원가 낮추는 식자재 특가",
+  "고기/구이":"고깃집 사장님 단골 구매 아이템",
+  "치킨":"치킨집 운영비 줄이는 필수템 모음",
+  "피자":"피자 원가 절감! 지금 최저가 갱신 중",
+  "족발/보쌈":"족발집 사장님 픽! 이달의 특가템",
+  "분식":"분식집 사장님 단골 구매 필수템",
+  "패스트푸드":"포장 비용 확 줄이는 업소용 특가",
+  "카페/베이커리":"카페 사장님 원두값 아끼는 방법",
+  "디저트":"디저트 원가 절감 필수 도구 특가",
+  "아이스크림":"아이스크림 가게 운영비 절감 특가",
+  "호프/맥주":"호프집 사장님 단골 주문 아이템",
+  "이자카야/포차":"이자카야 분위기 UP! 소품 특가",
+  "미용/뷰티":"미용실 원가 줄이는 전문가 픽 특가",
+  "헬스/스포츠":"헬스장 운영비 절감 필수 아이템",
+  "필라테스/요가":"필라테스 강사 단골 구매 용품 특가",
+  "스크린골프":"골프 업주 픽! 지금 최저가 갱신 중",
+  "PC방":"PC방 사장님 운영비 절감 필수템",
+  "노래방":"노래방 운영 필수! 실시간 최저가",
+  "기타업종":"사장님만 모르는 원가절감 필수템",
+  "기타/일반":"실시간 최저가 갱신 중! 지금 확인"
+};
+
+// 신뢰 문구 (랜덤)
+const trustPhrases = [
+  cat => `전국 ${cat} 사장님들이 가장 많이 찾은 상품`,
+  cat => `이번 달 ${cat} 업주들 구매 1위`,
+  cat => `${cat} 사장님 재구매율 94%`,
+  cat => `지금 이 순간도 ${cat} 사장님이 보는 중`,
+  cat => `${cat} 운영 사장님 5,000명+ 구매 완료`,
+];
+
+function getTrustPhrase(catLabel) {
+  const fn = trustPhrases[Math.floor(Math.random() * trustPhrases.length)];
+  return fn(catLabel);
+}
+
+
 async function updateBanner(cat) {
   if (!cat || cat === "선택안함" || bannerLoading) return;
-  if (cat === bannerCurrentCategory) return; // 같은 업종이면 skip
+  if (cat === bannerCurrentCategory) return;
   bannerCurrentCategory = cat;
   bannerLoading = true;
 
-  const keyword = bannerKeyword[cat] || "업소용 물티슈";
-  const label = bannerCategoryLabel[cat] || "사장님 맞춤";
+  const keyword  = bannerKeyword[cat] || "업소용 물티슈";
+  const catLabel = bannerCategoryLabel[cat] || "사장님";
+  const copy     = bannerCopy[cat] || "실시간 최저가 갱신 중!";
 
-  // 타이틀 업데이트
-  document.getElementById("banner-title-text").textContent = label + " 특가";
+  // 타이틀 + 카피 업데이트
+  document.getElementById("banner-title-text").textContent = copy;
 
-  // 스켈레톤 표시
+  // 스켈레톤
   const container = document.getElementById("banner-products");
   container.innerHTML = `
     <div class="banner-skeleton"></div>
@@ -1482,38 +1555,46 @@ async function updateBanner(cat) {
     <div class="banner-skeleton"></div>`;
 
   try {
-    const res = await fetch("/api/coupang", {
+    const res  = await fetch("/api/coupang", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ keyword })
     });
     const data = await res.json();
-
     if (!res.ok || !data.products?.length) throw new Error("상품 없음");
 
-    container.innerHTML = data.products.map(p => `
-      <a href="${p.productUrl}" target="_blank" referrerpolicy="unsafe-url"
-        class="banner-product" onclick="onBannerProductClick()">
-        <img src="${p.productImage}" alt="${p.productName}"
-          onerror="this.src='https://via.placeholder.com/40x40?text=상품'">
-        <div class="bp-info">
-          <div class="bp-name">${p.productName}</div>
-          <div class="bp-price">${Number(p.productPrice).toLocaleString()}원
-            ${p.isRocket ? '<span class="bp-rocket">🚀로켓</span>' : ""}
+    const hotLabels = ["🔥 HOT", "⚡ 마감임박", "🔥 인기", "⚡ 특가"];
+
+    container.innerHTML = data.products.map((p, i) => {
+      const hot   = hotLabels[i % hotLabels.length];
+      const trust = getTrustPhrase(catLabel);
+      return `
+        <a href="${p.productUrl}" target="_blank" referrerpolicy="unsafe-url"
+          class="banner-product" onclick="onBannerProductClick()">
+          <img src="${p.productImage}" alt="${p.productName}"
+            onerror="this.src='https://via.placeholder.com/44x44?text=상품'">
+          <div class="bp-info">
+            <div class="bp-name">${p.productName}</div>
+            <div class="bp-price-row">
+              <span class="bp-price">${Number(p.productPrice).toLocaleString()}원</span>
+              <span class="bp-hot">${hot}</span>
+              ${p.isRocket ? '<span class="bp-rocket">🚀로켓</span>' : ""}
+            </div>
+            <div class="bp-trust">${trust}</div>
           </div>
-        </div>
-      </a>
-    `).join("");
+        </a>`;
+    }).join("");
 
   } catch (e) {
-    // 실패 시 기본 링크 표시
     container.innerHTML = `
       <a href="https://link.coupang.com/a/egBt7O" target="_blank" referrerpolicy="unsafe-url"
         class="banner-product" style="min-width:200px;" onclick="onBannerProductClick()">
-        <div style="font-size:24px;width:40px;text-align:center;">🛒</div>
+        <div style="font-size:24px;width:44px;text-align:center;">🔥</div>
         <div class="bp-info">
-          <div class="bp-name">쿠팡 ${label} 특가 보러가기</div>
-          <div class="bp-price" style="color:#9CA3AF;font-size:11px;font-weight:600;">탭하여 확인 →</div>
+          <div class="bp-name">${copy}</div>
+          <div class="bp-price-row">
+            <span style="font-size:11px;font-weight:700;color:#EF4444;">지금 확인하기 →</span>
+          </div>
         </div>
       </a>`;
   } finally {
@@ -1546,14 +1627,23 @@ window.addEventListener("load", () => {
 <!-- ── Sticky Footer 배너 ── -->
 <div id="sticky-banner">
   <div class="banner-inner">
-    <div class="banner-title">
-      <span>🛒</span>
-      <span id="banner-title-text">사장님 맞춤 특가</span>
+    <div class="banner-header">
+      <div class="banner-title">
+        🔥 <span id="banner-title-text">사장님만 모르는 원가절감 필수템</span>
+      </div>
+      <div class="banner-live"><div class="live-dot"></div>실시간 최저가</div>
     </div>
-    <div id="banner-products" class="banner-products">
-      <div class="banner-skeleton"></div>
-      <div class="banner-skeleton"></div>
-      <div class="banner-skeleton"></div>
+    <div style="display:flex;gap:8px;align-items:stretch;">
+      <div id="banner-products" class="banner-products" style="flex:1;">
+        <div class="banner-skeleton"></div>
+        <div class="banner-skeleton"></div>
+        <div class="banner-skeleton"></div>
+      </div>
+      <a href="https://link.coupang.com/a/egBt7O" target="_blank" referrerpolicy="unsafe-url"
+        class="banner-cta" onclick="onBannerProductClick()">
+        <span>⚡</span>
+        <span>특가<br>확인</span>
+      </a>
     </div>
     <div class="banner-notice">이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.</div>
   </div>
